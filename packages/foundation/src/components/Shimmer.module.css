@@ -1,0 +1,131 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+.root {
+  position: relative;
+  display: inline-block;
+  overflow: visible;
+  --uit-shimmer-animation-duration: 1500ms;
+  --uit-shimmer-animation-delay: 0ms;
+  --uit-shimmer-iteration-count: infinite;
+  --uit-shimmer-direction: normal;
+  --uit-shimmer-mask-start-position: -100% 0;
+  --uit-shimmer-mask-end-position: 100% 0;
+  --uit-shimmer-mask-position: -100% 0;
+  --uit-shimmer-mask-angle: 110deg;
+}
+
+.clipToChildren {
+  overflow: hidden;
+}
+
+.content,
+.baseContent {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.shimmerVisible .baseContent {
+  -webkit-mask-image:
+    linear-gradient(
+      to right,
+      rgba(0, 0, 0, var(--uit-shimmer-base-opacity)) 0%,
+      rgba(0, 0, 0, var(--uit-shimmer-base-opacity)) 100%
+    ),
+    linear-gradient(
+      var(--uit-shimmer-mask-angle),
+      rgba(0, 0, 0, 0) 25%,
+      rgba(0, 0, 0, 1) 49.95%,
+      rgba(0, 0, 0, 1) 50.05%,
+      rgba(0, 0, 0, 0) 75%
+    );
+  mask-image:
+    linear-gradient(
+      to right,
+      rgba(0, 0, 0, var(--uit-shimmer-base-opacity)) 0%,
+      rgba(0, 0, 0, var(--uit-shimmer-base-opacity)) 100%
+    ),
+    linear-gradient(
+      var(--uit-shimmer-mask-angle),
+      rgba(0, 0, 0, 0) 25%,
+      rgba(0, 0, 0, 1) 49.95%,
+      rgba(0, 0, 0, 1) 50.05%,
+      rgba(0, 0, 0, 0) 75%
+    );
+  -webkit-mask-size: 100% 100%, 100% 100%;
+  mask-size: 100% 100%, 100% 100%;
+  -webkit-mask-position: 0 0, var(--uit-shimmer-mask-position);
+  mask-position: 0 0, var(--uit-shimmer-mask-position);
+  -webkit-mask-repeat: no-repeat, no-repeat;
+  mask-repeat: no-repeat, no-repeat;
+  -webkit-mask-composite: source-over;
+  mask-composite: add;
+}
+
+.running .baseContent {
+  animation-name: uit-shimmer-sweep;
+  animation-duration: var(--uit-shimmer-animation-duration);
+  animation-delay: var(--uit-shimmer-animation-delay);
+  animation-timing-function: linear;
+  animation-iteration-count: var(--uit-shimmer-iteration-count);
+  animation-direction: var(--uit-shimmer-direction);
+}
+
+.static .baseContent,
+.paused .baseContent {
+  animation: none;
+  -webkit-mask-position: 0 0, var(--uit-shimmer-mask-position);
+  mask-position: 0 0, var(--uit-shimmer-mask-position);
+}
+
+.item {
+  display: block;
+  flex: none;
+  background: var(--uit-color-loading-content);
+}
+
+.radiusSquare {
+  border-radius: 0;
+}
+
+.radiusXxsmall {
+  border-radius: var(--uit-corner-radius-xxsmall);
+}
+
+.radiusXsmall {
+  border-radius: var(--uit-corner-radius-xsmall);
+}
+
+.radiusSmall {
+  border-radius: var(--uit-corner-radius-small);
+}
+
+.radiusMedium {
+  border-radius: var(--uit-corner-radius-medium);
+}
+
+.radiusLarge {
+  border-radius: var(--uit-corner-radius-large);
+}
+
+.radiusXlarge {
+  border-radius: var(--uit-corner-radius-xlarge);
+}
+
+@keyframes uit-shimmer-sweep {
+  from {
+    -webkit-mask-position: 0 0, var(--uit-shimmer-mask-start-position);
+    mask-position: 0 0, var(--uit-shimmer-mask-start-position);
+  }
+
+  to {
+    -webkit-mask-position: 0 0, var(--uit-shimmer-mask-end-position);
+    mask-position: 0 0, var(--uit-shimmer-mask-end-position);
+  }
+}

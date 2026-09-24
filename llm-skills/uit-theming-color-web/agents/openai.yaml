@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Toolkit for Meta Ray-Ban Display Theming and Color"
+  short_description: "Apply the toolkit tokens, colors, and gradients"
+  default_prompt: "Use $uit-theming-color-web to theme this toolkit interface with compliant colors and gradients."

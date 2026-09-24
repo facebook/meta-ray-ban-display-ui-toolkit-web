@@ -1,0 +1,41 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+.tooltipOverlay {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.fadeIn {
+  animation: tooltipFadeIn 300ms cubic-bezier(0.68, 0, 0.29, 1) forwards;
+}
+
+.fadeOut {
+  animation: tooltipFadeOut 300ms cubic-bezier(0.68, 0, 0.29, 1) forwards;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes tooltipFadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}

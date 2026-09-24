@@ -1,0 +1,93 @@
+{
+  "name": "@wearables-ui-toolkit/foundation",
+  "private": true,
+  "version": "129.0.0",
+  "description": "React primitives for UI Toolkit for Meta Ray-Ban Display",
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./styles.css": "./dist/styles.css",
+    "./react-router": {
+      "types": "./dist/react-router/index.d.ts",
+      "import": "./dist/react-router/index.js"
+    },
+    "./internal": {
+      "types": "./dist/internal.d.ts",
+      "import": "./dist/internal.js"
+    },
+    "./material/layers": {
+      "types": "./dist/material/layers/index.d.ts",
+      "import": "./dist/material/layers/index.js"
+    },
+    "./components/private/*": null,
+    "./theme/corner-radius.generated": null,
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ],
+  "scripts": {
+    "generate": "node scripts/generate-corner-radius-css.mjs",
+    "check:generated": "node scripts/generate-corner-radius-css.mjs --check",
+    "build": "node scripts/generate-corner-radius-css.mjs --check && vite build && node scripts/verify-styles.mjs && tsc -p tsconfig.build.json && node scripts/verify-public-declarations.mjs",
+    "dev": "vite build --watch",
+    "prepack": "\"$npm_node_execpath\" ../../tools/npm-release/assert-validated-prepack.mjs && node scripts/generate-corner-radius-css.mjs --check && vite build && node scripts/verify-styles.mjs && tsc -p tsconfig.build.json && node scripts/verify-public-declarations.mjs"
+  },
+  "dependencies": {
+    "@wearables-ui-toolkit/androidx-shapes": "129.0.0"
+  },
+  "peerDependencies": {
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-router-dom": "^7.17.0"
+  },
+  "peerDependenciesMeta": {
+    "react-router-dom": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "^5.1.2",
+    "magic-string": "^0.30.21",
+    "react-router-dom": "7.17.0",
+    "typescript": "^5.9.3",
+    "vite": "^8.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "Apache-2.0",
+  "author": "Meta Platforms, Inc.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/facebook/meta-ray-ban-display-ui-toolkit-web.git",
+    "directory": "packages/foundation"
+  },
+  "homepage": "https://github.com/facebook/meta-ray-ban-display-ui-toolkit-web#readme",
+  "bugs": {
+    "url": "https://github.com/facebook/meta-ray-ban-display-ui-toolkit-web/issues"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "restricted",
+    "tag": "latest"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts"
+}

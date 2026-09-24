@@ -1,0 +1,71 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * Card component styles
+ *
+ * Featured content container with optional gradient scrims
+ * at top and/or bottom for text legibility over images.
+ *
+ * Z-index layering inside Card content:
+ *   0: default / below-scrim children
+ *   1: scrim overlay
+ *   2: above-scrim children
+ *
+ * Container foreground material renders above this content stack.
+ *
+ * Draw order:
+ *   1. Draw default and CardBelowScrim children
+ *   2. Draw top/bottom gradient
+ *   3. Draw CardAboveScrim children
+ */
+
+.card {
+  position: relative;
+  display: inline-flex;
+  overflow: hidden;
+}
+
+.contentStack {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: visible;
+}
+
+/*
+ * Scrim overlay layer
+ * The scrim draws between below-scrim and above-scrim children.
+ */
+.scrimLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/*
+ * Content that renders ABOVE the scrim.
+ * Usage: <div className={cardStyles.aboveScrim}>...</div>
+ */
+.aboveScrim {
+  position: relative;
+  z-index: 2;
+}
+
+/*
+ * Content that renders BELOW the scrim (default).
+ * Children without explicit class render at z-index 1 (content wrapper).
+ */
+.belowScrim {
+  position: relative;
+  z-index: 0;
+}

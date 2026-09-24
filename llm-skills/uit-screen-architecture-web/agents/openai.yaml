@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Toolkit for Meta Ray-Ban Display screen architecture"
+  short_description: "Design compliant route and scroll structure"
+  default_prompt: "Use $uit-screen-architecture-web to design or review this UI Toolkit for Meta Ray-Ban Display route before implementing components."

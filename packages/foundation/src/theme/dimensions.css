@@ -1,0 +1,47 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * Shared toolkit dimensions.
+ *
+ * CSS custom properties used by foundation layout, geometry, and iconography.
+ */
+
+@import './corner-radius.css';
+
+:root {
+  /* ===== Spacing ===== */
+  --uit-spacing-2xs: 2px;
+  --uit-spacing-xsmall: 4px;
+  --uit-spacing-small: 8px;
+  --uit-spacing-sm-med: 12px;
+  --uit-spacing-medium: 16px;
+  --uit-spacing-med-lg: 20px;
+  --uit-spacing-large: 24px;
+  --uit-spacing-xlarge: 32px;
+  --uit-spacing-2xl: 40px;
+  --uit-spacing-3xl: 48px;
+  --uit-spacing-4xl: 56px;
+  --uit-spacing-5xl: 64px;
+
+  /* ===== Icon Sizes ===== */
+  --uit-icon-2xs: 12px;
+  --uit-icon-xsmall: 16px;
+  --uit-icon-small: 20px;
+  --uit-icon-medium: 24px;
+  --uit-icon-large: 32px;
+  --uit-icon-xlarge: 48px;
+  --uit-icon-2xl: 56px;
+
+  /* ===== Scrollview / Fading Edge ===== */
+  --uit-fading-edge-xlarge: 100px;
+  --uit-fading-edge-large: 88px;
+  --uit-fading-edge-medium: 64px;
+  --uit-fading-edge-small: 32px;
+  --uit-header-area-length: 64px;
+}

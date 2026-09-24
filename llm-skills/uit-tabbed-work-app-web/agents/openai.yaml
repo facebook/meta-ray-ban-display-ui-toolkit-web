@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Toolkit for Meta Ray-Ban Display Tabbed Work App"
+  short_description: "Build a paged work queue and routed details"
+  default_prompt: "Build a production UI Toolkit for Meta Ray-Ban Display app with peer work queues, record details, and durable actions."

@@ -1,0 +1,76 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+.root {
+  --media-wrapper-dark-overlay: rgba(0, 0, 0, 0.749);
+
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.contentSlot {
+  width: 100%;
+  background: var(--media-wrapper-dark-overlay);
+}
+
+.scrim {
+  width: 100%;
+  flex: none;
+  pointer-events: none;
+}
+
+/* Height comes from MEDIA_WRAPPER_SCRIM_HEIGHT via --media-wrapper-scrim-height. */
+.small {
+  height: var(--media-wrapper-scrim-height);
+}
+
+.large {
+  height: var(--media-wrapper-scrim-height);
+}
+
+.topSmall {
+  background:
+    linear-gradient(
+      to bottom,
+      var(--media-wrapper-dark-overlay) 0%,
+      var(--uit-color-background-flat) 100%
+    );
+}
+
+.bottomSmall {
+  background:
+    linear-gradient(
+      to bottom,
+      var(--uit-color-background-flat) 0%,
+      var(--media-wrapper-dark-overlay) 100%
+    );
+}
+
+/* The dark band spans MEDIA_WRAPPER_LARGE_DARK_OVERLAY_STOP (75%) from the
+   content edge, via --media-wrapper-dark-stop. */
+.topLarge {
+  background:
+    linear-gradient(
+      to bottom,
+      var(--media-wrapper-dark-overlay) 0%,
+      var(--media-wrapper-dark-overlay) calc(100% - var(--media-wrapper-dark-stop)),
+      var(--uit-color-background-flat) 100%
+    );
+}
+
+.bottomLarge {
+  background:
+    linear-gradient(
+      to bottom,
+      var(--uit-color-background-flat) 0%,
+      var(--media-wrapper-dark-overlay) var(--media-wrapper-dark-stop),
+      var(--media-wrapper-dark-overlay) 100%
+    );
+}

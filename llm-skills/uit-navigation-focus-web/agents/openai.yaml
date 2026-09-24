@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Toolkit for Meta Ray-Ban Display Navigation and Focus"
+  short_description: "Build routes, scrolling, paging, and focus"
+  default_prompt: "Use $uit-navigation-focus-web to implement this route and focus flow."

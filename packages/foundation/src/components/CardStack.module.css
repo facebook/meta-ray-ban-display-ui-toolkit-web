@@ -1,0 +1,50 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * CardStack component styles
+ *
+ * Stacked card appearance with primary card on top
+ * and background cards rotated/translated behind it.
+ */
+
+.cardStack {
+  position: relative;
+  display: inline-flex;
+  overflow: visible;
+}
+
+/* Primary card - on top of the stack */
+.primaryCard {
+  position: relative;
+  z-index: 3;
+}
+
+/* Background cards - behind the primary card */
+.backgroundCard {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: center center;
+}
+
+/* Interactive type: cards fan from bottom-right corner pivot */
+.backgroundCardInteractive {
+  /* Bottom-right corner pivot set via inline style (needs corner radius) */
+}
+
+/* Display type: cards have fixed rotation and translation */
+.backgroundCardDisplay {
+  /* Transform set via inline styles */
+}
+
+/*
+ * The interactive background transition and focus-state rotation are applied via
+ * inline styles in getCardStackBackgroundCardStyle (the single source of truth,
+ * using the motion tokens), so there is no CSS transition/focus rule here.
+ */

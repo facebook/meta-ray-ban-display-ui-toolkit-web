@@ -1,0 +1,204 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * Avatar styles — clipping and rendering for the avatar surface.
+ *
+ * Background colors by AvatarStyle:
+ *   STANDARD:    var(--uit-color-background-elevation2)  #41454E
+ *   SURFACE:     var(--uit-color-background-surface)      #27282D
+ *   TRANSPARENT: var(--uit-color-background-flat)        transparent
+ *   TRANSLUCENT: var(--uit-color-background-track)
+ */
+
+.avatar {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Hidden SVG used solely for clip path definitions */
+.clipSvg {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* Clipped avatar content area — receives the CSS clip-path inline */
+.avatarClipped {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* Style-specific background colors (avatarBackgroundColor) */
+.standard {
+  background-color: var(--uit-color-background-elevation2, #41454E);
+}
+
+.surface {
+  background-color: var(--uit-color-background-surface, #27282D);
+}
+
+.transparent {
+  background-color: var(--uit-color-background-flat, transparent);
+}
+
+.translucent {
+  background-color: var(--uit-color-background-track, rgba(255, 255, 255, 0.251));
+}
+
+/* Image fills the avatar, cropped to cover */
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.avatarContent {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-width: 100%;
+  max-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-sizing: border-box;
+  contain: layout paint;
+}
+
+.avatarContent > * {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-width: 100%;
+  max-height: 100%;
+  flex: 0 1 100%;
+  object-fit: cover;
+  box-sizing: border-box;
+}
+
+/* Placeholder icon */
+.avatarPlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: var(--uit-color-text-primary, #ffffff);
+  user-select: none;
+}
+
+.avatarPlaceholder > svg {
+  width: var(--uit-avatar-placeholder-icon-size);
+  height: var(--uit-avatar-placeholder-icon-size);
+  display: block;
+  flex: 0 0 auto;
+}
+
+/* Stroke overlay — sits on top of the clipped image */
+.strokeOverlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* A radial gradient glow stroke is applied as a foreground layer,
+     approximated in CSS using an inset box-shadow with a gradient-like
+     glow effect. */
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.3);
+}
+
+.strokeCircle {
+  border-radius: 50%;
+}
+
+.strokeRoundedRect {
+  border-radius: var(--uit-corner-radius-xsmall);
+}
+
+/* Full-size overlay that receives the CSS clip-path for duo images.
+ * Clips the children at the parent level.
+ * The clip path coordinates are in the container's coordinate space. */
+.duoClipLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Duo image circles — positioned absolutely within the clip layer.
+ * The primary duo image sits bottom-left and the secondary duo image
+ * top-right within the container.
+ * Background color: track background for STANDARD/SURFACE. */
+.duoImage {
+  position: absolute;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: var(--uit-color-background-track, rgba(255, 255, 255, 0.251));
+}
+
+/* Badge / status indicator container — positioned bottom-right */
+.badgeContainer {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Status indicator dot — circular, uses persistent color tokens */
+.statusDot {
+  position: relative;
+  border-radius: 50%;
+}
+
+/* Glyph overlay centered on the status dot (tinted icon-primary). The inner
+ * IconImage is sized explicitly (dot - 2*inset); this wrapper just centers it. */
+.statusIndicatorGlyph {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Badge content wrapper — clips to a circle for the badge clipping path */
+.badgeContent {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: var(--uit-color-background-elevation1, #30333A);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  contain: layout paint;
+}
+
+.badgeContent > * {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-width: 100%;
+  max-height: 100%;
+  flex: 0 1 100%;
+  box-sizing: border-box;
+  display: block;
+  object-fit: cover;
+}

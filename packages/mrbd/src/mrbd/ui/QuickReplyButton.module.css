@@ -1,0 +1,92 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * QuickReplyButton styles
+ */
+
+.quickReplyButton {
+  display: inline-flex;
+  position: relative;
+  width: fit-content;
+}
+
+/* Content view container — outer, animated width (clipping container) */
+.contentViewContainer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Content view — inner, natural width (holds icon + text)
+ * Horizontal padding 24px */
+.contentView {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  height: 100%;
+  padding-left: var(--uit-spacing-large);
+  padding-right: var(--uit-spacing-large);
+  box-sizing: border-box;
+}
+
+/* Content view centered (when visibleContentWidth < minimumWidth) */
+.contentViewCentered {
+  justify-content: center;
+}
+
+/* Title label uses the label text appearance.
+ * Padding is on .contentView (parent), not on the label itself */
+.titleLabel {
+  composes: uit-text-label from global;
+  white-space: nowrap;
+}
+
+/* Default state text color */
+.titleDefault {
+  color: var(--uit-color-text-secondary);
+  mix-blend-mode: lighten;
+}
+
+/* Focused/pressed state text color */
+.titleExpanded {
+  color: var(--uit-color-text-primary);
+}
+
+/* Icon image — 24px */
+.iconImageView {
+  width: var(--uit-icon-medium);
+  height: var(--uit-icon-medium);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.iconImageViewWithText {
+  margin-left: var(--uit-spacing-small);
+}
+
+/* Default state icon color */
+.iconDefault {
+  color: var(--uit-color-icon-secondary);
+  mix-blend-mode: lighten;
+}
+
+/* Focused/pressed state icon color */
+.iconExpanded {
+  color: var(--uit-color-icon-primary);
+}
+
+.iconImageView svg,
+.iconImageView img {
+  width: 100%;
+  height: 100%;
+}

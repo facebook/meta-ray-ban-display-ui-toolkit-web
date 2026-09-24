@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Toolkit for Meta Ray-Ban Display Status Action App"
+  short_description: "Build a focused status surface with one action"
+  default_prompt: "Use $uit-status-action-app-web to build this focused status application."

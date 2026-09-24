@@ -1,0 +1,32 @@
+{
+  "name": "@meta/wearables-ui-toolkit-app-icon-generator",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "App icon and manifest generator for Meta Ray-Ban Display web apps",
+  "license": "Apache-2.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run src"
+  },
+  "dependencies": {
+    "@astryxdesign/core": "0.6.2",
+    "@astryxdesign/theme-neutral": "0.6.2",
+    "@stylexjs/stylex": "0.19.1",
+    "@wearables-ui-toolkit/foundation": "129.0.0",
+    "@wearables-ui-toolkit/icons": "129.0.0",
+    "@wearables-ui-toolkit/mrbd": "129.0.0",
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "^5.1.2",
+    "typescript": "^5.9.3",
+    "vite": "^8.0.0",
+    "vitest": "^4.1.6"
+  }
+}

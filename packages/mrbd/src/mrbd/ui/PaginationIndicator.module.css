@@ -1,0 +1,65 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * PaginationIndicator CSS
+ *
+ * TEXT mode: Chip-style container with "X / Y" text
+ * DOTS mode: Circular dots with animated transitions
+ *
+ * Colors use theme CSS variables:
+ * - Active dot: var(--uit-color-control-active)
+ * - Inactive dot: var(--uit-color-background-track)
+ * - Text chip: inherits from theme text colors
+ */
+
+.paginationIndicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/**
+ * TEXT mode uses a real Chip component rendered as a child.
+ * No custom text chip CSS needed.
+ */
+
+/* DOTS mode - Container */
+.dotsContainer {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Individual dot
+ * Animation timings:
+ *   Position: 300ms with a decelerating ease-out curve
+ *   Color: cubic-bezier(0.68, 0, 0.29, 1)
+ *   Size: cubic-bezier(0.68, 0, 0.29, 1)
+ *   Duration: growing=200ms, shrinking=100ms (CSS uses 200ms as default)
+ */
+.dot {
+  position: absolute;
+  border-radius: 50%;
+  background-color: var(--uit-color-background-track, rgba(255, 255, 255, 0.251));
+  transition:
+    left 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    width 200ms cubic-bezier(0.68, 0, 0.29, 1),
+    height 200ms cubic-bezier(0.68, 0, 0.29, 1),
+    top 200ms cubic-bezier(0.68, 0, 0.29, 1),
+    background-color 200ms cubic-bezier(0.68, 0, 0.29, 1);
+}
+
+/* Active dot */
+.dotActive {
+  background-color: var(--uit-color-control-active, rgba(255, 255, 255, 0.749));
+}
+
+/* Overflow dot (smaller, at edges) */
+.dotOverflow {
+  /* Size is handled via inline styles; this class is available for additional styling */
+}

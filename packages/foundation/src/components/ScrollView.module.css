@@ -1,0 +1,165 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * ScrollView component styles
+ *
+ * Scrollable container with custom scrollbar rendering,
+ * fading edges, and keyboard navigation.
+ */
+
+.scrollViewFrame {
+  position: relative;
+  overflow: hidden;
+}
+
+.scrollView {
+  width: 100%;
+  height: 100%;
+  overscroll-behavior: none; /* No overscroll effect */
+  outline: none;
+
+  /* Hide native scrollbar — we render our own */
+}
+
+.scrollView[data-axis='vertical'] {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.scrollView[data-axis='horizontal'] {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.scrollView::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Opera */
+}
+
+/* Content wrapper */
+.content {
+  position: relative;
+  min-height: 100%;
+}
+
+.content[data-axis='horizontal'] {
+  display: flex;
+  align-items: flex-start;
+  width: max-content;
+  min-width: 100%;
+}
+
+.fadingEdge {
+  position: absolute;
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 120ms linear;
+}
+
+.fadingEdge[data-edge='top'] {
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to bottom, rgb(0, 0, 0), rgba(0, 0, 0, 0));
+}
+
+.fadingEdge[data-edge='bottom'] {
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(to top, rgb(0, 0, 0), rgba(0, 0, 0, 0));
+}
+
+.fadingEdge[data-edge='left'] {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(to right, rgb(0, 0, 0), rgba(0, 0, 0, 0));
+}
+
+.fadingEdge[data-edge='right'] {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to left, rgb(0, 0, 0), rgba(0, 0, 0, 0));
+}
+
+/* ============================================================================
+ * Custom Scrollbar
+ * - Track: 100px tall, 8px wide, 25% white
+ * - Handle: proportional, min 8px, 100% white
+ * - Positioned on the right side, vertically centered
+ * ============================================================================ */
+
+.scrollbarContainer {
+  position: absolute;
+  z-index: 20;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+
+.scrollbarContainer[data-axis='vertical'] {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 8px;
+}
+
+.scrollbarContainer[data-axis='horizontal'] {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 8px;
+}
+
+.scrollbarContainer[data-visible='true'] {
+  opacity: 1;
+  transition: opacity 0ms;
+}
+
+.scrollbarTrack {
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.25);
+  border-radius: var(--uit-corner-radius-full);
+}
+
+.scrollbarContainer[data-axis='vertical'] .scrollbarTrack {
+  right: 0;
+  width: 8px;
+  height: 100px; /* scrollbar track size */
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.scrollbarContainer[data-axis='horizontal'] .scrollbarTrack {
+  bottom: 0;
+  height: 8px;
+  width: 100px; /* scrollbar track size */
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.scrollbarHandle {
+  position: absolute;
+  background-color: rgba(255, 255, 255, 1.0);
+  border-radius: var(--uit-corner-radius-full);
+}
+
+.scrollbarContainer[data-axis='vertical'] .scrollbarHandle {
+  right: 0;
+  width: 8px;
+  min-height: 8px; /* minimum scrollbar handle size */
+}
+
+.scrollbarContainer[data-axis='horizontal'] .scrollbarHandle {
+  bottom: 0;
+  height: 8px;
+  min-width: 8px; /* minimum scrollbar handle size */
+}

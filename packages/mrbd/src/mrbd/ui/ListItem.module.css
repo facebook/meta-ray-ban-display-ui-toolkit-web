@@ -1,0 +1,419 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * ListItem styles
+ *
+ * Layout: horizontal row with leading slot (icon/avatar), text content (title/subtitle),
+ * and trailing slot (switch/radio/slider/timestamp/status/tag).
+ * Material background from Container handles focused/pressed visual state transitions.
+ *
+ * Layout:
+ *   Container (material insets = 8px all around)
+ *     contentView (horizontal flex row):
+ *       left margin 20px, right margin 32px
+ *       8px vertical padding, 8px horizontal padding
+ *       min-height 120px
+ *       vertically centered, left-aligned
+ *       ├── avatar (right margin 16px)
+ *       ├── icon (32x32px, left margin 16px, right margin 32px)
+ *       └── title/accessory row (flex-grow: 1, horizontal)
+ *             ├── vertical column (flex-grow: 1): title + secondLine + slider
+ *             ├── switch / radio button
+ *             ├── trailing icon container (56x56px, left margin 24px)
+ *             ├── tag (left margin 16px)
+ *             └── timestampStatusContainer (left margin 24px)
+ */
+
+.listItem {
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/**
+ * Inner content row — horizontal flex row, center-aligned by default.
+ *
+ * Layout:
+ *   - left margin 20px, right margin 32px
+ *   - 8px vertical padding, 8px horizontal padding
+ *   - min-height 120px
+ *
+ * The Container's material insets add 8px padding all around. Combined with
+ * the contentView's own margins and padding, the effective left padding from
+ * the Container edge is: materialInset(8) + leftMargin(20) + padLeft(8) = 36px.
+ * Right side: materialInset(8) + rightMargin(32) + padRight(8) = 48px.
+ *
+ * Container applies material insets as inner padding on the content area.
+ * We set contentView margins to achieve the same effective spacing:
+ *   margin-left = leftMargin(20) + horizontalPad(8) = 28px
+ *   margin-right = rightMargin(32) + horizontalPad(8) = 40px
+ *   vertical padding = 8px
+ *   min-height = 120px
+ */
+.contentView {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  /* Fills parent minus margins = parent - left margin - right margin.
+   * Do NOT use width:100% — CSS 100% does not subtract margins, causing overflow.
+   * width:auto in block flow naturally fills parent minus margins. */
+  width: auto;
+  min-height: var(--uit-listitem-min-height);
+  /* Spacing:
+   *   left margin 20px, right margin 32px
+   *   8px vertical padding, 8px horizontal padding
+   * Margins and padding are separate — NOT combined. */
+  padding: var(--uit-spacing-small);
+  margin-left: var(--uit-spacing-med-lg);
+  margin-right: var(--uit-spacing-xlarge);
+  box-sizing: border-box;
+}
+
+/**
+ * Multi-line content distribution: top-align when subtitle maxLines > 1.
+ * Content distribution switches to 24px
+ * for vertical padding and top alignment.
+ */
+.contentView.multiline {
+  align-items: flex-start;
+  padding-top: var(--uit-spacing-large);
+  padding-bottom: var(--uit-spacing-large);
+}
+
+/**
+ * Leading slot: icon or avatar.
+ * The avatar has a 16px right margin.
+ * Icon has its own margins (left margin 16px, right margin 32px) in .iconContainer.
+ * The leadingSlot wrapper adds the avatar margin; icon margin is on .iconContainer.
+ */
+.leadingSlot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Avatar within leading slot — right margin 16px */
+.avatarWrapper {
+  display: flex;
+  align-items: center;
+  margin-right: var(--uit-spacing-medium);
+  flex-shrink: 0;
+}
+
+/**
+ * Icon within leading slot.
+ * Icon width/height 32px (--uit-listitem-icon-size),
+ *         left margin 16px (--uit-listitem-icon-start-margin),
+ *         right margin 32px (--uit-listitem-icon-end-margin)
+ */
+.iconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--uit-listitem-icon-size);
+  height: var(--uit-listitem-icon-size);
+  flex-shrink: 0;
+  margin-left: var(--uit-listitem-icon-start-margin);
+  margin-right: var(--uit-listitem-icon-end-margin);
+  color: var(--uit-color-icon-primary, rgba(255, 255, 255, 0.95));
+}
+
+.iconContainer svg,
+.iconContainer img {
+  width: 100%;
+  height: 100%;
+}
+
+/**
+ * Title/accessory row.
+ * The horizontal flex row that contains the
+ * text column and every trailing control. The whole row is vertically centered
+ * inside contentView; the tag itself is top-aligned within this row.
+ */
+.titleAccessoryContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Title + subtitle text column — 0px gap between title and subtitle */
+.titleSubtitleContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+  min-width: 0;
+  gap: 0px;
+}
+
+/* Title text */
+.titleText {
+  composes: uit-text-label from global;
+  color: var(--uit-color-text-primary, rgba(255, 255, 255, 0.95));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/**
+ * Subtitle row: secondary icon + subtitle text + inline timestamp.
+ * This row has no gap — spacing is controlled by
+ * individual child margins.
+ */
+.secondLineContainer {
+  display: flex;
+  flex-direction: row;
+  align-self: flex-start;
+  /* Vertically center the secondary icon / subtitle / inline timestamp in the
+     single-line case. The multiline rule below switches to top alignment. */
+  align-items: center;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Multiline subtitle: top-align the second line when the subtitle is multiline. */
+.contentView.multiline .secondLineContainer {
+  align-items: flex-start;
+}
+
+/**
+ * Secondary icon before subtitle text.
+ * 24px (--uit-listitem-secondary-icon-size),
+ *         right margin 6px (--uit-listitem-secondary-icon-end-margin)
+ */
+.secondaryIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--uit-listitem-secondary-icon-size);
+  height: var(--uit-listitem-secondary-icon-size);
+  flex-shrink: 0;
+  margin-right: var(--uit-listitem-secondary-icon-end-margin);
+  color: var(--uit-color-icon-secondary, #CFD3D9);
+}
+
+.secondaryIcon svg,
+.secondaryIcon img {
+  width: 100%;
+  height: 100%;
+}
+
+/* Subtitle text — flex-grow: 1 (fills remaining space) in the subtitle row */
+.subtitleText {
+  composes: uit-text-meta2 from global;
+  color: var(--uit-color-text-secondary, #CFD3D9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Subtitle text color variants (override default secondary) */
+.subtitleText.primary {
+  color: var(--uit-color-text-primary, #FFFFFF);
+}
+
+.subtitleText.positive {
+  color: var(--uit-color-persistent-positive, #26A756);
+}
+
+.subtitleText.warning {
+  color: var(--uit-color-persistent-warning, #C58600);
+}
+
+.subtitleText.negative {
+  color: var(--uit-color-persistent-negative, #FF5668);
+}
+
+.subtitleText.info {
+  color: var(--uit-color-persistent-info, #9081FF);
+}
+
+/**
+ * Inline timestamp divider.
+ * Divider text "•",
+ *         horizontal margin 4px (--uit-spacing-xsmall)
+ */
+.subtitleTimestampDivider {
+  composes: uit-text-meta2 from global;
+  color: var(--uit-color-text-secondary, #CFD3D9);
+  flex-shrink: 0;
+  margin-left: var(--uit-spacing-xsmall);
+  margin-right: var(--uit-spacing-xsmall);
+}
+
+/* Inline timestamp text (on subtitle line) */
+.subtitleTimestamp {
+  composes: uit-text-meta2 from global;
+  color: var(--uit-color-text-secondary, #CFD3D9);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/**
+ * Trailing slot: timestamp/status/switch/radio/slider/tag/accessory icon.
+ * Trailing elements are siblings in the title/accessory row,
+ * each with their own left margin. No shared gap.
+ */
+.trailingSlot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.trailingSlotTopAligned {
+  align-self: flex-start;
+}
+
+.trailingSlotWithTag {
+  align-self: flex-start;
+}
+
+/**
+ * Timestamp + status container (trailing accessory position).
+ * Left margin 24px,
+ *         vertical flex column, end-aligned, vertically centered
+ */
+.timestampStatusContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-left: var(--uit-spacing-large);
+}
+
+.timestampStatusContainer.topAligned {
+  justify-content: flex-start;
+}
+
+/* Standalone timestamp text (accessory position) — meta2 */
+.timestampText {
+  composes: uit-text-meta2 from global;
+  color: var(--uit-color-text-primary, rgba(255, 255, 255, 0.95));
+  white-space: nowrap;
+}
+
+/**
+ * Status indicators container.
+ * Left margin 24px,
+ *         height 28px (--uit-listitem-status-indicators-height),
+ *         end-aligned, vertically centered, horizontal flex row
+ */
+.statusIndicatorsContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: var(--uit-listitem-status-indicators-height);
+  /* Inner 24px start indent (spacing-large) on the status-indicator row, on top
+     of the column's own start margin. */
+  margin-left: var(--uit-spacing-large);
+}
+
+/**
+ * Status indicator dot.
+ * 16px (--uit-listitem-status-indicator-size), left margin 8px
+ * within the status indicators container.
+ */
+.statusIndicatorDot {
+  width: var(--uit-listitem-status-indicator-size);
+  height: var(--uit-listitem-status-indicator-size);
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-left: var(--uit-spacing-small);
+}
+
+/**
+ * Status indicator icons row.
+ * Horizontal flex row, end-aligned, vertically centered.
+ * Individual icons have a left margin of 8px except the first.
+ */
+.statusIndicatorIcons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+/**
+ * Individual status icon.
+ * 24px (--uit-listitem-status-icon-size), secondary icon tint.
+ * Margin: first icon has 0, subsequent icons have a left margin of 8px.
+ */
+.statusIndicatorIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--uit-listitem-status-icon-size);
+  height: var(--uit-listitem-status-icon-size);
+  flex-shrink: 0;
+  color: var(--uit-color-icon-secondary, #CFD3D9);
+}
+
+.statusIndicatorIcon + .statusIndicatorIcon {
+  margin-left: var(--uit-spacing-small);
+}
+
+.statusIndicatorIcon svg,
+.statusIndicatorIcon img {
+  width: 100%;
+  height: 100%;
+}
+
+/**
+ * Accessory trailing icon container.
+ *         width/height 56px (--uit-listitem-trailing-icon-container-size),
+ *         left margin 24px,
+ *         end-aligned, vertically centered.
+ *   Inner icon: 32px (--uit-listitem-icon-size), centered,
+ *         primary icon tint
+ */
+.accessoryIconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--uit-listitem-trailing-icon-container-size);
+  height: var(--uit-listitem-trailing-icon-container-size);
+  flex-shrink: 0;
+  margin-left: var(--uit-spacing-large);
+  color: var(--uit-color-icon-primary, rgba(255, 255, 255, 0.95));
+  transition: opacity 150ms ease-out;
+}
+
+.accessoryIconContainer .accessoryIcon {
+  width: var(--uit-listitem-icon-size);
+  height: var(--uit-listitem-icon-size);
+}
+
+/**
+ * Slider container within the ListItem.
+ * The slider fills available width, min-width 200px (--uit-listitem-control-slider-min-width)
+ */
+.sliderContainer {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: var(--uit-listitem-control-slider-min-width);
+}
+
+/**
+ * Tag positioned as trailing element.
+ * Left margin 16px,
+ *         top-aligned
+ */
+.trailingTag {
+  flex-shrink: 0;
+  margin-left: var(--uit-spacing-medium);
+  align-self: flex-start;
+}

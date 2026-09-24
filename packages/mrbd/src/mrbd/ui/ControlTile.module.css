@@ -1,0 +1,167 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * ControlTile styles
+ *
+ * Layout: full-width, fits-content height, minHeight 120px.
+ * The tile fills its parent (flex:1 in a row of tiles) — no hardcoded width.
+ * Height is driven by min-height + content (icon 72px + padding).
+ */
+
+.controlTile {
+  display: flex;
+  position: relative;
+  flex: 1;
+  min-height: var(--uit-controltile-min-height);
+  min-width: 0;
+}
+
+/* Root layout
+ * horizontal padding = 24px
+ * vertical padding = 16px */
+.root {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  padding: var(--uit-spacing-medium) var(--uit-spacing-large);
+  box-sizing: border-box;
+}
+
+/* Content area (icon + title/slider) — horizontal flex row */
+.content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* Icon container — icon container size (72px).
+ * The container stays in layout always. Background views inside
+ * are shown/hidden separately. The container itself has no
+ * background — the .iconBackground child handles it. */
+.iconContainerBackground {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--uit-controltile-icon-container-size);
+  height: var(--uit-controltile-icon-container-size);
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* Base circle background — icon container background view.
+ * Dark circle always visible behind the icon (unless progress bar shown). */
+.iconBaseBackground {
+  position: absolute;
+  inset: 1px;
+  border-radius: 50%;
+  background-color: var(--uit-color-background-inset2);
+}
+
+/* Focused/checked overlay — icon background view.
+ * Gradient overlay shown on focus or checked state. */
+.iconOverlayBackground {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+}
+
+.iconMaterialBackground {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+/* Icon image — 24px with progress, 32px without */
+.iconImageView {
+  width: var(--uit-icon-large);
+  height: var(--uit-icon-large);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--uit-color-icon-primary);
+  position: relative;
+  z-index: 1;
+}
+
+.iconImageView.iconImageView svg,
+.iconImageView.iconImageView img,
+.iconImageView.iconImageView > * {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* Small icon for progress bar mode — 24px */
+.iconSmall {
+  width: var(--uit-icon-medium);
+  height: var(--uit-icon-medium);
+}
+
+/* Right side content area (title or slider)
+ * Content area expands to fill remaining width */
+.contentRight {
+  position: relative;
+  display: flex;
+  height: var(--uit-controltile-icon-container-size);
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Title text uses the emphasized-label text style.
+ * The title sits 24px from the left in ControlTile rows. */
+.titleText {
+  composes: uit-text-label-emphasized from global;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  color: var(--uit-color-text-primary);
+  text-align: left;
+  margin-left: var(--uit-spacing-large);
+  width: calc(100% - var(--uit-spacing-large));
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  transform: translateY(-50%);
+}
+
+/* Slider bar container — right padding = 8px */
+.sliderBarContainer {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
+  padding-right: var(--uit-spacing-small);
+  transform: translateY(-50%);
+}
+
+/* Hidden element (used for animated show/hide) */
+.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.visible {
+  opacity: 1;
+  visibility: visible;
+}

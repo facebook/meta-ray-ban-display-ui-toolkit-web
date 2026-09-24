@@ -1,0 +1,65 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * Meta Ray-Ban Display component dimensions.
+ *
+ * CSS custom properties owned by the package's specialized components.
+ */
+
+:root {
+  /* ===== Component - Button ===== */
+  --uit-button-icon-size: 32px;
+  --uit-button-icon-indicator-size: 4px;
+  --uit-button-icon-indicator-margin: 6px;
+
+  /* ===== Component - Chip ===== */
+  --uit-chip-min-height: 44px;
+  --uit-chip-image-size: 24px;
+  --uit-chip-text-margin-vertical: 6px;
+
+  /* ===== Component - ListItem ===== */
+  --uit-listitem-icon-size: 32px;
+  --uit-listitem-media-size: 74px;
+  --uit-listitem-secondary-icon-size: 24px;
+  --uit-listitem-trailing-icon-container-size: 56px;
+  --uit-listitem-icon-start-margin: 16px;
+  --uit-listitem-icon-end-margin: 32px;
+  --uit-listitem-secondary-icon-end-margin: 6px;
+  --uit-listitem-status-icon-size: 24px;
+  --uit-listitem-status-indicator-size: 16px;
+  --uit-listitem-min-height: 120px;
+  --uit-listitem-status-indicators-height: 28px;
+  --uit-listitem-control-slider-min-width: 200px;
+
+  /* ===== Component - ControlTile ===== */
+  --uit-controltile-icon-container-size: 72px;
+  --uit-controltile-min-height: 120px;
+
+  /* ===== Component - AppControlTile ===== */
+  --uit-appcontroltile-image-container-size: 72px;
+  --uit-appcontroltile-image-size: 40px;
+  --uit-appcontroltile-min-height: 120px;
+  --uit-appcontroltile-min-width: 144px;
+  --uit-appcontroltile-title-fade-width: 60px;
+
+  /* ===== Component - QuickReplyButton ===== */
+  --uit-quick-reply-height: 72px;
+  --uit-quick-reply-min-width: 72px;
+
+  /* ===== Component - ContainerHeader ===== */
+  /* minHeight 94px */
+  --uit-container-header-min-height: 94px;
+  /* container header icon size = 36px */
+  --uit-container-header-icon-size: 36px;
+  /* container header icon container size = 56px */
+  --uit-container-header-icon-container-size: 56px;
+
+  /* ===== Component - Divider ===== */
+  --uit-divider-thickness: 2px;
+}

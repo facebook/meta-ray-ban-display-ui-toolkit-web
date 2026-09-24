@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Toolkit for Meta Ray-Ban Display Materials"
+  short_description: "Author and customize the toolkit container materials"
+  default_prompt: "Use $uit-materials-web to design a compliant custom toolkit container material."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Toolkit for Meta Ray-Ban Display Interface Builder"
+  short_description: "Build polished, compliant UI Toolkit for Meta Ray-Ban Display interfaces"
+  default_prompt: "Use $building-uit-interfaces-web to build a polished interface with UI Toolkit for Meta Ray-Ban Display."

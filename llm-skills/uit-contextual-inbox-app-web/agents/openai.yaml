@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Toolkit for Meta Ray-Ban Display Contextual Inbox App"
+  short_description: "Build list inboxes with anchored temporary actions"
+  default_prompt: "Use $uit-contextual-inbox-app-web to build a polished responsive inbox with contextual actions."

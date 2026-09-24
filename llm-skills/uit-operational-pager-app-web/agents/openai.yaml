@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Toolkit for Meta Ray-Ban Display Operational Pager"
+  short_description: "Build a focused three-area operational app"
+  default_prompt: "Build a production UI Toolkit for Meta Ray-Ban Display operational pager with three peer areas."

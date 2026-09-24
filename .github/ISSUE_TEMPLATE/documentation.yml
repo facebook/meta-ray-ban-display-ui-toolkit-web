@@ -1,0 +1,16 @@
+name: Documentation problem
+description: A documentation page is incorrect, unclear, or out of date.
+labels: ["documentation"]
+body:
+  - type: input
+    id: page
+    attributes:
+      label: Page URL
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is wrong
+    validations:
+      required: true

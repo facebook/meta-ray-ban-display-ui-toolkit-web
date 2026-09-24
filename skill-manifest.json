@@ -1,0 +1,170 @@
+{
+  "schema_version": 2,
+  "skill_count": 24,
+  "skills": [
+    {
+      "name": "building-uit-interfaces-web",
+      "description": "Build, revise, or review polished production Meta Ray-Ban Display React interfaces with the public `@wearables-ui-toolkit/mrbd` library. Use for UI Toolkit for Meta Ray-Ban Display applications, routes, layouts, focus/D-pad navigation, materials, responsive sizing, overlays, accessibility, performance, or visual validation. Covers component selection, compliant composition, semantic tokens, filled icons, additive-display legibility, incorrect patterns, and device-ready testing. Assume no prior toolkit knowledge.",
+      "file_count": 11,
+      "sha256": "sha256:ceab44e19d421c981850e2ac9037eea82d062e46910cc63bcf2148ed37d5c4b9"
+    },
+    {
+      "name": "uit-accessibility-testing-web",
+      "description": "Audit, test, or validate production UI Toolkit for Meta Ray-Ban Display interfaces for accessibility, focus/D-pad navigation, responsive layout, WebView rendering, performance, component states, route restoration, scroll boundaries, popup behavior, additive-display contrast, package-export safety, formatting, lint, tests, and build readiness.",
+      "file_count": 3,
+      "sha256": "sha256:c3f0cc661473ff3e752c3005caa57d7bb5c8f7f9e238bec147853c385de208fe"
+    },
+    {
+      "name": "uit-actions-web",
+      "description": "Build or review UI Toolkit for Meta Ray-Ban Display actions using Button, ButtonRail, ButtonGroup, ButtonDivider, QuickReplyButton, ActionHint, and the InputTextView built-in action. Use for horizontal actions, text submission, overflowing rails, anchors, centered focus cursors, disabled actions, tooltips, icon-only actions, reply suggestions, action transitions, or action-layout bugs.",
+      "file_count": 3,
+      "sha256": "sha256:d939500f150d11459c609c3d8b378603a0996a7c889ce307a987e6b8d61e4b9c"
+    },
+    {
+      "name": "uit-content-identity-web",
+      "description": "Build or review UI Toolkit for Meta Ray-Ban Display text, icons, avatars, app badges, notification badges, tags, chips, container headers, ReadMoreTextView, TextSwitcher, and IconImage. Use for typography hierarchy, icon sources/tint, person or duo identity, avatar status/badges, app identity, unread counts, metadata, loading chips, clamped copy, or content accessibility.",
+      "file_count": 4,
+      "sha256": "sha256:30e34cd0a08dc910fa3989f86a18dc52353e3bdfc091770d647dfd2cf03ddb1b"
+    },
+    {
+      "name": "uit-contextual-inbox-app-web",
+      "description": "Build a production UI Toolkit for Meta Ray-Ban Display inbox or work queue where each ListItem opens an anchored temporary VerticalMenu and menu actions update that record. Use when row-level Assign, Snooze, Archive, or similar secondary commands must dismiss with Back and return focus without reflow.",
+      "file_count": 4,
+      "sha256": "sha256:ef45b2307b264596fc42ca7e5854e97c85d50e00d567ced47b617a0159d394ef"
+    },
+    {
+      "name": "uit-controls-web",
+      "description": "Build or review UI Toolkit for Meta Ray-Ban Display settings and value controls using Switch, RadioButton, SliderBar, Scrubber, IsolatedControl, ControlTile, AppControlTile, and ListItem control modes. Use for binary settings, mutually exclusive choices, sliders, media seek, D-pad value adjustment, progress tiles, app/person shortcuts, controlled state, or control accessibility.",
+      "file_count": 3,
+      "sha256": "sha256:e5b3ec0f1ccfe8a4a450651978e7791535bd0a88d0e3fec7245ab90d8e93ebd0"
+    },
+    {
+      "name": "uit-lists-menus-web",
+      "description": "Build or review UI Toolkit for Meta Ray-Ban Display ListItem, VerticalList, ScrollView list layouts, SwipeToReveal rows, Divider, VerticalMenu, VerticalMenuButton, ContextMenu, and menu items. Use for navigation/settings rows, timestamps, avatars, status/accessories, row controls, list spacing/insets, boundary scrolling, reveal actions, anchored menus, dismissal, or focus restoration.",
+      "file_count": 3,
+      "sha256": "sha256:774c766a940c2831624c4ce90d13128f1a7c90fd247376eb07e1dac2efc573a1"
+    },
+    {
+      "name": "uit-material-controls-app-web",
+      "description": "Build a restrained production UI Toolkit for Meta Ray-Ban Display control dashboard from a small vertical set of interactive Containers with custom materials. Use when several peer operational values each have one direct reversible mode action and custom surface color is an explicit product requirement.",
+      "file_count": 3,
+      "sha256": "sha256:f120709d8e4c5704d82f328029c7d42764952a4baeb3f06a938804859ea50cdd"
+    },
+    {
+      "name": "uit-materials-web",
+      "description": "Design, customize, derive, implement, debug, or review UI Toolkit for Meta Ray-Ban Display `ContainerMaterial` rendering. Use for material factories, custom colors, layer composition, gradients, glow strokes, inner shadows, noise, press overlays, drop shadows, shape providers, canvas drawing, state transitions, partial focus, focus handoff, rubber-band feedback, or material performance. Covers public material APIs and correct production ownership.",
+      "file_count": 4,
+      "sha256": "sha256:0e40565b8d3bdffd0af790f4d77db57ca84c380a0ddf1f0df73ae98a22e2382b"
+    },
+    {
+      "name": "uit-media-browser-app-web",
+      "description": "Build a production UI Toolkit for Meta Ray-Ban Display media collection with a horizontal Carousel of image Cards and a static reading detail route. Use when real media is the primary collection, selecting an item opens detail, and selection/focus must restore after Back.",
+      "file_count": 7,
+      "sha256": "sha256:abf67778580468d692cfcd720fa8f2f4b45d441669720d12576fde69c683a445"
+    },
+    {
+      "name": "uit-navigation-focus-web",
+      "description": "Build, debug, or review UI Toolkit for Meta Ray-Ban Display App, Page, Header, ScrollView, VerticalList, Pager, SubNavigationPager, SubNavigation, PaginationIndicator, SwipeIndicator, route transitions, React Router integration, focus coordination, focus restoration, partial focus, rubber-band feedback, boundary scrolling, fading edges, and scrollbars.",
+      "file_count": 3,
+      "sha256": "sha256:68635d87f51a8473ec694e19461847866a48fc85eeae42931c268841689f0769"
+    },
+    {
+      "name": "uit-operational-pager-app-web",
+      "description": "Build a production UI Toolkit for Meta Ray-Ban Display operational workspace with exactly three peer one-word areas in a SubNavigationPager: one compact overview with bottom actions, one actionable record list, and one read-only notes or handoff surface. Use for trip, route, inspection, event, shift, or field-operation briefs that explicitly need three peer areas such as Overview/Stops/Notes, Summary/Tasks/Log, or Status/Checks/Notes without routed record details.",
+      "file_count": 4,
+      "sha256": "sha256:224fe88ed236e808d1e23f1aeaddf7d62e71ee24d72c2c7d9ba60a56ab87b0cc"
+    },
+    {
+      "name": "uit-overlays-feedback-web",
+      "description": "Build, debug, or review UI Toolkit for Meta Ray-Ban Display Tooltip, TooltipContainer, VerticalMenu, ContextMenu, Modal, Toast, Scrim, and portal behavior. Use for anchored positioning, focusable tooltip content, popup dismissal, menu item activation, focus restoration, modal decisions, queued toast, text-over-media protection, overlay z-order, Back/Escape precedence, or flicker/reopen bugs.",
+      "file_count": 3,
+      "sha256": "sha256:95ff71ea495e7f019a8a41f15eb88f435c5b060db3e5380cc341e0e90f28ed6e"
+    },
+    {
+      "name": "uit-routed-list-app-web",
+      "description": "Build a production UI Toolkit for Meta Ray-Ban Display application around one data-driven collection, routed record details, durable state, and a real detail action. Use for conventional list/detail products and as the default architecture for ambiguous simple or medium-complexity application briefs.",
+      "file_count": 4,
+      "sha256": "sha256:e8966763e3dddab88908bb79ea3457cfa6113f5aac4ff9ccc4cffbec6b199c8e"
+    },
+    {
+      "name": "uit-screen-architecture-web",
+      "description": "Design, implement, or review production UI Toolkit for Meta Ray-Ban Display route structure before choosing detailed components. Use for Page versus SubNavigationPager, ScrollView versus VerticalList, single-scroll-owner composition, mixed content and lists, settings screens, edge-to-edge rails/lists, responsive containment, D-pad scrolling, focus visibility, route height, or horizontal overflow.",
+      "file_count": 5,
+      "sha256": "sha256:63bed7c38a3921d485ada3748d13a565b147ab9548aa27ce09c8d8b5e4ab9618"
+    },
+    {
+      "name": "uit-status-action-app-web",
+      "description": "Build a focused production UI Toolkit for Meta Ray-Ban Display status, monitor, singular incident-acknowledgement, or session application with one Page, one edge-to-edge informational Panel, and one reversible bottom action. Use for one recorded alert, event, threshold crossing, or excursion, or another product with one primary state that does not need routes, collections, history, or peer tabs.",
+      "file_count": 4,
+      "sha256": "sha256:42d2d4caaa93981a5afad3a1a2c1b9e0403838ef77172684b5e6504dc671cdb5"
+    },
+    {
+      "name": "uit-status-loading-web",
+      "description": "Build or review UI Toolkit for Meta Ray-Ban Display determinate and indeterminate state using ProgressIndicator, ProgressRing, CircularProgressBar, IndeterminateLoader, Shimmer, ShimmerItem, InputTextView loading, VolumeIndicator, ZoomIndicator, status indicators, badges, loading icons, and dynamic replacement. Use for progress, loading skeletons, operation state, field loading, volume/zoom feedback, accessibility announcements, or focus stability during async updates.",
+      "file_count": 3,
+      "sha256": "sha256:930846be0eef49a0815fc97e67a1ebd66e650fe48431dc3c7dcbf43cc607d8d8"
+    },
+    {
+      "name": "uit-surfaces-media-web",
+      "description": "Build or review UI Toolkit for Meta Ray-Ban Display Container, StaticContainer, Panel, Surface, Card, CardStack, Carousel, MediaWrapper, Scrim, and Vignette compositions. Use for interactive/static materials, information grouping, custom widgets, image cards, arbitrary card content, media collections, horizontal paging, text-over-media contrast, pannable-media edges, responsive sizing, clipping, or nested-container problems.",
+      "file_count": 3,
+      "sha256": "sha256:57fcc3e57ef92035b57b5d09b1a200c3934a008556d6b5b819ac9aaaf62f41d5"
+    },
+    {
+      "name": "uit-tabbed-controls-app-web",
+      "description": "Build a production UI Toolkit for Meta Ray-Ban Display application with a SubNavigationPager, peer one-word control categories, integrated ListItem switches, and exclusive radio choices. Use for focused settings/control products that need two peer pages without routes, Page, or action rails.",
+      "file_count": 4,
+      "sha256": "sha256:92b37013dd465a5343b7058419a26894c53c5a06d821df222dfa37209e42af60"
+    },
+    {
+      "name": "uit-tabbed-work-app-web",
+      "description": "Build a production UI Toolkit for Meta Ray-Ban Display application with two peer SubNavigationPager work queues, routed record details, durable completion/defer state, and bottom detail actions. Use when a brief explicitly asks users to switch between one-word work collections such as Today/Done, Active/Done, Open/Closed, or Current/History and then inspect or act on one record.",
+      "file_count": 4,
+      "sha256": "sha256:2d605403cc5c5b44b3db7735588aa47af3de99e88670b37e38442b6cea7a6c94"
+    },
+    {
+      "name": "uit-text-input-web",
+      "description": "Build, compose, or review free-form text entry for UI Toolkit for Meta Ray-Ban Display using InputTextView. Use for controlled or uncontrolled text, device-host input handoff, multiline growth and scrolling, the built-in send action, loading state, submission progress, accessibility, focus traversal, or text-entry layout bugs.",
+      "file_count": 3,
+      "sha256": "sha256:25c29162cfd6c065f19bbbd9622554767a72042eff4b187bfed82de57297e969"
+    },
+    {
+      "name": "uit-theming-color-web",
+      "description": "Apply or review UI Toolkit for Meta Ray-Ban Display themes, semantic colors, typography, spacing, radii, opacity, component color variants, and custom color ramps. Use when changing application appearance, selecting tokens, customizing a subtree, creating gradient steps, checking additive-display contrast, migrating token names, or deciding between CSS theme overrides and a custom ContainerMaterial.",
+      "file_count": 2,
+      "sha256": "sha256:86f8893d5d6e4f5ecff9e1ce40bec30d2e14bd2005adc4d7abc51588e305b968"
+    },
+    {
+      "name": "uit-timed-session-app-web",
+      "description": "Build a production UI Toolkit for Meta Ray-Ban Display countdown or timed-session application with synchronized running, paused, complete, and restart behavior in one Page, one informational Panel, and one persistent bottom action.",
+      "file_count": 4,
+      "sha256": "sha256:c6c38b1074240323288fcf93069e72c16a90222d65d7e1ac9a90f619a8539f2d"
+    },
+    {
+      "name": "wearables-ui-toolkit-web",
+      "description": "Discover and route to the complete UI Toolkit for Meta Ray-Ban Display skill library for building production Meta Ray-Ban Display React applications with `@wearables-ui-toolkit/mrbd`. Use first for any broad, ambiguous, multi-component, or unfamiliar toolkit task; for architecture decisions; or when an agent needs to locate the right component, material, navigation, accessibility, validation, or design-system skill.",
+      "file_count": 7,
+      "sha256": "sha256:5d57606c93c3cf5be4a5942f4a9103376a00fd538a68055a445760c3f61cd3a4"
+    }
+  ],
+  "targets": [
+    {
+      "id": "claude-code",
+      "account_skills_directory": ".claude/skills",
+      "project_skills_directory": ".claude/skills",
+      "skill_count": 24
+    },
+    {
+      "id": "codex",
+      "account_skills_directory": ".codex/skills",
+      "project_skills_directory": ".agents/skills",
+      "skill_count": 24
+    },
+    {
+      "id": "muse-code",
+      "account_skills_directory": ".agents/skills",
+      "project_skills_directory": ".agents/skills",
+      "skill_count": 24
+    }
+  ]
+}

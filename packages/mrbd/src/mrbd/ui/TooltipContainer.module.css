@@ -1,0 +1,121 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * TooltipContainer styles
+ * Non-interactive display component with material background and blend mode text
+ */
+
+.tooltipContainer {
+  display: inline-flex;
+  position: relative;
+  box-sizing: border-box;
+  isolation: isolate;
+  color-scheme: dark;
+}
+
+.materialShape {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.35));
+  z-index: 0;
+}
+
+.contentContainer {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  /* Keep z-index auto so plus-lighter text/icon content additively blends
+     against the tooltip material shape. */
+  min-width: 36px;
+  width: max-content;
+  padding: var(--uit-spacing-small) var(--uit-spacing-medium);
+  box-sizing: border-box;
+}
+
+/* Icon — leading side */
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  /* Icon tint uses --uit-color-icon-secondary; .text/.metadata keep
+     --uit-color-text-secondary. */
+  color: var(--uit-color-icon-secondary);
+  mix-blend-mode: lighten;
+}
+
+.icon svg,
+.icon img {
+  width: 100%;
+  height: 100%;
+}
+
+/* Icon margin when followed by text */
+.iconWithText {
+  margin-right: var(--uit-spacing-small);
+}
+
+/* Text label — meta2 text appearance, additively blended */
+.text {
+  composes: uit-text-meta2 from global;
+  color: var(--uit-color-text-secondary);
+  mix-blend-mode: lighten;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  white-space: normal;
+}
+
+/* Metadata text — meta2 text appearance, lighten blend mode */
+.metadata {
+  composes: uit-text-meta2 from global;
+  color: var(--uit-color-text-secondary);
+  mix-blend-mode: lighten;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Metadata margin when preceded by text */
+.metadataWithText {
+  margin-left: var(--uit-spacing-small);
+}
+
+/* Trailing icon */
+.trailingIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  /* Icon tint uses --uit-color-icon-secondary; .text/.metadata keep
+     --uit-color-text-secondary. */
+  color: var(--uit-color-icon-secondary);
+  mix-blend-mode: lighten;
+}
+
+.trailingIcon svg,
+.trailingIcon img {
+  width: 100%;
+  height: 100%;
+}
+
+/* Trailing icon margin when preceded by content */
+.trailingIconWithContent {
+  margin-left: var(--uit-spacing-small);
+}

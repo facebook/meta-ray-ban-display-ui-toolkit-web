@@ -1,0 +1,36 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * Tag component styles
+ *
+ * Key visual: mix-blend-mode composites the Tag layer with its backdrop.
+ * Lightweight text label extending StaticContainer.
+ */
+
+.tag {
+  display: inline-flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  /*
+   * The whole tag layer composites with the `screen` blend mode (result =
+   * a + b - a*b), not `plus-lighter` (additive clamp), so it blends against the
+   * backdrop without over-brightening.
+   */
+  mix-blend-mode: screen;
+}
+
+.tagText {
+  composes: uit-text-meta3 from global;
+  display: block;
+  color: var(--uit-color-text-primary, rgba(255, 255, 255, 0.95));
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+  max-width: none;
+}

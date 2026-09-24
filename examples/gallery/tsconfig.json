@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "types": [
+      "vite/client",
+      "vitest/globals",
+      "@testing-library/jest-dom"
+    ],
+    "paths": {
+      "@wearables-ui-toolkit/mrbd": ["../../packages/mrbd/src/index.ts"],
+      "@wearables-ui-toolkit/mrbd/*": ["../../packages/mrbd/src/*"],
+      "@wearables-ui-toolkit/androidx-shapes": [
+        "../../packages/androidx-shapes/src/index.ts"
+      ],
+      "@wearables-ui-toolkit/icons": ["../../packages/icons/src/index.ts"],
+      "@wearables-ui-toolkit/icons/*": ["../../packages/icons/src/*"]
+    }
+  },
+  "include": ["src"]
+}

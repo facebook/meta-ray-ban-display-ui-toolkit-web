@@ -1,0 +1,60 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * ActionHint styles — a horizontal row with icon + text.
+ *
+ * Styling:
+ * - the META3 text appearance (18px, 400 weight, 24px line-height)
+ * - colorTextPrimary for text color
+ * - additive (plus) blending on text
+ * - corner radius XSMALL (16px)
+ * - actionHint material: linear gradient (15% light overlay → transparent white, top-left to bottom-right)
+ *                       + radial-gradient glow stroke at 10% alpha
+ */
+
+.actionHint {
+  display: inline-flex;
+  /* Corner radius (XSMALL = 16px) set by actionHint material's cornerRadius config */
+  overflow: hidden;
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  /* The bundled vector icons are monochrome glyphs drawn with `currentColor`
+     and would be invisible without a color, so icon-primary is set here. Callers
+     passing a full-color image should use an IconUriSource with `tinted: false`
+     so it renders untinted in its own colors. */
+  color: var(--uit-color-icon-primary);
+}
+
+.icon svg,
+.icon img {
+  width: 100%;
+  height: 100%;
+}
+
+.text {
+  /* Typography via the META3 text appearance:
+   * 18px, 400 weight, 24px line-height, 1px padding-block. */
+  composes: uit-text-meta3 from global;
+  color: var(--uit-color-text-primary);
+  white-space: nowrap;
+  /* Additive (plus) blending. */
+  mix-blend-mode: plus-lighter;
+}

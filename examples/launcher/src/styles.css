@@ -1,0 +1,700 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: #000000;
+}
+
+html,
+body {
+  overflow: hidden;
+}
+
+button,
+[role='button'] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.launcherAppRoot {
+  width: 100%;
+  height: 100%;
+  background: var(--uit-color-background-window);
+  color: var(--uit-color-text-primary);
+}
+
+.launcherPageTransition {
+  width: 100%;
+  height: 100%;
+}
+
+.launcherViewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--uit-color-background-window);
+  container-type: size;
+  --launcher-done-bar-height: clamp(4rem, 12dvh, 4.5rem);
+  --launcher-icon-size: clamp(3.5rem, 10.667vmin, 4rem);
+  --launcher-page-top-inset: clamp(4rem, 12dvh, 4.5rem);
+  --launcher-tile-height: clamp(6.5rem, 20dvh, 7.5rem);
+  --launcher-small-button-height: clamp(4rem, 12dvh, 4.5rem);
+}
+
+.launcherHorizontalPager,
+.nestedHomePager,
+.launcherPage {
+  width: 100%;
+  height: 100%;
+}
+
+.launcherPage {
+  position: relative;
+  overflow: hidden;
+}
+
+.launcherStatusBar {
+  position: absolute;
+  top: var(--launcher-status-bar-top);
+  left: 50%;
+  width: var(--launcher-status-bar-width);
+  height: var(--launcher-status-bar-height);
+  z-index: 5;
+  transform: translateX(-50%);
+  transition:
+    top 400ms cubic-bezier(0.33, 0, 0, 1),
+    width 400ms cubic-bezier(0.33, 0, 0, 1),
+    height 400ms cubic-bezier(0.33, 0, 0, 1);
+  opacity: 1;
+}
+
+.launcherStatusBar[data-slider-overlay-active='true'] {
+  transition:
+    top 400ms cubic-bezier(0.33, 0, 0, 1),
+    width 400ms cubic-bezier(0.33, 0, 0, 1),
+    height 400ms cubic-bezier(0.33, 0, 0, 1);
+}
+
+.launcherStatusBarSurface {
+  border-radius: var(--uit-corner-radius-large);
+}
+
+.launcherStatusBarContent {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.launcherStatusBarClock,
+.launcherStatusBarTempState,
+.launcherPagination {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+
+.launcherStatusBarClock,
+.launcherStatusBarTempState {
+  transition:
+    opacity 400ms cubic-bezier(0.33, 0, 0, 1),
+    transform 400ms cubic-bezier(0.33, 0, 0, 1);
+}
+
+.launcherPagination {
+  transition:
+    opacity 500ms cubic-bezier(0.33, 0, 0, 1),
+    transform 500ms cubic-bezier(0.33, 0, 0, 1);
+}
+
+.launcherStatusBarClock,
+.launcherStatusBarTempState {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: max-content;
+  white-space: nowrap;
+  transform: translate(-50%, -50%);
+}
+
+.launcherPagination {
+  transform: translate(-50%, -50%);
+}
+
+.launcherStatusBar[data-status-bar-mode='pagination'] .launcherStatusBarClock {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.96);
+}
+
+.launcherStatusBar[data-status-bar-mode='pagination'] .launcherPagination {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.launcherStatusBar[data-status-bar-mode='pagination'] .launcherStatusBarTempState {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.96);
+}
+
+.launcherStatusBar[data-status-bar-mode='clock'] .launcherStatusBarClock,
+.launcherStatusBar[data-status-bar-mode='upperClock'] .launcherStatusBarClock {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.launcherStatusBar[data-status-bar-mode='clock'] .launcherPagination,
+.launcherStatusBar[data-status-bar-mode='upperClock'] .launcherPagination,
+.launcherStatusBar[data-status-bar-mode='tempState'] .launcherPagination {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.96);
+}
+
+.launcherStatusBar[data-status-bar-mode='clock'] .launcherStatusBarTempState,
+.launcherStatusBar[data-status-bar-mode='upperClock'] .launcherStatusBarTempState {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.96);
+}
+
+.launcherStatusBar[data-status-bar-mode='tempState'] .launcherStatusBarClock {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.96);
+}
+
+.launcherStatusBar[data-status-bar-mode='tempState'] .launcherStatusBarTempState {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.widgetPlaceholder {
+  width: 100%;
+}
+
+.widgetPlaceholderShimmer {
+  display: block;
+  width: 100%;
+}
+
+.allAppsScrollView {
+  width: 100%;
+  height: 100%;
+}
+
+.allAppsPagePinning .allAppsScrollView {
+  height: calc(100% - var(--launcher-done-bar-height) - 0.3125rem);
+}
+
+.allAppsGrid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(100%, 17rem), 1fr)
+  );
+  gap: clamp(0.5rem, 2vmin, 0.75rem) 0.25rem;
+  padding:
+    clamp(4.75rem, 13.833dvh, 5.1875rem)
+    var(--uit-spacing-medium)
+    var(--uit-spacing-large);
+}
+
+.launcherAppTileSlot {
+  position: relative;
+  width: 100%;
+  height: var(--launcher-tile-height);
+}
+
+.allAppsGridIconGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px 16px;
+  padding:
+    104px
+    16px
+    100px;
+}
+
+.launcherIconGridTileSlot {
+  display: flex;
+  height: 144px;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.launcherIconGridTile {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  align-items: center;
+  flex-direction: column;
+}
+
+.launcherIconGridSurface {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.launcherIconGridTitle {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  margin-top: 4px;
+  text-align: center;
+  text-overflow: ellipsis;
+  transform: translateY(0);
+  white-space: nowrap;
+}
+
+.launcherIconGridPinBadge {
+  position: absolute;
+  top: -6px;
+  inset-inline-end: -6px;
+  display: flex;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--uit-color-button-primary-background);
+  box-shadow: 0 4px 6px rgb(0 0 0 / 30%);
+  color: var(--uit-color-icon-primary);
+}
+
+.launcherIconGridPinGlyph {
+  width: 20px;
+  height: 20px;
+}
+
+.allAppsGridIconGrid.allAppsGridEntering
+  .launcherIconGridTileSlot[data-icon-grid-entrance='true'] {
+  animation: launcherIconGridEnter 350ms cubic-bezier(0.2, 0, 0, 1) both;
+  animation-delay: var(--launcher-icon-grid-entrance-delay, 0ms);
+}
+
+@keyframes launcherIconGridEnter {
+  from {
+    opacity: 0;
+    transform: translateX(var(--launcher-icon-grid-entrance-offset, 0px));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.launcherAppTile {
+  width: 100%;
+  --launcher-app-icon-material-opacity: 1;
+  --launcher-app-icon-scale: 0.663;
+  --launcher-app-pin-background-progress: 0;
+  --launcher-app-pin-container-opacity: 0;
+  --launcher-app-pin-icon-opacity: 0;
+  --launcher-app-pin-icon-scale: 0.5;
+  --launcher-app-title-translation-x: 0px;
+}
+
+.launcherAppTileContent {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px 0 20px;
+}
+
+.launcherIconMaterial {
+  display: block;
+  position: relative;
+  overflow: visible;
+}
+
+.launcherIconMaterialSurface {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.launcherAssetIconFrame {
+  display: block;
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  transform-origin: center;
+}
+
+.launcherAssetIcon {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    white 0%,
+    white 45%,
+    color-mix(in srgb, white 58%, var(--launcher-icon-light-color)) 100%
+  );
+  -webkit-mask-image: var(--launcher-icon-mask-image);
+  mask-image: var(--launcher-icon-mask-image);
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  transform-origin: center;
+}
+
+.launcherAssetIcon {
+  filter: drop-shadow(2px 3px 5px rgb(0 0 0 / 15%));
+}
+
+.launcherAppTileIconMaterial .launcherAssetIconFrame {
+  transform: scale(var(--launcher-app-icon-scale));
+}
+
+.launcherAppTileTitle {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--uit-color-text-primary);
+  text-overflow: clip;
+  transform: translateX(var(--launcher-app-title-translation-x));
+  white-space: nowrap;
+}
+
+.launcherAppPinBadge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  opacity: var(--launcher-app-pin-container-opacity);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.launcherAppPinBadgeBase,
+.launcherAppPinBadgeSelected {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  mix-blend-mode: overlay;
+}
+
+.launcherAppPinBadgeBase {
+  background:
+    radial-gradient(
+      circle,
+      var(--uit-color-background-elevation2) 0%,
+      var(--uit-color-background-elevation2) 50%,
+      var(--uit-color-background-elevation1) 100%
+    );
+  opacity: calc(1 - var(--launcher-app-pin-background-progress));
+}
+
+.launcherAppPinBadgeSelected {
+  background: var(--uit-color-icon-primary);
+  opacity: calc(var(--launcher-app-pin-background-progress) * 0.25);
+}
+
+.launcherAppPinIcon {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 24px;
+  height: 24px;
+  color: var(--uit-color-icon-primary);
+  opacity: var(--launcher-app-pin-icon-opacity);
+  transform: scale(var(--launcher-app-pin-icon-scale));
+  transform-origin: center;
+}
+
+.allAppsManagePinsItem {
+  display: flex;
+  grid-column: 1 / -1;
+  height: clamp(5rem, 16dvh, 6rem);
+  align-items: center;
+  justify-content: center;
+}
+
+.allAppsDoneButtonBar {
+  position: absolute;
+  right: 0;
+  bottom: max(env(safe-area-inset-bottom), 0.3125rem);
+  left: 0;
+  display: flex;
+  height: var(--launcher-done-bar-height);
+  align-items: center;
+  justify-content: center;
+}
+
+.launcherSmallButton {
+  width: auto;
+  min-width: 0;
+}
+
+.launcherSmallButtonContent {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 0 var(--uit-spacing-large);
+}
+
+.launcherSmallButtonIconSlot {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.launcherSmallButtonIcon {
+  width: 32px;
+  height: 32px;
+  color: var(--uit-color-icon-primary);
+}
+
+.launcherSmallButtonTitle {
+  white-space: nowrap;
+}
+
+.launcherSmallButtonIconSlot + .launcherSmallButtonTitle {
+  margin-left: 8px;
+}
+
+.homeScrollView {
+  width: 100%;
+  height: 100%;
+}
+
+.homeFeed {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.homeNotificationItem {
+  width: 100%;
+}
+
+.homeNotificationListItem {
+  width: 100%;
+  pointer-events: none;
+  --uit-listitem-min-height: var(--launcher-tile-height);
+}
+
+.homeNotificationListItemContent {
+  margin-left: var(--uit-spacing-sm-med);
+  margin-right: var(--uit-spacing-large);
+  min-height: var(--launcher-tile-height);
+}
+
+.upperPanelPage {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding:
+    0
+    clamp(1.5rem, 8cqw, 3rem)
+    clamp(3rem, 16dvh, 6rem);
+  box-sizing: border-box;
+  background: #000000;
+}
+
+.launcherSettingsPage {
+  width: 100%;
+  height: 100%;
+  background: var(--uit-color-background-window);
+}
+
+.launcherSettingsList,
+.appGridStyleList {
+  width: 100%;
+  height: 100%;
+}
+
+.launcherSettingsListContent {
+  padding-bottom: var(--uit-spacing-xlarge);
+}
+
+.appGridStyleOptions {
+  padding-bottom: var(--uit-spacing-xlarge);
+}
+
+.appGridStyleRadioGroup {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--uit-spacing-medium);
+}
+
+.appGridStyleOption {
+  min-width: 0;
+}
+
+.appGridStyleOptionContent {
+  display: grid;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  grid-template-rows: 128px 1fr;
+  padding: var(--uit-spacing-medium);
+}
+
+.appGridStylePreview {
+  display: grid;
+  align-self: stretch;
+  padding: 12px;
+  border-radius: 20px;
+  background: color-mix(
+    in srgb,
+    var(--uit-color-background-inset) 76%,
+    transparent
+  );
+}
+
+.appGridStylePreviewTiles {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.appGridStylePreviewWideTile {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  padding: 6px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #477cc8, #493266);
+}
+
+.appGridStylePreviewWideTileIcon {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  border-radius: 6px;
+  background: rgb(255 255 255 / 82%);
+}
+
+.appGridStylePreviewLabel {
+  display: block;
+  height: 4px;
+  border-radius: var(--uit-corner-radius-full);
+  background: rgb(255 255 255 / 64%);
+}
+
+.appGridStylePreviewWideTile .appGridStylePreviewLabel {
+  width: 24px;
+  margin-left: 6px;
+}
+
+.appGridStylePreviewIcons {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.appGridStylePreviewIconCell {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.appGridStylePreviewIcon {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #4ec8b5, #493266);
+}
+
+.appGridStylePreviewIconCell .appGridStylePreviewLabel {
+  width: 22px;
+  margin-top: 5px;
+}
+
+.appGridStyleOptionText {
+  display: flex;
+  min-width: 0;
+  align-self: center;
+  flex-direction: column;
+  padding-right: 40px;
+}
+
+.appGridStyleOptionTitle,
+.appGridStyleOptionDescription {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.appGridStyleOptionRadio {
+  position: absolute;
+  right: var(--uit-spacing-medium);
+  bottom: var(--uit-spacing-medium);
+  display: flex;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .launcherStatusBar,
+  .launcherStatusBarClock,
+  .launcherStatusBarTempState,
+  .launcherPagination {
+    transition: none;
+  }
+
+  .allAppsGridIconGrid.allAppsGridEntering
+    .launcherIconGridTileSlot[data-icon-grid-entrance='true'] {
+    animation: none;
+  }
+}
+
+@media (max-width: 30rem) {
+  .appGridStyleRadioGroup {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 25rem) {
+  .allAppsGridIconGrid {
+    gap: 20px 8px;
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  .launcherIconGridSurface {
+    scale: 0.9;
+  }
+}
+
+@media (max-width: 22rem) {
+  .launcherIconGridSurface {
+    scale: 0.78;
+  }
+}

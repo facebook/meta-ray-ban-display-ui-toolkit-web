@@ -1,0 +1,61 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * Page styles
+ *
+ * Hierarchy:
+ *   Page (full display bounds)
+ *   ├── Header (positioned at the system-safe top-center, above content)
+ *   └── Content (optionally inset below the system-bar region)
+ *       └── Content (with top padding to clear header area)
+ *
+ * The Header and content are SIBLINGS within the page at the SAME
+ * position boundaries. The Header OVERLAPS the content and floats above it
+ * via stacking order. The content uses top padding so items start below the
+ * header. When scrolling, items pass UNDER the fixed Header.
+ *
+ * The root remains full bleed. The absolute content layer owns the optional
+ * system-bar inset, while the absolute header remains at its invariant safe
+ * position and overlays scrolling content.
+ */
+
+.page {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/**
+ * Header wrapper — fixed overlay above content.
+ * Uses position:absolute + a high z-index for consistent layering.
+ * Header is positioned at top-center.
+ */
+.headerWrapper {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  /* z-index is applied inline from PAGE_HEADER_TRANSLATION_Z; no class-level
+     z-index to shadow it. */
+  pointer-events: auto;
+  overflow: visible;
+}
+
+/**
+ * Content area — fills from its configured top inset to the Page bottom and
+ * scrolls underneath Header. Scroll containers can independently reserve the
+ * header area through their own insetForHeader behavior.
+ */
+.content {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+}

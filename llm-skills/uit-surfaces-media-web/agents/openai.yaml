@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Toolkit for Meta Ray-Ban Display Surfaces and Media"
+  short_description: "Build containers, cards, and media layouts"
+  default_prompt: "Use $uit-surfaces-media-web to compose this surface or media experience."

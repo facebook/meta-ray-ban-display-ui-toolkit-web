@@ -1,0 +1,39 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * CircularProgressBar CSS
+ *
+ * Uses SVG path arcs with round linecaps.
+ * Track color: colorIconPrimary at 20% opacity (BACKGROUND_ALPHA = 0x33)
+ * Progress color: colorIconPrimary at full opacity
+ */
+
+.circularProgressBar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Track (background arc) - 20% opacity matching BACKGROUND_ALPHA */
+.track {
+  stroke: var(--uit-color-icon-primary, #FFFFFF);
+  opacity: 0.2;
+}
+
+/* Progress arc - full opacity */
+.progress {
+  stroke: var(--uit-color-icon-primary, #FFFFFF);
+  /* stroke-dasharray set via inline styles for animated transitions */
+}

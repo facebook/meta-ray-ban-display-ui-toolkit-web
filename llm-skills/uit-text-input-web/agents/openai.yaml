@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Toolkit for Meta Ray-Ban Display Text Input"
+  short_description: "Build text entry and submission flows"
+  default_prompt: "Use $uit-text-input-web to implement this text-entry flow."

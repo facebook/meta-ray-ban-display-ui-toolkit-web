@@ -1,0 +1,25 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+.dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--uit-spacing-3xl);
+  pointer-events: auto;
+  background: var(--uit-color-background-window, #000);
+  outline: none;
+}
+
+.text {
+  max-width: 100%;
+  text-align: center;
+}

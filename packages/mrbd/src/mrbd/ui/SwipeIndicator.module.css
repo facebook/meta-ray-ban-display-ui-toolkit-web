@@ -1,0 +1,77 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * SwipeIndicator CSS
+ *
+ * Structure:
+ * - Root container (relative positioned, holds scrim + content)
+ * - Scrim (gradient overlay, absolute positioned)
+ * - Content (flex column, centered, holds caret + prompt)
+ *
+ * Colors use theme CSS variables:
+ * - Caret/prompt: colorIconPrimary (via currentColor, additively blended)
+ * - Scrim: colorBackgroundPrimary gradient from transparent to solid
+ */
+
+.swipeIndicator {
+  position: relative;
+  display: block;
+  overflow: hidden;
+}
+
+/* Gradient scrim overlay */
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    var(--uit-color-background-window, #000000) 100%
+  );
+  pointer-events: none;
+}
+
+/* Content container (caret + prompt)
+ * Vertical flex column with padding = 16px
+ */
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  padding: 16px;
+  will-change: transform;
+}
+
+/* Caret (arrow icon)
+ * Tinted with colorIconSecondary, additively blended.
+ * Icon size: 24px
+ */
+.caret {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: var(--uit-color-icon-secondary, #CFD3D9);
+  mix-blend-mode: lighten;
+}
+
+/* Prompt text
+ * META3 text appearance, colorTextSecondary, additively blended.
+ */
+.prompt {
+  color: var(--uit-color-text-secondary, #CFD3D9);
+  text-align: center;
+  white-space: normal;
+  user-select: none;
+  mix-blend-mode: lighten;
+}

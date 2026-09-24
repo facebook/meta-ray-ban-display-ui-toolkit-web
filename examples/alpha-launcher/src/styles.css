@@ -1,0 +1,86 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: #000;
+}
+
+.alpha-launcher,
+.launcher-screen {
+  width: 100%;
+  height: 100%;
+}
+
+.launcher-screen {
+  position: relative;
+}
+
+.launcher-page {
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.launcher-page.is-ready {
+  opacity: 1;
+}
+
+.launcher-page.is-leaving {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.launcher-rail-layer,
+.launcher-adjustment-layer,
+.launcher-list-layer {
+  position: absolute;
+  right: 0;
+  bottom: 24px;
+  left: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+}
+
+.launcher-rail-layer.is-visible,
+.launcher-adjustment-layer.is-visible,
+.launcher-list-layer.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.launcher-adjustment-layer {
+  display: flex;
+  justify-content: center;
+}
+
+.launcher-list-layer {
+  top: 0;
+  bottom: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .launcher-page,
+  .launcher-rail-layer,
+  .launcher-adjustment-layer,
+  .launcher-list-layer {
+    transition: none;
+  }
+}

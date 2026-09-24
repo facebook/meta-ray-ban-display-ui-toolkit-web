@@ -1,0 +1,77 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+.root {
+  --uit-read-more-text-view-padding: 2px;
+  --uit-read-more-text-view-scrim-width: 72px;
+  position: relative;
+  width: 100%;
+  isolation: isolate;
+}
+
+.text {
+  display: -webkit-box;
+  -webkit-line-clamp: var(--uit-read-more-text-view-max-lines);
+  -webkit-box-orient: vertical;
+  padding-block: 0;
+  overflow: hidden;
+}
+
+.textWithReadMore {
+  -webkit-mask-image:
+    linear-gradient(#000, #000),
+    linear-gradient(
+      to right,
+      #000 0,
+      #000 calc(100% - var(--uit-read-more-text-view-affordance-width)),
+      transparent calc(
+        100% - var(--uit-read-more-text-view-affordance-width) +
+          var(--uit-read-more-text-view-scrim-width)
+      ),
+      transparent 100%
+    );
+  -webkit-mask-position: top left, bottom left;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: 100% calc(100% - 1lh), 100% 1lh;
+  mask-image:
+    linear-gradient(#000, #000),
+    linear-gradient(
+      to right,
+      #000 0,
+      #000 calc(100% - var(--uit-read-more-text-view-affordance-width)),
+      transparent calc(
+        100% - var(--uit-read-more-text-view-affordance-width) +
+          var(--uit-read-more-text-view-scrim-width)
+      ),
+      transparent 100%
+    );
+  mask-position: top left, bottom left;
+  mask-repeat: no-repeat;
+  mask-size: 100% calc(100% - 1lh), 100% 1lh;
+}
+
+.readMoreAffordance {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  display: inline-flex;
+  width: max-content;
+  padding-left: calc(
+    var(--uit-read-more-text-view-scrim-width) +
+      var(--uit-read-more-text-view-padding)
+  );
+  padding-right: var(--uit-read-more-text-view-padding);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.readMoreText {
+  display: inline-block;
+  white-space: nowrap;
+}

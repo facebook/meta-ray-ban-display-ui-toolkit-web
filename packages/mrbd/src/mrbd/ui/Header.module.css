@@ -1,0 +1,33 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * Header component styles
+ *
+ * Page header with text and optional metadata.
+ * Uses Chip internally for content display.
+ */
+
+.header {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: visible;
+  --uit-chip-large-avatar-gap: var(--uit-spacing-small);
+  --uit-chip-text-letter-spacing: -0.094px;
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  width: auto;
+  max-width: 100%;
+  overflow: visible;
+}

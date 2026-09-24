@@ -1,0 +1,97 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * ButtonRail styles
+ *
+ * A horizontally scrolling container for buttons.
+ * Uses CSS transform for smooth scroll positioning via keyboard navigation.
+ * Fading edges use CSS mask-image gradients.
+ *
+ * Children are not clipped → overflow: visible on inner group.
+ * The outer container clips overflow to create the viewport effect.
+ */
+
+.buttonRail {
+  position: relative;
+  /*
+   * Clip horizontally to form the scrolling viewport, but leave the vertical
+   * axis visible so a focused button's partial-focus rubberband — the small
+   * edge nudge on DPad up/down when there is no focusable target — is not
+   * clipped. `clip`/`visible` is a valid pair (neither coerces
+   * the other, unlike `hidden`/`visible`), and `overflow-x: clip` keeps the
+   * rail recognized as an X-axis scroller by geometric focus navigation
+   * (getOverflowAxes treats `clip` as clipping). The horizontal
+   * rubberband is already absorbed by the inner row's left/right padding.
+   */
+  overflow-x: clip;
+  overflow-y: visible;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+/**
+ * Inner container that holds the ButtonGroup.
+ * Translates horizontally to simulate scrolling. Animation is driven from
+ * ButtonRail.tsx so layout retargeting follows the spring/jump rules.
+ *
+ * The inner group uses horizontal padding of 24px.
+ */
+.buttonRailInner {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  padding-left: var(--uit-spacing-large);
+  padding-right: var(--uit-spacing-large);
+  will-change: transform;
+}
+
+.buttonRailInner [role='button'] {
+  margin-left: var(--uit-button-layout-compensation, 0px);
+  margin-right: var(--uit-button-layout-compensation, 0px);
+}
+
+/**
+ * Fading edge overlays.
+ * Drawn on top of content to fade out overflowing buttons at edges.
+ */
+.fadingEdgeLeft,
+.fadingEdgeRight {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--fading-edge-length, 32px);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+.fadingEdgeLeft {
+  left: 0;
+  background: linear-gradient(
+    to right,
+    var(--uit-color-background-window, #000) 0%,
+    transparent 100%
+  );
+}
+
+.fadingEdgeRight {
+  right: 0;
+  background: linear-gradient(
+    to left,
+    var(--uit-color-background-window, #000) 0%,
+    transparent 100%
+  );
+}
+
+.fadingEdgeLeft.visible,
+.fadingEdgeRight.visible {
+  opacity: 1;
+}

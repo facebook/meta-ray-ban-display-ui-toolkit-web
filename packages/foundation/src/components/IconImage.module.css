@@ -1,0 +1,23 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/*
+ * Fill sizing for the rendered icon. Applied as a class (not inline) so a host
+ * component's own CSS can override it regardless of cross-package stylesheet
+ * evaluation order. The icon fills its container by default; the host owns the
+ * final size.
+ */
+:where(.fill) {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+:where(.contain) {
+  object-fit: contain;
+}

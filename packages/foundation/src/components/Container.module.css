@@ -1,0 +1,82 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/* Keep overridable layout defaults at zero specificity so component root
+ * classes can replace them regardless of cross-package stylesheet order. */
+:where(.container) {
+  display: inline-flex;
+  position: relative;
+}
+
+.container {
+  /* Material overflow stays visible; the content wrapper owns clipContent. */
+  color-scheme: dark;
+  /* Creates a stacking context so that:
+   * 1. backgroundLayers (z-index:-1) paint within this container, not behind the parent
+   * 2. Child mix-blend-mode (e.g. Tag's screen blend) composites with backgroundLayers */
+  isolation: isolate;
+}
+
+:global([data-scroll-view='true'])
+  .container:not([data-uit-background-blends-with-backdrop='true']) {
+  /*
+   * Some WebView hardware compositors can skip repainting isolated material
+   * containers inside overflow scrollers. Promoting only scroll-view descendants
+   * keeps material layers stable without forcing every container in the app into
+   * its own layer. Backdrop-blended materials must remain unpromoted so the new
+   * stacking context does not isolate their blend from the surface behind them.
+   */
+  will-change: transform;
+}
+
+.clipPath {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.backgroundLayers {
+  position: absolute;
+  top: var(--uit-material-inset-top, 0);
+  left: var(--uit-material-inset-left, 0);
+  right: var(--uit-material-inset-right, 0);
+  bottom: var(--uit-material-inset-bottom, 0);
+  z-index: -1;
+  pointer-events: none;
+  isolation: isolate;
+}
+
+.materialLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.contentWrapper {
+  /* No position or z-index — this is intentional.
+   * Without position:relative, this div does NOT create a stacking context.
+   * This allows child mix-blend-mode (e.g. Tag's screen blend) to composite
+   * directly with the background layers below in the container's stacking
+   * context (established by isolation:isolate on .container).
+   * Paint order: background (z-index:-1) → content (normal flow) → foreground (z-index:1). */
+}
+
+.foregroundLayers {
+  position: absolute;
+  top: var(--uit-material-inset-top, 0);
+  left: var(--uit-material-inset-left, 0);
+  right: var(--uit-material-inset-right, 0);
+  bottom: var(--uit-material-inset-bottom, 0);
+  z-index: 1;
+  pointer-events: none;
+}

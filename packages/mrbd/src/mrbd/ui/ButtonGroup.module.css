@@ -1,0 +1,30 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * ButtonGroup styles
+ * Container with horizontal child arrangement.
+ *
+ * Flexbox handles the horizontal positioning.
+ *
+ * Children and padding are not clipped → overflow: visible here.
+ */
+
+.buttonGroup {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  /* justifyContent set via inline style based on alignment */
+  overflow: visible;
+  outline: none;
+}
+
+.buttonGroup > [role='button'] {
+  margin-left: var(--uit-button-layout-compensation, 0px);
+  margin-right: var(--uit-button-layout-compensation, 0px);
+}

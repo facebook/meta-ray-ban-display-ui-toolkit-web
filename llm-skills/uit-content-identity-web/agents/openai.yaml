@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Toolkit for Meta Ray-Ban Display Content and Identity"
+  short_description: "Build text, icons, avatars, and badges"
+  default_prompt: "Use $uit-content-identity-web to implement this content and identity UI."

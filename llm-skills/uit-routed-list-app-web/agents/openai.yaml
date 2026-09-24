@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Toolkit for Meta Ray-Ban Display Routed List App"
+  short_description: "Build focused production list and detail apps"
+  default_prompt: "Use $uit-routed-list-app-web to build this routed collection and detail application."

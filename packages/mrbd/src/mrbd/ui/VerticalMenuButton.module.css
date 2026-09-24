@@ -1,0 +1,35 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+.button {
+  width: 100%;
+  min-width: 0;
+}
+
+.content {
+  box-sizing: border-box;
+  display: flex;
+  min-width: 0;
+  width: 100%;
+  align-items: center;
+  gap: var(--uit-spacing-medium);
+  padding: var(--uit-spacing-med-lg);
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  color: var(--uit-color-icon-primary);
+}
+
+.text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: start;
+}

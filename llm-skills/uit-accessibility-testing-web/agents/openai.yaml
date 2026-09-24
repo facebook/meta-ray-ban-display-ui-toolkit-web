@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Toolkit for Meta Ray-Ban Display Accessibility and Testing"
+  short_description: "Validate focus, accessibility, and rendering"
+  default_prompt: "Use $uit-accessibility-testing-web to audit and validate this toolkit interface."

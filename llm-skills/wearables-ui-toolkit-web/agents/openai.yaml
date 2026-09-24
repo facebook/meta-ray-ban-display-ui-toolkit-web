@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Toolkit for Meta Ray-Ban Display"
+  short_description: "Find the right UI Toolkit for Meta Ray-Ban Display production guidance"
+  default_prompt: "Use $wearables-ui-toolkit-web to find and apply the right UI Toolkit for Meta Ray-Ban Display skills for this interface."

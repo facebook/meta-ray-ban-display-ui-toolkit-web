@@ -1,0 +1,290 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * Modal styles
+ *
+ * Non-focusable/clickable Panel-based dialog surface.
+ * Supports icon/banner/logo/avatar in leading area,
+ * title/subtitle text, list items, and buttons.
+ *
+ * Composes a Panel component with CSS flexbox layout.
+ */
+
+/*
+ * The Modal has no entrance/exit animation or backdrop. (A previous attempt
+ * was non-functional — the keyframes were bound to a wrapper that was never
+ * rendered, and the overlay was never wired up — so it was removed.)
+ */
+
+/**
+ * Modal panel — the actual content surface.
+ * Panel with MEDIUM corner radius.
+ * Padding:
+ *   24px top/left/right, 32px bottom
+ */
+.modal {
+  display: flex;
+  flex-direction: column;
+  /* Padding: 24px top/left/right, 32px bottom */
+  padding: var(--uit-spacing-large) var(--uit-spacing-large) var(--uit-spacing-xlarge) var(--uit-spacing-large);
+  box-sizing: border-box;
+  width: 100%;
+  outline: none;
+}
+
+/**
+ * Mutually exclusive leading area (icon, banner, logo/avatar).
+ * Only one should be visible at a time.
+ */
+/* Icon container size = 56px, margin-bottom = 24px */
+.iconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: var(--uit-spacing-large);
+}
+
+.iconContainer > svg,
+.iconContainer > img {
+  width: 100%;
+  height: 100%;
+  color: var(--uit-color-icon-primary, #fff);
+}
+
+/**
+ * Banner container — responsive aspect ratio.
+ * Width-based aspect ratio (204/440 standard, 300/440 taller), set via the
+ * CSS aspect-ratio property.
+ */
+/* StaticContainer with corner radius = xxsmall (8px), margin-bottom = 24px */
+.bannerContainer {
+  width: 100%;
+  margin-bottom: var(--uit-spacing-large);
+  position: relative;
+  display: block;
+}
+
+.bannerContainer > [class*="contentWrapper"],
+.bannerImageFrame,
+.bannerImageSvg {
+  width: 100%;
+  height: 100%;
+}
+
+.bannerImageFrame,
+.bannerImageSvg,
+.bannerImageFallback {
+  display: block;
+}
+
+.bannerImageFallback {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+}
+
+.bannerStandard {
+  aspect-ratio: 440 / 204;
+}
+
+.bannerTaller {
+  aspect-ratio: 440 / 300;
+}
+
+/**
+ * Banner tag — overlaid on the banner with a gradient scrim.
+ * Gradient from colorBackgroundWindow to colorBackgroundFlat.
+ */
+.bannerTagScrim {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--uit-spacing-small) var(--uit-spacing-sm-med);
+  background: linear-gradient(
+    to bottom,
+    var(--uit-color-background-window, rgba(0, 0, 0, 0)),
+    var(--uit-color-background-flat, rgba(0, 0, 0, 0.6))
+  );
+}
+
+/* Logo container — margin-bottom = 24px */
+.logoContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--uit-spacing-large);
+}
+
+/* Avatar container — margin-bottom = 24px */
+.avatarContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--uit-spacing-large);
+}
+
+/**
+ * Title text — heading2 in STANDARD mode, body2Emphasized in TITLE_ONLY.
+ * The text appearance toggles between modes.
+ *
+ * STANDARD: HEADING2
+ * TITLE_ONLY: BODY2_EMPHASIZED
+ */
+.title {
+  color: var(--uit-color-text-primary, #fff);
+  margin: 0;
+  text-align: center;
+  /* Horizontal padding = 16px */
+  padding-left: var(--uit-spacing-medium);
+  padding-right: var(--uit-spacing-medium);
+}
+
+.titleStandard {
+  composes: uit-text-heading2 from global;
+  min-height: 51px;
+}
+
+.titleOnly {
+  composes: uit-text-body2-emphasized from global;
+}
+
+/**
+ * Subtitle text — secondary color with lighten blend mode.
+ * A read-more text view clamped to a maximum of 4 lines, truncated via
+ * -webkit-line-clamp. The subtitle uses the meta1 text appearance.
+ */
+.subtitle {
+  composes: uit-text-meta1 from global;
+  color: var(--uit-color-text-secondary, rgba(255, 255, 255, 0.6));
+  padding-block: 0;
+  margin: 0;
+  text-align: center;
+  /* Horizontal padding = 16px */
+  padding-left: var(--uit-spacing-medium);
+  padding-right: var(--uit-spacing-medium);
+  display: -webkit-box;
+  /*
+   * Fixed 4-line clamp. Web font scaling is browser-level (zoom/rem) rather
+   * than an app-level large-font setting, so the clamp stays at 4 at all font
+   * sizes — reducing it unconditionally would wrongly shrink it at normal sizes.
+   */
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  mix-blend-mode: lighten;
+}
+
+/**
+ * Spacing between title and subtitle.
+ * Title bottom margin = 16px.
+ */
+.titleWithSubtitle {
+  margin-bottom: var(--uit-spacing-medium);
+}
+
+.subtitleContainer {
+  position: relative;
+  width: 100%;
+  isolation: isolate;
+}
+
+.readMoreAffordance {
+  --modal-read-more-padding: 2px;
+  --modal-read-more-scrim-width: 72px;
+  position: absolute;
+  right: var(--uit-spacing-medium);
+  bottom: 0;
+  z-index: 1;
+  /* Draws one scrim rect from (labelLeft - 72px) to (labelRight + 2px).
+   * Shrink-wrapping the localized label makes the total occluding band grow
+   * with text length while preserving the 72px fade ramp before the label. */
+  padding-left: calc(var(--modal-read-more-scrim-width) + var(--modal-read-more-padding));
+  padding-right: var(--modal-read-more-padding);
+  width: max-content;
+  white-space: nowrap;
+  color: var(--uit-color-text-placeholder, rgba(255, 255, 255, 0.6));
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0),
+    var(--uit-color-background-window, #000) var(--modal-read-more-scrim-width),
+    var(--uit-color-background-window, #000) 100%
+  );
+}
+
+.readMoreText {
+  composes: uit-text-meta1 from global;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/**
+ * List items container.
+ * Vertical stack layout.
+ */
+.listContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+/**
+ * Individual list item — icon + description horizontal flex row.
+ * List item top margin = 24px.
+ */
+.listItem {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-top: var(--uit-spacing-large);
+}
+
+.listItemIcon {
+  width: var(--uit-icon-medium);
+  height: var(--uit-icon-medium);
+  flex-shrink: 0;
+  color: var(--uit-color-icon-primary, #fff);
+}
+
+.listItemIcon > svg,
+.listItemIcon > img {
+  width: 100%;
+  height: 100%;
+}
+
+/**
+ * List item description text.
+ *   meta1 text appearance → 24px, line-height 32px
+ *   secondary text color
+ *   margin-left = 16px
+ */
+.listItemDescription {
+  composes: uit-text-meta1 from global;
+  color: var(--uit-color-text-secondary, rgba(255, 255, 255, 0.6));
+  margin-left: var(--uit-spacing-medium);
+  flex: 1;
+  mix-blend-mode: lighten;
+}
+
+/**
+ * Buttons section at the bottom.
+ * Convenience API for rendering buttons inside the modal.
+ * Uses 24px for consistency with inter-element spacing.
+ */
+.buttonsContainer {
+  margin-top: var(--uit-spacing-large);
+}

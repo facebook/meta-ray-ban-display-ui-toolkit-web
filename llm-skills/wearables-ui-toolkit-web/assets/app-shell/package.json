@@ -1,0 +1,25 @@
+{
+  "name": "wearables-ui-toolkit-application",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build"
+  },
+  "dependencies": {
+    "@wearables-ui-toolkit/mrbd": "129.0.0",
+    "@wearables-ui-toolkit/androidx-shapes": "129.0.0",
+    "@wearables-ui-toolkit/icons": "129.0.0",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "react-router-dom": "7.17.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "5.1.2",
+    "typescript": "5.9.3",
+    "vite": "8.0.0"
+  }
+}

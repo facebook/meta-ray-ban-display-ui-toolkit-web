@@ -1,0 +1,24 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+.menu {
+  width: 220px;
+  max-width: min(
+    220px,
+    calc(100vw - var(--uit-spacing-medium) - var(--uit-spacing-medium))
+  );
+}
+
+.content {
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 0;
+  padding: var(--uit-spacing-small);
+}

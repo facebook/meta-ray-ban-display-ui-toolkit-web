@@ -1,0 +1,277 @@
+{
+  "name": "@wearables-ui-toolkit/mrbd",
+  "private": true,
+  "version": "129.0.0",
+  "type": "module",
+  "description": "React component library for UI Toolkit for Meta Ray-Ban Display",
+  "license": "Apache-2.0",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "files": [
+    "dist",
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./styles.css": "./dist/styles.css",
+    "./package.json": "./package.json",
+    "./ActionHint": {
+      "types": "./dist/mrbd/ui/ActionHint.d.ts",
+      "import": "./dist/mrbd/ui/ActionHint.js"
+    },
+    "./App": {
+      "types": "./dist/mrbd/app/App.d.ts",
+      "import": "./dist/mrbd/app/App.js"
+    },
+    "./AppBadge": {
+      "types": "./dist/mrbd/ui/AppBadge.d.ts",
+      "import": "./dist/mrbd/ui/AppBadge.js"
+    },
+    "./AppControlTile": {
+      "types": "./dist/mrbd/ui/AppControlTile.d.ts",
+      "import": "./dist/mrbd/ui/AppControlTile.js"
+    },
+    "./WebAppIcon": {
+      "types": "./dist/mrbd/ui/WebAppIcon.d.ts",
+      "import": "./dist/mrbd/ui/WebAppIcon.js"
+    },
+    "./Avatar": {
+      "types": "./dist/mrbd/ui/Avatar.d.ts",
+      "import": "./dist/mrbd/ui/Avatar.js"
+    },
+    "./Button": {
+      "types": "./dist/mrbd/ui/Button.d.ts",
+      "import": "./dist/mrbd/ui/Button.js"
+    },
+    "./ButtonDivider": {
+      "types": "./dist/mrbd/ui/ButtonDivider.d.ts",
+      "import": "./dist/mrbd/ui/ButtonDivider.js"
+    },
+    "./ButtonGroup": {
+      "types": "./dist/mrbd/ui/ButtonGroup.d.ts",
+      "import": "./dist/mrbd/ui/ButtonGroup.js"
+    },
+    "./ButtonRail": {
+      "types": "./dist/mrbd/ui/ButtonRail.d.ts",
+      "import": "./dist/mrbd/ui/ButtonRail.js"
+    },
+    "./Carousel": {
+      "types": "./dist/mrbd/ui/Carousel.d.ts",
+      "import": "./dist/mrbd/ui/Carousel.js"
+    },
+    "./Chip": {
+      "types": "./dist/mrbd/ui/Chip.d.ts",
+      "import": "./dist/mrbd/ui/Chip.js"
+    },
+    "./CircularProgressBar": {
+      "types": "./dist/mrbd/ui/CircularProgressBar.d.ts",
+      "import": "./dist/mrbd/ui/CircularProgressBar.js"
+    },
+    "./ContainerHeader": {
+      "types": "./dist/mrbd/ui/ContainerHeader.d.ts",
+      "import": "./dist/mrbd/ui/ContainerHeader.js"
+    },
+    "./ContextMenu": {
+      "types": "./dist/mrbd/ui/ContextMenu.d.ts",
+      "import": "./dist/mrbd/ui/ContextMenu.js"
+    },
+    "./ContextMenuItemView": {
+      "types": "./dist/mrbd/ui/ContextMenuItemView.d.ts",
+      "import": "./dist/mrbd/ui/ContextMenuItemView.js"
+    },
+    "./ControlTile": {
+      "types": "./dist/mrbd/ui/ControlTile.d.ts",
+      "import": "./dist/mrbd/ui/ControlTile.js"
+    },
+    "./Divider": {
+      "types": "./dist/mrbd/ui/Divider.d.ts",
+      "import": "./dist/mrbd/ui/Divider.js"
+    },
+    "./Header": {
+      "types": "./dist/mrbd/ui/Header.d.ts",
+      "import": "./dist/mrbd/ui/Header.js"
+    },
+    "./IndeterminateLoader": {
+      "types": "./dist/mrbd/ui/IndeterminateLoader.d.ts",
+      "import": "./dist/mrbd/ui/IndeterminateLoader.js"
+    },
+    "./IsolatedControl": {
+      "types": "./dist/mrbd/ui/IsolatedControl.d.ts",
+      "import": "./dist/mrbd/ui/IsolatedControl.js"
+    },
+    "./ListItem": {
+      "types": "./dist/mrbd/ui/ListItem.d.ts",
+      "import": "./dist/mrbd/ui/ListItem.js"
+    },
+    "./Modal": {
+      "types": "./dist/mrbd/ui/Modal.d.ts",
+      "import": "./dist/mrbd/ui/Modal.js"
+    },
+    "./NotificationBadge": {
+      "types": "./dist/mrbd/ui/NotificationBadge.d.ts",
+      "import": "./dist/mrbd/ui/NotificationBadge.js"
+    },
+    "./Page": {
+      "types": "./dist/mrbd/ui/Page.d.ts",
+      "import": "./dist/mrbd/ui/Page.js"
+    },
+    "./PaginationIndicator": {
+      "types": "./dist/mrbd/ui/PaginationIndicator.d.ts",
+      "import": "./dist/mrbd/ui/PaginationIndicator.js"
+    },
+    "./ProgressIndicator": {
+      "types": "./dist/mrbd/ui/ProgressIndicator.d.ts",
+      "import": "./dist/mrbd/ui/ProgressIndicator.js"
+    },
+    "./ProgressRing": {
+      "types": "./dist/mrbd/ui/ProgressRing.d.ts",
+      "import": "./dist/mrbd/ui/ProgressRing.js"
+    },
+    "./QuickReplyButton": {
+      "types": "./dist/mrbd/ui/QuickReplyButton.d.ts",
+      "import": "./dist/mrbd/ui/QuickReplyButton.js"
+    },
+    "./RadioButton": {
+      "types": "./dist/mrbd/ui/RadioButton.d.ts",
+      "import": "./dist/mrbd/ui/RadioButton.js"
+    },
+    "./ReadMoreTextView": {
+      "types": "./dist/mrbd/ui/ReadMoreTextView.d.ts",
+      "import": "./dist/mrbd/ui/ReadMoreTextView.js"
+    },
+    "./InputTextView": {
+      "types": "./dist/mrbd/ui/InputTextView.d.ts",
+      "import": "./dist/mrbd/ui/InputTextView.js"
+    },
+    "./react-router": {
+      "types": "./dist/react-router/index.d.ts",
+      "import": "./dist/react-router/index.js"
+    },
+    "./Scrubber": {
+      "types": "./dist/mrbd/ui/Scrubber.d.ts",
+      "import": "./dist/mrbd/ui/Scrubber.js"
+    },
+    "./Scrim": {
+      "types": "./dist/mrbd/ui/Scrim.d.ts",
+      "import": "./dist/mrbd/ui/Scrim.js"
+    },
+    "./SliderBar": {
+      "types": "./dist/mrbd/ui/SliderBar.d.ts",
+      "import": "./dist/mrbd/ui/SliderBar.js"
+    },
+    "./SubNavigation": {
+      "types": "./dist/mrbd/ui/SubNavigation.d.ts",
+      "import": "./dist/mrbd/ui/SubNavigation.js"
+    },
+    "./SubNavigationPager": {
+      "types": "./dist/mrbd/ui/SubNavigationPager.d.ts",
+      "import": "./dist/mrbd/ui/SubNavigationPager.js"
+    },
+    "./SwipeIndicator": {
+      "types": "./dist/mrbd/ui/SwipeIndicator.d.ts",
+      "import": "./dist/mrbd/ui/SwipeIndicator.js"
+    },
+    "./SwipeToReveal": {
+      "types": "./dist/mrbd/ui/SwipeToReveal.d.ts",
+      "import": "./dist/mrbd/ui/SwipeToReveal.js"
+    },
+    "./Switch": {
+      "types": "./dist/mrbd/ui/Switch.d.ts",
+      "import": "./dist/mrbd/ui/Switch.js"
+    },
+    "./Tag": {
+      "types": "./dist/mrbd/ui/Tag.d.ts",
+      "import": "./dist/mrbd/ui/Tag.js"
+    },
+    "./Toast": {
+      "types": "./dist/mrbd/ui/Toast.d.ts",
+      "import": "./dist/mrbd/ui/Toast.js"
+    },
+    "./Tooltip": {
+      "types": "./dist/mrbd/ui/Tooltip.d.ts",
+      "import": "./dist/mrbd/ui/Tooltip.js"
+    },
+    "./TooltipContainer": {
+      "types": "./dist/mrbd/ui/TooltipContainer.d.ts",
+      "import": "./dist/mrbd/ui/TooltipContainer.js"
+    },
+    "./VerticalMenu": {
+      "types": "./dist/mrbd/ui/VerticalMenu.d.ts",
+      "import": "./dist/mrbd/ui/VerticalMenu.js"
+    },
+    "./VerticalMenuButton": {
+      "types": "./dist/mrbd/ui/VerticalMenuButton.d.ts",
+      "import": "./dist/mrbd/ui/VerticalMenuButton.js"
+    },
+    "./VolumeIndicator": {
+      "types": "./dist/mrbd/ui/VolumeIndicator.d.ts",
+      "import": "./dist/mrbd/ui/VolumeIndicator.js"
+    },
+    "./ZoomIndicator": {
+      "types": "./dist/mrbd/ui/ZoomIndicator.d.ts",
+      "import": "./dist/mrbd/ui/ZoomIndicator.js"
+    }
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "generate": "node scripts/generate-public-api.mjs",
+    "check:generated": "node scripts/generate-public-api.mjs --check",
+    "build": "node scripts/generate-public-api.mjs && vite build && node scripts/verify-styles.mjs && tsc -p tsconfig.build.json && node scripts/verify-public-declarations.mjs && node scripts/generate-public-api.mjs --check",
+    "dev": "vite build --watch",
+    "prepack": "\"$npm_node_execpath\" ../../tools/npm-release/assert-validated-prepack.mjs && node scripts/generate-public-api.mjs && vite build && node scripts/verify-styles.mjs && tsc -p tsconfig.build.json && node scripts/verify-public-declarations.mjs && node scripts/generate-public-api.mjs --check"
+  },
+  "keywords": [
+    "web-ui",
+    "design-system",
+    "react",
+    "meta"
+  ],
+  "author": "Meta Platforms, Inc.",
+  "dependencies": {
+    "@wearables-ui-toolkit/foundation": "129.0.0"
+  },
+  "peerDependencies": {
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-router-dom": "^7.17.0"
+  },
+  "peerDependenciesMeta": {
+    "react-router-dom": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "^5.1.2",
+    "magic-string": "^0.30.21",
+    "react-router-dom": "7.17.0",
+    "typescript": "^5.9.3",
+    "vite": "^8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/facebook/meta-ray-ban-display-ui-toolkit-web.git",
+    "directory": "packages/mrbd"
+  },
+  "homepage": "https://github.com/facebook/meta-ray-ban-display-ui-toolkit-web#readme",
+  "bugs": {
+    "url": "https://github.com/facebook/meta-ray-ban-display-ui-toolkit-web/issues"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "restricted",
+    "tag": "latest"
+  }
+}

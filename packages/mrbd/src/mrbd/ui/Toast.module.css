@@ -1,0 +1,71 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * Toast styles
+ * Renders a Chip inside a frame, positioned at the top of the screen with a
+ * gradient background.
+ *
+ * Structure:
+ *   toast wrapper
+ *     frame (full-width x fits-content)
+ *       background: top-to-bottom gradient [colorBackgroundWindow, colorBackgroundFlat]
+ *       padding: 24px top+bottom, 0 left+right
+ *       aligned: top, fills width
+ *       -> Chip (fits-content, centered horizontally)
+ *            style = Chip Style ELEVATED
+ */
+
+/* Fixed container at the top of the viewport. */
+.toastContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  overflow: clip;
+}
+
+/* Toast wrapper — the frame.
+ *   full-width x fits-content
+ *   background = top-to-bottom gradient [colorBackgroundWindow, colorBackgroundFlat]
+ *   vertical padding 24px, no horizontal padding
+ *   child Chip centered horizontally
+ *
+ * Animation: the content fades in place at the top edge, so the chip stays
+ * anchored 24px from the top throughout. */
+.toastWrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  /* Gradient background:
+   * top-to-bottom gradient [colorBackgroundWindow, colorBackgroundFlat]
+   * colorBackgroundWindow (opaque black)
+   * colorBackgroundFlat (transparent) */
+  background: linear-gradient(
+    to bottom,
+    var(--uit-color-background-window),
+    var(--uit-color-background-flat, transparent)
+  );
+  /* Padding: 24px top and bottom, 0 left and right. */
+  padding: var(--uit-spacing-large) 0;
+  transition: opacity 300ms cubic-bezier(0.68, 0, 0.29, 1);
+}
+
+/* Visible state: fully shown */
+.toastVisible {
+  opacity: 1;
+}
+
+/* Hidden state: faded out in place */
+.toastHidden {
+  opacity: 0;
+}

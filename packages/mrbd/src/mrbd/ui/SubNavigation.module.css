@@ -1,0 +1,80 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * SubNavigation styles
+ */
+
+.subNavigation {
+  display: inline-flex;
+  position: relative;
+  outline: none;
+}
+
+/* Horizontal flex row of navigation items */
+.navRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+/* Individual navigation item wrapper */
+.itemWrapper {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+/* Content row inside item (icon + text) */
+.itemContent {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 100%;
+}
+
+/* Icon container */
+.iconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.iconImageView {
+  display: grid;
+  align-items: center;
+  justify-content: center;
+  place-items: center;
+  color: var(--uit-color-icon-primary);
+}
+
+.swapLayer {
+  grid-area: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.swapLayer svg,
+.swapLayer img {
+  width: 100%;
+  height: 100%;
+}
+
+/* Text label (hidden by default, peeks on active+focused)
+   Uses the META2 appearance */
+.textLabel {
+  composes: uit-text-meta2 from global;
+  color: var(--uit-color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+}

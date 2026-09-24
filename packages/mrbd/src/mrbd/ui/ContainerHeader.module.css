@@ -1,0 +1,101 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * ContainerHeader styles
+ */
+
+/* minHeight 94px, vertically centered, left-aligned content.
+ * No padding on the outer container — margins are on child elements */
+.containerHeader {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: var(--uit-container-header-min-height);
+  box-sizing: border-box;
+}
+
+/* Icon container — icon container size 56px,
+ * left margin = 16px */
+.iconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--uit-container-header-icon-container-size);
+  height: var(--uit-container-header-icon-container-size);
+  margin-left: var(--uit-spacing-medium);
+}
+
+/* icon size 36px */
+.iconImageView {
+  width: var(--uit-container-header-icon-size);
+  height: var(--uit-container-header-icon-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--uit-color-icon-primary);
+}
+
+.iconImageView svg,
+.iconImageView img {
+  width: 100%;
+  height: 100%;
+}
+
+/* Avatar container — left margin = 16px */
+.avatarContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-left: var(--uit-spacing-medium);
+}
+
+/* Text content — top/bottom margin = 16px,
+ * right margin = 32px */
+.textContent {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+  margin-top: var(--uit-spacing-medium);
+  margin-bottom: var(--uit-spacing-medium);
+  margin-right: var(--uit-spacing-xlarge);
+}
+
+/* Margin when there IS a leading visual (icon or avatar)
+ * left margin = 16px when avatar/icon visible */
+.textContentWithLeading {
+  margin-left: var(--uit-spacing-medium);
+}
+
+/* Margin when there is NO leading visual
+ * left margin = 32px when no icon/avatar */
+.textContentWithoutLeading {
+  margin-left: var(--uit-spacing-xlarge);
+}
+
+/* Emphasized label text style. */
+.titleTextView {
+  composes: uit-text-label-emphasized from global;
+  color: var(--uit-color-text-primary);
+  height: 34px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.subtitleTextView {
+  composes: uit-text-meta2 from global;
+  color: var(--uit-color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  mix-blend-mode: lighten;
+}

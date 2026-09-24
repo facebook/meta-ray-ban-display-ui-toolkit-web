@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@wearables-ui-toolkit/foundation": ["src/index.ts"],
+      "@wearables-ui-toolkit/foundation/*": ["src/*"]
+    }
+  },
+  "include": ["src"]
+}

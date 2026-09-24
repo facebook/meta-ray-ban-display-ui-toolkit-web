@@ -1,0 +1,30 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+.controlGlyph {
+  position: relative;
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  color: currentColor;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.controlGlyphSvg {
+  display: block;
+  flex: 0 0 auto;
+}
+
+.controlGlyphAssetIcon {
+  background-color: currentColor;
+  mask: var(--control-glyph-asset-url) center / contain no-repeat;
+  -webkit-mask: var(--control-glyph-asset-url) center / contain no-repeat;
+}

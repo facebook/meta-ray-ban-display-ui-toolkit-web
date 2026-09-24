@@ -1,0 +1,135 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+.button {
+  display: inline-flex;
+  position: relative;
+}
+
+/* Content view container - outer, animated width (the contentViewContainer) */
+.contentViewContainer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
+  /* Width and overflow set via inline styles */
+}
+
+/* Content view - inner, natural width (the contentView) */
+.contentView {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  height: 100%;
+  /* Width set via inline styles (fit-content) */
+}
+
+/* Legacy contentWrapper - keeping for backwards compatibility if needed */
+.contentWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  height: 100%;
+  transform-origin: center;
+}
+
+/**
+ * The content row centers this naturally sized icon/indicator stack. Keeping
+ * the stack at its intrinsic height preserves Button alignment and prevents
+ * percentage-height flex sizing from shifting the glyph within the material.
+ */
+.iconContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.iconRotationContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconImageView {
+  width: var(--uit-button-icon-size);
+  height: var(--uit-button-icon-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconImageView svg,
+.iconImageView img {
+  width: 100%;
+  height: 100%;
+}
+
+/**
+ * Indicator positioned below the icon in the vertical layout. Its size and
+ * margin use the corresponding toolkit custom properties below.
+ */
+.iconIndicator {
+  width: var(--uit-button-icon-indicator-size);
+  height: var(--uit-button-icon-indicator-size);
+  border-radius: 50%;
+  background-color: var(--uit-color-icon-primary);
+  margin-top: var(--uit-button-icon-indicator-margin);
+}
+
+/* Avatar content */
+.avatarContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Text content */
+.textContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Text truncation - only applied when width constrained */
+.textContentTruncate {
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Title label */
+.titleLabel {
+  composes: uit-text-label from global;
+  color: var(--uit-color-text-primary);
+  white-space: nowrap;
+}
+
+/* Subtitle label */
+.subtitleLabel {
+  composes: uit-text-meta2 from global;
+  color: var(--uit-color-text-secondary);
+  white-space: nowrap;
+  mix-blend-mode: lighten;
+}
+
+/* Truncation styles for labels - only when parent has truncate class */
+.textContentTruncate .titleLabel,
+.textContentTruncate .subtitleLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trailingTag {
+  flex-shrink: 0;
+}

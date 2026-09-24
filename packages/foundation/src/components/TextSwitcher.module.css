@@ -1,0 +1,35 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * TextSwitcher styles
+ * Animated text transitions with crossfade
+ *
+ * Uses a LARGE corner radius and an initial alpha of 0.
+ */
+
+.textSwitcher {
+  display: inline-flex;
+  position: relative;
+  overflow: hidden;
+}
+
+/**
+ * Text display — uses the body2 text appearance with:
+ *   vertical margin = spacing medium (16px), horizontal margin = spacing xlarge (32px)
+ *   centered, end ellipsis, primary text color
+ */
+.textView {
+  display: block;
+  padding: 16px 32px;
+  text-align: center;
+  color: var(--uit-color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

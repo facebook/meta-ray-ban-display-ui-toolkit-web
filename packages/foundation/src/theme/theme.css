@@ -1,0 +1,188 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * Global theme CSS variables and utilities
+ */
+@import './dimensions.css';
+@import './semantic-colors.css';
+@import './text-styles.css';
+
+:root {
+  /* Colors - Icon */
+  --uit-color-icon-primary: #ffffff;
+  --uit-color-icon-secondary: #CFD3D9;
+  --uit-color-icon-placeholder: #AAAFB9;
+  --uit-color-icon-active-hover: #FFFFFF;
+  --uit-color-icon-accent: #2694FE;
+  --uit-color-icon-inverse: #000000;
+
+  /* Colors - Text */
+  --uit-color-text-primary: #ffffff;
+  --uit-color-text-secondary: #CFD3D9;
+  --uit-color-text-placeholder: #AAAFB9;
+  --uit-color-text-active-hover: #CFD3D9;
+  --uit-color-text-accent: #2694FE;
+  --uit-color-text-inverse: #000000;
+
+  /* Colors - Border */
+  --uit-color-border-primary: rgba(255, 255, 255, 0.251); /* light overlay at 25% */
+
+  /* Colors - Interactive */
+  --uit-color-interactive-stroke-highlight: #FFFFFF;
+  --uit-color-interactive-stroke-targeted: rgba(255, 255, 255, 0.051);
+  --uit-color-interactive-stroke-pressed: rgba(255, 255, 255, 0.102);
+  --uit-color-interactive-stroke-idle: rgba(255, 255, 255, 0);
+  --uit-color-interactive-fill-pressed: rgba(255, 255, 255, 0.251);
+  --uit-color-interactive-text-highlight: rgba(255, 255, 255, 0.251);
+  --uit-color-interactive-text-edit: rgba(255, 255, 255, 0.149);
+
+  /* Colors - Background Elevation */
+  --uit-color-background-surface: #27282D;
+  --uit-color-background-elevation1: #30333A;
+  --uit-color-background-elevation2: #41454E;
+  /* Elevation 3 = gray 650 (do not use directly) */
+  --uit-color-background-elevation3: #646A76;
+  --uit-color-background-backface: #8D929D;
+
+  /* Colors - Background Inset */
+  /* dark overlay at 50% */
+  --uit-color-background-inset: rgba(0, 0, 0, 0.5);
+  /* dark overlay at 30% */
+  --uit-color-background-inset2: rgba(0, 0, 0, 0.302);
+
+  /* Colors - Background Flat (colorBackgroundFlat — fully transparent) */
+  --uit-color-background-flat: transparent;
+  --uit-color-background-shade: rgba(0, 0, 0, 0.5);
+  /* colorBackgroundWindow = occlude = #000000.
+     ControlTile's icon overlay material uses this as the top of its static gradient. */
+  --uit-color-background-window: #000000;
+  --uit-color-background-message-inbound: #30333A;
+  --uit-color-background-message-outbound: #27344A;
+  --uit-color-background-input-field: #1E1E21;
+  --uit-color-background-input-field-primary: #9FA4AE;
+
+  /* Colors - Button */
+  --uit-color-button-primary-background: #30333A;
+  --uit-color-button-secondary-background: #1E1E21;
+  --uit-color-button-primary-targeted-background: #1E1E21;
+  --uit-color-button-primary-targeted-highlight: #474D57;
+  --uit-color-button-ai-response-background: #111113;
+  --uit-color-button-toggle-active-icon: #1E1E21;
+  --uit-color-button-toggle-active-background: #FFFFFF;
+
+  /* Colors - Control (SliderBar fill, Switch/RadioButton thumb) */
+  --uit-color-control-idle: rgba(255, 255, 255, 0.502);
+  --uit-color-control-active: rgba(255, 255, 255, 0.749);
+  --uit-color-control-active-background: #BF8CFD;
+
+  /* Colors - Background Track (light overlay at 25%) */
+  --uit-color-background-track: rgba(255, 255, 255, 0.251);
+
+  /* Colors - Persistent (colorPersistent* tokens)
+     Persistent-action color = #2694FE */
+  --uit-color-persistent-action: #2694FE;
+  --uit-color-persistent-positive: #26A756;
+  --uit-color-persistent-warning: #C58600;
+  --uit-color-persistent-negative: #FF5668;
+  --uit-color-persistent-info: #9081FF;
+  --uit-color-persistent-active: #26A756;
+  --uit-color-persistent-caution: #EB6E00;
+  --uit-color-persistent-unread: #2694FE;
+  --uit-color-persistent-notification: #FF5668;
+  --uit-color-persistent-recording: #FF5668;
+  --uit-color-persistent-inactive: #8D929D;
+
+  /* Colors - Loading */
+  --uit-color-loading-content: rgba(255, 255, 255, 0.251);
+  --uit-color-loading-glimmer: rgba(255, 255, 255, 0.502);
+
+  /* Colors - Container */
+  --uit-color-container-primary-idle: #30333A;
+  --uit-color-container-primary-target-step1: #8D929D;
+  --uit-color-container-primary-target-step2: #474D57;
+  --uit-color-container-primary-target-step3: #111113;
+  --uit-color-container-primary-target-step4: #111113;
+  --uit-color-container-secondary-idle: #27282D;
+  --uit-color-container-secondary-target-step1: #585E6A;
+  --uit-color-container-secondary-target-step2: #30333A;
+  --uit-color-container-secondary-target-step3: #1E1E21;
+  --uit-color-container-secondary-target-step4: #111113;
+  --uit-color-container-glow: #6D84A9;
+  --uit-color-container-message-inbound-target-step1: #585E6A;
+  --uit-color-container-message-inbound-target-step2: #30333A;
+  --uit-color-container-message-inbound-target-step3: #111113;
+  --uit-color-container-message-inbound-target-step4: #111113;
+  --uit-color-container-message-inbound-glow: #7F93B5;
+  --uit-color-container-message-outbound-target-step1: #495E84;
+  --uit-color-container-message-outbound-target-step2: #27344A;
+  --uit-color-container-message-outbound-target-step3: #0E1119;
+  --uit-color-container-message-outbound-target-step4: #0E1119;
+  --uit-color-container-message-outbound-glow: #7F93B5;
+
+  /* Colors - Accent */
+  --uit-color-accent-red: #FF5668;
+  --uit-color-accent-orange: #EB6E00;
+  --uit-color-accent-yellow: #C58600;
+  --uit-color-accent-olive: #65A20F;
+  --uit-color-accent-green: #1EA920;
+  --uit-color-accent-shamrock: #26A756;
+  --uit-color-accent-teal: #08A3A3;
+  --uit-color-accent-cyan: #089DD0;
+  --uit-color-accent-blue: #2694FE;
+  --uit-color-accent-indigo: #6F8AFF;
+  --uit-color-accent-purple: #9081FF;
+  --uit-color-accent-violet: #B272FE;
+  --uit-color-accent-pink: #F351C0;
+  --uit-color-accent-rose: #FF5280;
+  --uit-color-accent-gray: #8D929D;
+
+  /* Opacity
+     disabledOpacity = 0.5 */
+  --uit-disabled-opacity: 0.5;
+  --uit-enabled-opacity: 1;
+
+  /* Elevation (box-shadow blur) */
+  --uit-elevation-default: 0px;
+  --uit-elevation-focused: 4px;
+  --uit-elevation-pressed: 2px;
+
+}
+
+/* Reset and base styles — scoped to the toolkit <App> subtree.
+ *
+ * Every toolkit surface (including portaled overlays, which render into the
+ * floating portal root inside <App>) lives under [data-app-root], so scoping
+ * the reset here keeps it from leaking into the consuming document and
+ * clobbering app-wide styles such as unlayered Tailwind utilities. The :root
+ * design tokens above stay global on purpose — they are additive CSS
+ * variables and must resolve for any toolkit component.
+ *
+ * The scope selector is wrapped in :where() so it contributes ZERO
+ * specificity. A bare `[data-app-root] *` reset has specificity (0,1,0), which
+ * ties with — and on source order overrides — single-class component rules
+ * like `.contentContainer { padding: 8px 16px }`, silently zeroing their
+ * padding/margin across the subtree. :where() keeps the reset at the same
+ * (0,0,0) weight the original global `*` reset had, so component styles win. */
+:where([data-app-root]),
+:where([data-app-root] *) {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:where([data-app-root]) {
+  /* 'Noto Sans Local' is a local()-only alias registered by <App>: an installed
+     Noto Sans is used with no download; otherwise the stack falls through to the
+     CDN-loaded 'Noto Sans'. */
+  font-family: 'Noto Sans Local', 'Noto Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--uit-color-background-window);
+  color: var(--uit-color-text-primary);
+}

@@ -1,0 +1,367 @@
+name: npm release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Protected npm operation
+        required: true
+        type: choice
+        options:
+          - canary
+          - release
+          - public_launch
+      canary_version:
+        description: Private canary version matching 0.0.0-canary.<integer>
+        required: false
+        type: string
+      release_version:
+        description: Version for a manual release or an existing private stable version to make public
+        required: false
+        type: string
+      confirm_release:
+        description: Enter PUBLISH_RELEASE for the manual release operation
+        required: false
+        type: string
+      confirm_public_launch:
+        description: Enter MAKE_PUBLIC for the public launch operation
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-release
+  cancel-in-progress: false
+
+jobs:
+  validate-release-title:
+    if: github.event_name == 'push' || inputs.operation == 'release'
+    runs-on: ubuntu-latest
+    outputs:
+      release: ${{ steps.release.outputs.release }}
+      version: ${{ steps.release.outputs.version }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Copy release scripts before validation
+        run: |
+          set -euo pipefail
+          for file in tools/npm-release/publish-staging.mjs tools/npm-release/release-config.mjs; do
+            test -f "$file"
+            test ! -L "$file"
+          done
+          install -d -m 0755 "$RUNNER_TEMP/wui-npm-publisher"
+          install -m 0644 tools/npm-release/publish-staging.mjs "$RUNNER_TEMP/wui-npm-publisher/publish-staging.mjs"
+          install -m 0644 tools/npm-release/release-config.mjs "$RUNNER_TEMP/wui-npm-publisher/release-config.mjs"
+      - name: Upload immutable publisher
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: wui-npm-publisher-${{ github.sha }}
+          path: ${{ runner.temp }}/wui-npm-publisher
+          if-no-files-found: error
+          retention-days: 1
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Validate manual release request
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          RELEASE_CONFIRMATION: ${{ inputs.confirm_release }}
+          RELEASE_VERSION: ${{ inputs.release_version }}
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_REF" != refs/heads/main ]]; then
+            echo "::error::Manual npm releases must run from the main branch."
+            exit 1
+          fi
+          if [[ -z "$RELEASE_VERSION" ]]; then
+            echo "::error::Manual npm releases require a release_version input."
+            exit 1
+          fi
+          if [[ "$RELEASE_CONFIRMATION" != PUBLISH_RELEASE ]]; then
+            echo "::error::Manual npm releases require confirmation PUBLISH_RELEASE."
+            exit 1
+          fi
+      - name: Validate release title and versions
+        id: release
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_EVENT_NAME" == push ]]; then
+            GITHUB_COMMIT_TITLE="$(git log -1 --pretty=%B)"
+          else
+            GITHUB_COMMIT_TITLE="Release version $RELEASE_VERSION"
+          fi
+          export GITHUB_COMMIT_TITLE
+          node tools/npm-release/check-release-title.mjs
+
+  build-release-artifacts:
+    if: needs.validate-release-title.outputs.release == 'true' && vars.WUI_NPM_RELEASE_ENABLED == 'true'
+    needs: validate-release-title
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: yarn
+      - name: Install build dependencies
+        run: |
+          corepack enable
+          npm install --global npm@11.5.1
+          yarn install --frozen-lockfile --non-interactive
+      - name: Build and run public checks
+        run: |
+          yarn build
+          yarn terminology:check
+          yarn license:check
+          yarn test:public
+          node --test tools/npm-release/release-config.test.mjs
+      - name: Pack and validate consumer installations
+        env:
+          WUI_NPM_STABLE_RELEASE_ACCESS: ${{ vars.WUI_NPM_STABLE_RELEASE_ACCESS || 'restricted' }}
+        run: >-
+          node tools/npm-release/validate-packages.mjs
+          --output "$RUNNER_TEMP/wui-npm-packages"
+          --release-access "$WUI_NPM_STABLE_RELEASE_ACCESS"
+      - name: Upload validated package artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: wui-npm-packages-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/wui-npm-packages/*.tgz
+            ${{ runner.temp }}/wui-npm-packages/pack-manifest.json
+          if-no-files-found: error
+          retention-days: 1
+
+  publish-release:
+    if: needs.validate-release-title.outputs.release == 'true' && needs.build-release-artifacts.result == 'success' && vars.WUI_NPM_RELEASE_ENABLED == 'true'
+    needs:
+      - validate-release-title
+      - build-release-artifacts
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    permissions:
+      actions: read
+      id-token: write
+    steps:
+      - name: Download immutable publisher
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: wui-npm-publisher-${{ github.sha }}
+          path: ${{ runner.temp }}/wui-npm-release/publisher
+      - name: Download validated package artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: wui-npm-packages-${{ github.sha }}
+          path: ${{ runner.temp }}/wui-npm-release/packages
+      - name: Verify downloaded publisher files
+        run: |
+          set -euo pipefail
+          for file in \
+            "$RUNNER_TEMP/wui-npm-release/publisher/publish-staging.mjs" \
+            "$RUNNER_TEMP/wui-npm-release/publisher/release-config.mjs"; do
+            test -f "$file"
+            test ! -L "$file"
+          done
+      - name: Set up trusted-publishing runtime
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+      - name: Publish with Trusted Publishing
+        if: vars.WUI_NPM_BOOTSTRAP_TOKEN_ENABLED != 'true'
+        env:
+          WUI_NPM_RELEASE_ENABLED: ${{ vars.WUI_NPM_RELEASE_ENABLED }}
+          WUI_NPM_STABLE_RELEASE_ACCESS: ${{ vars.WUI_NPM_STABLE_RELEASE_ACCESS || 'restricted' }}
+        run: >-
+          node "$RUNNER_TEMP/wui-npm-release/publisher/publish-staging.mjs"
+          --manifest "$RUNNER_TEMP/wui-npm-release/packages/pack-manifest.json"
+          --version "${{ needs.validate-release-title.outputs.version }}"
+      - name: Publish with temporary bootstrap token
+        if: vars.WUI_NPM_BOOTSTRAP_TOKEN_ENABLED == 'true'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_USERCONFIG: ${{ runner.temp }}/wui-npm-bootstrap.npmrc
+          WUI_NPM_BOOTSTRAP_TOKEN_ENABLED: 'true'
+          WUI_NPM_RELEASE_ENABLED: ${{ vars.WUI_NPM_RELEASE_ENABLED }}
+          WUI_NPM_STABLE_RELEASE_ACCESS: ${{ vars.WUI_NPM_STABLE_RELEASE_ACCESS || 'restricted' }}
+        run: |
+          set -euo pipefail
+          cleanup() {
+            rm -f "$NPM_CONFIG_USERCONFIG"
+          }
+          trap cleanup EXIT HUP INT TERM
+          : "${NODE_AUTH_TOKEN:?NPM_TOKEN must be set in the protected environment}"
+          umask 077
+          printf '%s\n' "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > "$NPM_CONFIG_USERCONFIG"
+          node "$RUNNER_TEMP/wui-npm-release/publisher/publish-staging.mjs" \
+            --manifest "$RUNNER_TEMP/wui-npm-release/packages/pack-manifest.json" \
+            --version "${{ needs.validate-release-title.outputs.version }}"
+
+  build-publishing-canary:
+    if: github.event_name == 'workflow_dispatch' && inputs.operation == 'canary' && vars.WUI_NPM_CANARY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+      - name: Copy publisher before running repository scripts
+        run: |
+          set -euo pipefail
+          install -d -m 0755 "$RUNNER_TEMP/wui-npm-canary/publisher"
+          for file in \
+            tools/npm-release/prepare-publishing-canary.mjs \
+            tools/npm-release/publish-canary.mjs \
+            tools/npm-release/publish-staging.mjs \
+            tools/npm-release/release-config.mjs; do
+            test -f "$file"
+            test ! -L "$file"
+            install -m 0644 "$file" "$RUNNER_TEMP/wui-npm-canary/publisher/$(basename "$file")"
+          done
+      - name: Build private canary artifact
+        env:
+          CANARY_VERSION: ${{ inputs.canary_version }}
+        run: |
+          set -euo pipefail
+          install -d -m 0755 "$RUNNER_TEMP/wui-npm-canary/packages"
+          node "$RUNNER_TEMP/wui-npm-canary/publisher/prepare-publishing-canary.mjs" \
+            "$RUNNER_TEMP/wui-npm-canary/source" "$CANARY_VERSION"
+          npm pack "$RUNNER_TEMP/wui-npm-canary/source" \
+            --ignore-scripts \
+            --pack-destination "$RUNNER_TEMP/wui-npm-canary/packages"
+      - name: Upload immutable canary and publisher
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: wui-npm-canary-${{ github.run_id }}
+          path: ${{ runner.temp }}/wui-npm-canary
+          if-no-files-found: error
+          retention-days: 1
+
+  publish-publishing-canary:
+    if: github.event_name == 'workflow_dispatch' && needs.build-publishing-canary.result == 'success' && vars.WUI_NPM_CANARY_ENABLED == 'true'
+    needs: build-publishing-canary
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    permissions:
+      actions: read
+      id-token: write
+    steps:
+      - name: Download immutable canary and publisher
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: wui-npm-canary-${{ github.run_id }}
+          path: ${{ runner.temp }}/wui-npm-canary
+      - name: Set up trusted-publishing runtime
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+      - name: Publish canary with Trusted Publishing
+        if: vars.WUI_NPM_BOOTSTRAP_TOKEN_ENABLED != 'true'
+        env:
+          CANARY_VERSION: ${{ inputs.canary_version }}
+          WUI_NPM_CANARY_ENABLED: ${{ vars.WUI_NPM_CANARY_ENABLED }}
+        run: >-
+          node "$RUNNER_TEMP/wui-npm-canary/publisher/publish-canary.mjs"
+          "$RUNNER_TEMP/wui-npm-canary/packages"
+          "$CANARY_VERSION"
+      - name: Publish canary with temporary bootstrap token
+        if: vars.WUI_NPM_BOOTSTRAP_TOKEN_ENABLED == 'true'
+        env:
+          CANARY_VERSION: ${{ inputs.canary_version }}
+          WUI_NPM_CANARY_ENABLED: ${{ vars.WUI_NPM_CANARY_ENABLED }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_USERCONFIG: ${{ runner.temp }}/wui-npm-bootstrap.npmrc
+        run: |
+          set -euo pipefail
+          cleanup() {
+            rm -f "$NPM_CONFIG_USERCONFIG"
+          }
+          trap cleanup EXIT HUP INT TERM
+          : "${NODE_AUTH_TOKEN:?NPM_TOKEN must be set in the protected environment}"
+          umask 077
+          printf '%s\n' "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > "$NPM_CONFIG_USERCONFIG"
+          node "$RUNNER_TEMP/wui-npm-canary/publisher/publish-canary.mjs" \
+            "$RUNNER_TEMP/wui-npm-canary/packages" \
+            "$CANARY_VERSION"
+
+  build-public-launch-bundle:
+    if: github.event_name == 'workflow_dispatch' && inputs.operation == 'public_launch' && vars.WUI_NPM_PUBLIC_LAUNCH_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Copy launch scripts
+        run: |
+          set -euo pipefail
+          install -d -m 0755 "$RUNNER_TEMP/wui-npm-public-launch"
+          for file in \
+            tools/npm-release/launch-public.mjs \
+            tools/npm-release/publish-staging.mjs \
+            tools/npm-release/release-config.mjs; do
+            test -f "$file"
+            test ! -L "$file"
+            install -m 0644 "$file" "$RUNNER_TEMP/wui-npm-public-launch/$(basename "$file")"
+          done
+      - name: Upload immutable launch scripts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: wui-npm-public-launch-${{ github.run_id }}
+          path: ${{ runner.temp }}/wui-npm-public-launch
+          if-no-files-found: error
+          retention-days: 1
+
+  launch-public-packages:
+    if: github.event_name == 'workflow_dispatch' && inputs.operation == 'public_launch' && needs.build-public-launch-bundle.result == 'success' && vars.WUI_NPM_PUBLIC_LAUNCH_ENABLED == 'true'
+    needs: build-public-launch-bundle
+    runs-on: ubuntu-latest
+    environment: npm-public-launch
+    permissions:
+      actions: read
+    steps:
+      - name: Download immutable launch scripts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: wui-npm-public-launch-${{ github.run_id }}
+          path: ${{ runner.temp }}/wui-npm-public-launch
+      - name: Set up npm runtime
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+      - name: Make verified stable packages public
+        env:
+          NPM_CONFIG_USERCONFIG: ${{ runner.temp }}/wui-npm-public-launch.npmrc
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLIC_LAUNCH_TOKEN }}
+          RELEASE_VERSION: ${{ inputs.release_version }}
+          PUBLIC_LAUNCH_CONFIRMATION: ${{ inputs.confirm_public_launch }}
+          WUI_NPM_PUBLIC_LAUNCH_ENABLED: ${{ vars.WUI_NPM_PUBLIC_LAUNCH_ENABLED }}
+        run: |
+          set -euo pipefail
+          cleanup() {
+            rm -f "$NPM_CONFIG_USERCONFIG"
+          }
+          trap cleanup EXIT HUP INT TERM
+          : "${NODE_AUTH_TOKEN:?NPM_PUBLIC_LAUNCH_TOKEN must be set in the protected environment}"
+          test "$PUBLIC_LAUNCH_CONFIRMATION" = MAKE_PUBLIC
+          umask 077
+          printf '%s\n' "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > "$NPM_CONFIG_USERCONFIG"
+          node "$RUNNER_TEMP/wui-npm-public-launch/launch-public.mjs" \
+            "$RELEASE_VERSION" \
+            "$PUBLIC_LAUNCH_CONFIRMATION"

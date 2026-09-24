@@ -1,0 +1,84 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+.root {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.scrim {
+  position: absolute;
+  pointer-events: none;
+  opacity: 1;
+}
+
+.scrim.animate {
+  /* Duration from VIGNETTE_FADE_DURATION_MS via the root --vignette-fade-duration. */
+  transition:
+    opacity var(--vignette-fade-duration) ease-in-out,
+    visibility var(--vignette-fade-duration) ease-in-out;
+}
+
+.hidden {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.top {
+  top: 0;
+  right: 0;
+  left: 0;
+  height: var(--vignette-scrim-size);
+  background:
+    linear-gradient(
+      to bottom,
+      var(--uit-color-background-window) 0%,
+      var(--uit-color-background-flat) 100%
+    );
+}
+
+.bottom {
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: var(--vignette-scrim-size);
+  background:
+    linear-gradient(
+      to top,
+      var(--uit-color-background-window) 0%,
+      var(--uit-color-background-flat) 100%
+    );
+}
+
+.left {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--vignette-scrim-size);
+  background:
+    linear-gradient(
+      to right,
+      var(--uit-color-background-window) 0%,
+      var(--uit-color-background-flat) 100%
+    );
+}
+
+.right {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: var(--vignette-scrim-size);
+  background:
+    linear-gradient(
+      to left,
+      var(--uit-color-background-window) 0%,
+      var(--uit-color-background-flat) 100%
+    );
+}

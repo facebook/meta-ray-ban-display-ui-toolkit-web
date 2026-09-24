@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@wearables-ui-toolkit/androidx-shapes": [
+        "../../packages/androidx-shapes/src/index.ts"
+      ],
+      "@wearables-ui-toolkit/mrbd": ["../../packages/mrbd/src/index.ts"],
+      "@wearables-ui-toolkit/icons/svg/*": [
+        "../../packages/icons/src/svg/*"
+      ],
+      "@wearables-ui-toolkit/icons": ["../../packages/icons/src/index.ts"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"]
+}

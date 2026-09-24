@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Toolkit for Meta Ray-Ban Display Timed Session App"
+  short_description: "Build a synchronized countdown session"
+  default_prompt: "Use $uit-timed-session-app-web to build this timed-session application."

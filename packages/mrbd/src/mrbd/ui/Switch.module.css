@@ -1,0 +1,46 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  border-radius: var(--uit-corner-radius-full);
+}
+
+.switch:focus-visible {
+  box-shadow: 0 0 0 2px var(--uit-color-interactive-stroke-targeted);
+}
+
+.switchSvg {
+  display: block;
+}
+
+/* Track: transitions between the default track color and the on track color. */
+.track {
+  fill: var(--uit-color-background-inset);
+}
+
+.thumbGroup {
+  transform-box: view-box;
+}
+
+/* Thumb outline ring */
+.thumbOutline {
+  fill: none;
+  stroke: var(--uit-color-control-active);
+}
+
+/* Thumb inner fill (visible when on) */
+.thumbFill {
+  fill: var(--uit-color-control-active);
+}

@@ -1,0 +1,105 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * ContextMenu styles
+ * Horizontal scrolling menu with drop shadow material and optional tail
+ */
+
+/**
+ * ContextMenu uses a custom material with:
+ *   a solid-color container material layer using elevation 3 background
+ *   cornerRadius = FULL
+ * Override the default material background to match.
+ */
+.contextMenu {
+  display: inline-flex;
+  position: relative;
+  overflow: visible;
+  color: var(--uit-color-text-primary);
+}
+
+.materialShape {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* Viewport clips and fades the composed scrolling content, including focused material overflow. */
+.scrollViewport {
+  display: flex;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 72px;
+  overflow: hidden;
+  border-radius: var(--uit-corner-radius-full);
+  isolation: isolate;
+  contain: paint;
+}
+
+/* Scroll container — horizontal scroll, clipped by scrollViewport above.
+ * NOTE: no `scroll-behavior: smooth` here. Focus navigation scrolls items into
+ * view via a JS rAF animation (scrollToFocusSafeAreaTarget, which sets scrollLeft
+ * per frame). CSS `scroll-behavior: smooth` re-animates every one of those
+ * per-frame assignments, so the two fight and the scroll never reaches its
+ * target — leaving the focused item stranded off-screen. Smoothness is provided
+ * by the JS driver. */
+.scrollContainer {
+  display: flex;
+  position: relative;
+  width: 100%;
+  height: 72px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.scrollContainer::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+.fadingEdge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--uit-context-menu-fading-edge-length, 64px);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.fadingEdgeLeft {
+  left: 0;
+  background: linear-gradient(
+    to right,
+    var(--uit-color-background-elevation3, #646A76) 0%,
+    rgba(100, 106, 118, 0) 100%
+  );
+}
+
+.fadingEdgeRight {
+  right: 0;
+  background: linear-gradient(
+    to left,
+    var(--uit-color-background-elevation3, #646A76) 0%,
+    rgba(100, 106, 118, 0) 100%
+  );
+}
+
+/* Items container — horizontal layout with spacing */
+.itemsContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex: 0 0 max-content;
+  gap: 8px;
+  padding: 0 8px;
+  height: 100%;
+}

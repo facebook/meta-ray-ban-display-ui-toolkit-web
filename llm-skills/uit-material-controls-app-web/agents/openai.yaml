@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Toolkit for Meta Ray-Ban Display Material Controls App"
+  short_description: "Build restrained custom-material control applications"
+  default_prompt: "Use $uit-material-controls-app-web to build a polished responsive custom-material controls app."

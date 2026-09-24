@@ -1,0 +1,40 @@
+name: Component or API request
+description: Request a new component, or a change to an existing component's API.
+labels: ["component-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before you fill this in, please read this.
+
+        This is a design system. Its component set is intentionally scoped to what
+        the Meta design team creates and supports, so that what you build stays
+        consistent with what ships on device.
+
+        We review every request against the design roadmap, but **most requests do
+        not result in a new component**. The system is deliberately small, and we
+        would rather tell you that up front than leave your issue open
+        indefinitely. When we decline, we will explain why and point to a supported
+        composition or an application-layer approach.
+
+        The most useful thing you can give us is the second field below.
+  - type: textarea
+    id: building
+    attributes:
+      label: What are you building?
+      description: The experience or screen you are trying to create.
+    validations:
+      required: true
+  - type: textarea
+    id: attempted
+    attributes:
+      label: What did you try with the existing components?
+      description: Which components or compositions you tried, and where they fell short.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What are you asking for?
+    validations:
+      required: true

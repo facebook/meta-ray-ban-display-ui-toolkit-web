@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.base.json",
+  "references": [
+    { "path": "./packages/androidx-shapes" },
+    { "path": "./packages/icons" },
+    { "path": "./packages/foundation" },
+    { "path": "./packages/mrbd" },
+    { "path": "./examples/gallery" },
+    { "path": "./examples/launcher" }
+  ],
+  "include": []
+}

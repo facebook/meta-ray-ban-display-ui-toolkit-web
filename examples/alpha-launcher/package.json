@@ -1,0 +1,26 @@
+{
+  "name": "@meta/wearables-ui-toolkit-mrbd-alpha-launcher",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Alpha Launcher example for UI Toolkit for Meta Ray-Ban Display",
+  "license": "Apache-2.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@wearables-ui-toolkit/mrbd": "129.0.0",
+    "@wearables-ui-toolkit/icons": "129.0.0",
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "^5.1.2",
+    "typescript": "^5.9.3",
+    "vite": "^8.0.0"
+  }
+}

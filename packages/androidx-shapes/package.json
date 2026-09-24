@@ -1,0 +1,54 @@
+{
+  "name": "@wearables-ui-toolkit/androidx-shapes",
+  "private": true,
+  "version": "129.0.0",
+  "type": "module",
+  "description": "TypeScript port of the AndroidX graphics-shapes RoundedPolygon geometry (Apache-2.0).",
+  "license": "Apache-2.0",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "src",
+    "LICENSE",
+    "NOTICE",
+    "README.md",
+    "UPSTREAM.md"
+  ],
+  "scripts": {
+    "build": "vite build && tsc -p tsconfig.build.json",
+    "dev": "vite build --watch",
+    "prepack": "\"$npm_node_execpath\" ../../tools/npm-release/assert-validated-prepack.mjs && vite build && tsc -p tsconfig.build.json"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vite": "^8.0.0"
+  },
+  "author": "Meta Platforms, Inc.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/facebook/meta-ray-ban-display-ui-toolkit-web.git",
+    "directory": "packages/androidx-shapes"
+  },
+  "homepage": "https://github.com/facebook/meta-ray-ban-display-ui-toolkit-web#readme",
+  "bugs": {
+    "url": "https://github.com/facebook/meta-ray-ban-display-ui-toolkit-web/issues"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "restricted",
+    "tag": "latest"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

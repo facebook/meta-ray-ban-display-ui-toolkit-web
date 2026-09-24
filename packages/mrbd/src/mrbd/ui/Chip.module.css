@@ -1,0 +1,260 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * Chip component styles
+ *
+ * Text chip with optional icon, avatar, and loading state.
+ * Uses the secondary semantic lighten blend for DEEMPHASIZED content.
+ */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--uit-chip-min-height); /* minimum chip height */
+  /* fits-content width — chip sizes to its content */
+}
+
+.chipLayoutTransition .textView {
+  flex-shrink: 0;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.chipTrailingAnchorTransition {
+  justify-content: flex-end;
+}
+
+.chipTrailingAnchorContent {
+  display: flex;
+  flex: 1 1 auto;
+  justify-content: flex-end;
+  min-width: 0;
+  width: 100%;
+}
+
+.chipTrailingAnchorTransition .chipContainer {
+  flex-shrink: 0;
+}
+
+.chipContainer {
+  display: flex;
+  align-items: center;
+  /* horizontal layout, vertically centered, start-aligned */
+  /* No width:100% — container wraps content within the chip */
+}
+
+/* Margins adapt based on avatar presence */
+.chipContainerDefault {
+  margin: 0 var(--uit-spacing-medium); /* 16px on both sides */
+}
+
+.chipContainerWithAvatar {
+  margin: 0 var(--uit-spacing-medium) 0 var(--uit-spacing-xsmall); /* 4px left, 16px right */
+}
+
+/* Icon container - sized to the chip image size (square) */
+.iconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  width: var(--uit-chip-image-size);
+  height: var(--uit-chip-image-size);
+  /* vertical margin = 8px */
+  margin-top: var(--uit-spacing-small);
+  margin-bottom: var(--uit-spacing-small);
+  transform-origin: center;
+}
+
+.iconContainerWithText {
+  margin-right: var(--uit-spacing-small); /* 8px */
+}
+
+.iconContainerNoText {
+  margin-right: 0;
+}
+
+/* Icon/image */
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--uit-chip-image-size);
+  height: var(--uit-chip-image-size);
+}
+
+.iconDeemphasized {
+  mix-blend-mode: lighten;
+  color: var(--uit-color-icon-secondary, #CFD3D9);
+}
+
+.iconEmphasized,
+.iconElevated {
+  color: var(--uit-color-icon-primary, rgba(255, 255, 255, 0.95));
+}
+
+/* Text */
+.textView {
+  composes: uit-text-meta2 from global;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: var(--uit-chip-text-letter-spacing, 0);
+  /* vertical margin = 6px */
+  margin-top: var(--uit-chip-text-margin-vertical);
+  margin-bottom: var(--uit-chip-text-margin-vertical);
+}
+
+.textDeemphasized {
+  color: var(--uit-color-text-secondary, #CFD3D9);
+  mix-blend-mode: lighten;
+}
+
+.textEmphasized,
+.textElevated {
+  color: var(--uit-color-text-primary, rgba(255, 255, 255, 0.95));
+}
+
+.textCentered {
+  text-align: center;
+}
+
+.textStart {
+  text-align: left;
+}
+
+/* Metadata text */
+.metadataText {
+  composes: uit-text-meta2 from global;
+  color: var(--uit-color-text-secondary, #CFD3D9);
+  mix-blend-mode: lighten;
+  flex-shrink: 0;
+  white-space: nowrap;
+  letter-spacing: var(--uit-chip-text-letter-spacing, 0);
+}
+
+.metadataWithText {
+  margin-left: var(--uit-spacing-small); /* 8px */
+}
+
+.metadataNoText {
+  margin-left: 0;
+}
+
+/* Avatar wrapper */
+.avatarWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  /* vertical margin = 4px */
+  margin-top: var(--uit-spacing-xsmall);
+  margin-bottom: var(--uit-spacing-xsmall);
+  transform-origin: center;
+}
+
+.avatarSmall {
+  margin-right: var(--uit-spacing-small); /* 8px */
+}
+
+.avatarLarge {
+  /* The large avatar size uses 12px between avatar and text.
+   * Header overrides this token because its separately validated rendered
+   * large-avatar chip leaves an 8px gap on device. */
+  margin-right: var(--uit-chip-large-avatar-gap, var(--uit-spacing-sm-med));
+}
+
+/* Loader wrapper */
+.loaderWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Transition for icon/avatar swaps */
+.swapTransition {
+  transition-property: opacity, transform;
+  transition-timing-function: cubic-bezier(0, 0.45, 0.46, 0.94);
+}
+
+.contentSwapTransition {
+  transition-duration: 300ms;
+}
+
+.loadingSwapTransition {
+  transition-duration: var(--uit-chip-loading-swap-exit-duration, 150ms);
+  transition-timing-function:
+    var(
+      --uit-chip-loading-swap-exit-easing,
+      cubic-bezier(0, 0.45, 0.46, 0.94)
+    );
+}
+
+.swapHidden {
+  opacity: 0;
+  transform: scale(0);
+}
+
+.loadingSwapTransition.swapHidden {
+  transform: scale(0.5);
+}
+
+.swapEntering {
+  animation-fill-mode: both;
+  animation-name: chipLeadingEnter;
+  animation-timing-function: cubic-bezier(0, 0.45, 0.46, 0.94);
+  opacity: 1;
+  transform: scale(1);
+}
+
+.contentSwapTransition.swapEntering {
+  animation-duration: 300ms;
+}
+
+.loadingSwapTransition.swapEntering {
+  animation-duration: var(--uit-chip-loading-swap-enter-duration, 150ms);
+  animation-name: chipLeadingLoadingEnter;
+  animation-timing-function:
+    var(
+      --uit-chip-loading-swap-enter-easing,
+      cubic-bezier(0, 0.45, 0.46, 0.94)
+    );
+}
+
+.swapVisible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@keyframes chipLeadingEnter {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes chipLeadingLoadingEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

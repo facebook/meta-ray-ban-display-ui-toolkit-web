@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Toolkit for Meta Ray-Ban Display Overlays and Feedback"
+  short_description: "Build tooltips, menus, modals, and toast"
+  default_prompt: "Use $uit-overlays-feedback-web to implement this transient UI."

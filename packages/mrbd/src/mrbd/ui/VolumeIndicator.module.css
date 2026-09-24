@@ -1,0 +1,70 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * VolumeIndicator styles
+ *
+ * Horizontal layout: icon on left, SliderBar fills remaining width.
+ * Rounded pill-shaped background using elevation 2 background.
+ */
+
+.volumeIndicator {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--uit-color-background-elevation2, #41454E);
+  border-radius: var(--uit-corner-radius-full);
+  overflow: hidden;
+  width: fit-content;
+}
+
+/* Content row: icon + slider in a horizontal flex */
+.content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+/**
+ * Icon on the left — icon size = 24px.
+ * Tinted with colorIconPrimary.
+ */
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--uit-icon-medium, 24px);
+  height: var(--uit-icon-medium, 24px);
+  color: var(--uit-color-icon-primary, rgba(255, 255, 255, 0.9));
+}
+
+.icon svg,
+.icon img {
+  width: 100%;
+  height: 100%;
+}
+
+/* SliderBar wrapper fills remaining space */
+.sliderWrapper {
+  flex: 1;
+}
+
+/* Visually-hidden live region: announced by screen readers, not rendered visually */
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}

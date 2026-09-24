@@ -1,0 +1,47 @@
+{
+  "XXSMALL": {
+    "cssVariable": "--uit-corner-radius-xxsmall",
+    "cssPixels": 8,
+    "geometryPixels": 8
+  },
+  "XSMALL": {
+    "cssVariable": "--uit-corner-radius-xsmall",
+    "cssPixels": 16,
+    "geometryPixels": 16
+  },
+  "SMALL": {
+    "cssVariable": "--uit-corner-radius-small",
+    "cssPixels": 24,
+    "geometryPixels": 24
+  },
+  "MEDIUM": {
+    "cssVariable": "--uit-corner-radius-medium",
+    "cssPixels": 32,
+    "geometryPixels": 32
+  },
+  "LARGE": {
+    "cssVariable": "--uit-corner-radius-large",
+    "cssPixels": 48,
+    "geometryPixels": 48
+  },
+  "XLARGE": {
+    "cssVariable": "--uit-corner-radius-xlarge",
+    "cssPixels": 56,
+    "geometryPixels": 56
+  },
+  "XXLARGE": {
+    "cssVariable": "--uit-corner-radius-2xlarge",
+    "cssPixels": 64,
+    "geometryPixels": 64
+  },
+  "XXXLARGE": {
+    "cssVariable": "--uit-corner-radius-3xlarge",
+    "cssPixels": 128,
+    "geometryPixels": 128
+  },
+  "FULL": {
+    "cssVariable": "--uit-corner-radius-full",
+    "cssPixels": 9999,
+    "geometryPixels": 999
+  }
+}

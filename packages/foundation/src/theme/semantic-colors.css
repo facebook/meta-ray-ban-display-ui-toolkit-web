@@ -1,0 +1,22 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/*
+ * Secondary foregrounds require both their semantic color token and the
+ * platform compositing behavior. Use these classes instead of applying the
+ * secondary color variables by themselves.
+ */
+.uit-color-text-secondary {
+  color: var(--uit-color-text-secondary);
+  mix-blend-mode: lighten !important;
+}
+
+.uit-color-icon-secondary {
+  color: var(--uit-color-icon-secondary);
+  mix-blend-mode: lighten !important;
+}

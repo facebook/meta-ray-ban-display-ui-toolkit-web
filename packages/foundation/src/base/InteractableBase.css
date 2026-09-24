@@ -1,0 +1,40 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/*
+ * Focus indication for InteractableBase roots.
+ *
+ * The toolkit interaction model is the focus indicator: on focus the
+ * FocusCoordinator paints the focused material treatment (glow / fill / scale)
+ * for BOTH keyboard and pointer focus, which is a visible, WCAG 2.4.7-compliant
+ * indicator. The browser's native outline is therefore suppressed so it does
+ * not double up as a second box on top of that treatment.
+ *
+ * Caveat: a bare `InteractableBase` used WITHOUT a material has no focus
+ * treatment of its own. Consumers composing the raw primitive should provide
+ * their own `:focus-visible` style (or render it through a material-backed
+ * component such as Container/Button).
+ */
+[data-uit-interactable]:focus {
+  outline: none;
+}
+
+button[data-uit-interactable] {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+}
+
+a[data-uit-interactable] {
+  color: inherit;
+  text-decoration: none;
+}

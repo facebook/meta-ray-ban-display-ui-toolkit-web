@@ -1,0 +1,36 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * ProgressIndicator styles
+ */
+
+.progressIndicator {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.progressbar {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+/* Visually-hidden live region: announced by screen readers, not rendered visually */
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}

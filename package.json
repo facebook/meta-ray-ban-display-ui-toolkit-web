@@ -1,0 +1,36 @@
+{
+  "private": true,
+  "type": "module",
+  "description": "UI Toolkit for Meta Ray-Ban Display source workspace",
+  "license": "SEE LICENSE IN NOTICE",
+  "workspaces": [
+    "packages/*",
+    "examples/*"
+  ],
+  "scripts": {
+    "build": "yarn workspace @wearables-ui-toolkit/androidx-shapes build && yarn workspace @wearables-ui-toolkit/icons build && yarn workspace @wearables-ui-toolkit/foundation build && yarn workspace @wearables-ui-toolkit/mrbd build && yarn workspace @meta/wearables-ui-toolkit-mrbd-alpha-launcher build",
+    "build:all": "yarn terminology:check && yarn build && yarn workspace @meta/wearables-ui-toolkit-mrbd-gallery build && yarn workspace @meta/wearables-ui-toolkit-mrbd-example-launcher build && yarn workspace @meta/wearables-ui-toolkit-mrbd-messaging-demo build && yarn workspace @meta/wearables-ui-toolkit-pages-index build",
+    "build:gallery": "yarn workspace @meta/wearables-ui-toolkit-mrbd-gallery build",
+    "pages:build": "node tools/build-pages.mjs",
+    "test": "vitest run",
+    "test:public": "vitest run packages/icons/src packages/foundation/src packages/mrbd/src examples/alpha-launcher/src examples/gallery/src examples/launcher/src examples/messaging/src examples/shared",
+    "test:watch": "vitest",
+    "license:check": "node tools/validate-license.mjs",
+    "skills:check": "node --test tools/install-skills.test.mjs && node tools/export-skills.mjs --check",
+    "skills:export": "node tools/export-skills.mjs",
+    "terminology:check": "node --test tools/validate-terminology.test.mjs && node tools/validate-terminology.mjs",
+    "npm:validate": "node --test tools/npm-release/release-config.test.mjs && node tools/npm-release/validate-packages.mjs"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "babel-plugin-react-compiler": "1.0.0",
+    "jsdom": "^29.1.1",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "react-router": "7.17.0",
+    "react-router-dom": "7.17.0",
+    "vitest": "^4.1.6"
+  }
+}

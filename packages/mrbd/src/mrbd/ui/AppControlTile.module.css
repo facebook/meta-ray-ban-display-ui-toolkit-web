@@ -1,0 +1,188 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * AppControlTile styles
+ *
+ * Extends Container -- horizontal flex row
+ * with app image/avatar on left + optional title on right.
+ * When title is absent, the image is centered.
+ * When present, image on left, title fills remaining width.
+ */
+
+/* fill width (or flex-grow: 1 to fill remaining space), fits-content height,
+ * minHeight=120px, minWidth=144px */
+.appControlTile {
+  display: flex;
+  min-height: var(--uit-appcontroltile-min-height);
+  min-width: var(--uit-appcontroltile-min-width);
+}
+
+/**
+ * Root layout — a horizontal flex row.
+ * Vertically centered when title is present.
+ * Fully centered when title is absent (image centered).
+ */
+/* fill width/height with minHeight=120px.
+ * Explicit min-height ensures content fills the full tile height
+ * for proper vertical centering (avoids top-push from residual gap). */
+.root {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: var(--uit-appcontroltile-min-height);
+  box-sizing: border-box;
+}
+
+/* With title: vertically centered, padding applied via inline style */
+.rootWithTitle {
+  justify-content: flex-start;
+}
+
+/* App image container */
+.appImageContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* The app icon container receives its own default material pinned focused. */
+.appIconMaterial {
+  flex-shrink: 0;
+}
+
+.appIconMaterialContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* App icon wrapper (for static icon images) */
+.appIconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.appIconContainer img,
+.appIconContainer svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/**
+ * Title container — fills the remaining width.
+ * Vertical flex column, left margin = 16px.
+ * Margin applied via inline style.
+ */
+.titleContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  flex: 1;
+  min-width: 0;
+}
+
+/**
+ * Title text — uses the emphasized-label text style (TextAppearance.LABEL_EMPHASIZED):
+ *   font-size=24px, line-height=32px, font-weight=700
+ *   colorTextPrimary
+ * Long text is clipped and a fade edge is applied as foreground
+ * (60px fade from right edge). No text-overflow ellipsis — text is
+ * masked with a gradient fade instead.
+ */
+.title {
+  composes: uit-text-label-emphasized from global;
+  color: var(--uit-color-text-primary, rgba(255, 255, 255, 0.9));
+  text-align: left;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* Single-line title (when status icon is present).
+ * Single line, NO text-overflow ellipsis — uses a gradient fade edge. */
+.titleSingleLine {
+  white-space: nowrap;
+  display: block;
+}
+
+/* Marquee effect (continuous scroll for long titles).
+ * Distance, duration, and play-state are set imperatively from the measured
+ * overflow (useAppControlTileTitleOverflow): the text scrolls only the
+ * overflowing remainder at a constant speed and pauses while offscreen, instead
+ * of translating the whole text off-screen over a fixed 8s loop. Fallbacks keep
+ * a sensible animation if the metrics haven't been applied yet. */
+.titleMarquee {
+  animation: marquee var(--marquee-duration, 8s) linear infinite;
+  animation-play-state: var(--marquee-play-state, running);
+  white-space: nowrap;
+  display: block;
+  overflow: visible;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  10% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-1 * var(--marquee-distance, 100%)));
+  }
+}
+
+/**
+ * Status icon below title — uses 24px size,
+ * 4px top margin, tinted with colorIconPrimary.
+ * Dimensions applied via inline style.
+ */
+.statusIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--uit-color-icon-primary, rgba(255, 255, 255, 0.9));
+}
+
+.statusIcon svg,
+.statusIcon img {
+  width: 100%;
+  height: 100%;
+}
+
+/* Fade edge effect for long titles.
+ * Gradient fade edge with 60px fade width from right edge.
+ * Uses absolute pixel values (60px) instead of proportional. */
+.titleFadeRight {
+  mask-image: linear-gradient(to right, black calc(100% - var(--uit-appcontroltile-title-fade-width)), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - var(--uit-appcontroltile-title-fade-width)), transparent 100%);
+}
+
+.titleFadeBoth {
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    black var(--uit-appcontroltile-title-fade-width),
+    black calc(100% - var(--uit-appcontroltile-title-fade-width)),
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    black var(--uit-appcontroltile-title-fade-width),
+    black calc(100% - var(--uit-appcontroltile-title-fade-width)),
+    transparent 100%
+  );
+}

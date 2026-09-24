@@ -1,0 +1,21 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/* Generated from corner-radius.tokens.json. */
+
+:root {
+  --uit-corner-radius-xxsmall: 8px;
+  --uit-corner-radius-xsmall: 16px;
+  --uit-corner-radius-small: 24px;
+  --uit-corner-radius-medium: 32px;
+  --uit-corner-radius-large: 48px;
+  --uit-corner-radius-xlarge: 56px;
+  --uit-corner-radius-2xlarge: 64px;
+  --uit-corner-radius-3xlarge: 128px;
+  --uit-corner-radius-full: 9999px;
+}

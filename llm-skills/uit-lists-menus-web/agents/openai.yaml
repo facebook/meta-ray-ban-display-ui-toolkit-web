@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Toolkit for Meta Ray-Ban Display Lists and Menus"
+  short_description: "Build compliant lists, rows, and menus"
+  default_prompt: "Use $uit-lists-menus-web to build this list or menu flow."

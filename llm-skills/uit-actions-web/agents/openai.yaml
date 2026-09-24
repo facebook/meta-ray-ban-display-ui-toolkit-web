@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Toolkit for Meta Ray-Ban Display Actions"
+  short_description: "Build buttons, groups, and action rails"
+  default_prompt: "Use $uit-actions-web to build a polished action surface."

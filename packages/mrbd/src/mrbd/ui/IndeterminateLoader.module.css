@@ -1,0 +1,185 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * IndeterminateLoader CSS
+ *
+ * A single linear 1667ms loop drives both arc position and arc length,
+ * producing a start angle and sweep angle for each frame.
+ *
+ * The rotation is not a separate animation; it is included in the start angle:
+ *   startAngle = trimStart*3.6 + rotation + TRIM_OFFSET(-14) - 90
+ *   sweepAngle = (trimEnd - trimStart) * 3.6
+ *
+ * For CSS/SVG: one animation on the circle element controls both arc position
+ * (stroke-dashoffset) and arc length (stroke-dasharray). No separate rotate.
+ *
+ * Keyframes are sampled at 1% intervals:
+ *   rotation = lerp(-40, 105, t)
+ *   trimEnd: 30→90 over t=0..0.8
+ *   trimStart: 0 for t=0..0.48, then 0→52
+ *
+ * SVG circle: r=22, circumference = 138.2
+ *   arcLength = sweepAngle / 360 * circumference
+ *   gapLength = circumference - arcLength
+ *   dashoffset = -startAngle / 360 * circumference
+ */
+
+.loader {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loaderSvg {
+  transform-origin: center center;
+}
+
+.loaderCircle {
+  stroke: var(--uit-color-control-active, rgba(255, 255, 255, 0.749));
+  fill: none;
+  stroke-linecap: round;
+  animation: indeterminateArc 1667ms linear infinite;
+}
+
+/* Paused state */
+.loaderPaused .loaderCircle {
+  animation-play-state: paused;
+}
+
+/**
+ * Single combined animation — rotation baked into dashoffset.
+ * Sampled at t = 0%, 5%, ..., 100%.
+ * dashoffset continuously decreases → arc moves forward (clockwise).
+ * The visible dash plus gap must equal exactly one circumference. Otherwise
+ * SVG repeats the dash pattern over a longer period and the loop reset snaps.
+ */
+@keyframes indeterminateArc {
+    0% { stroke-dasharray: 41.46 96.74; stroke-dashoffset: 55.28; }
+    1% { stroke-dasharray: 41.47 96.73; stroke-dashoffset: 54.72; }
+    2% { stroke-dasharray: 41.49 96.71; stroke-dashoffset: 54.17; }
+    3% { stroke-dasharray: 41.53 96.67; stroke-dashoffset: 53.61; }
+    4% { stroke-dasharray: 41.59 96.61; stroke-dashoffset: 53.05; }
+    5% { stroke-dasharray: 41.66 96.54; stroke-dashoffset: 52.50; }
+    6% { stroke-dasharray: 41.75 96.45; stroke-dashoffset: 51.94; }
+    7% { stroke-dasharray: 41.87 96.33; stroke-dashoffset: 51.38; }
+    8% { stroke-dasharray: 42.00 96.20; stroke-dashoffset: 50.83; }
+    9% { stroke-dasharray: 42.15 96.05; stroke-dashoffset: 50.27; }
+   10% { stroke-dasharray: 42.32 95.88; stroke-dashoffset: 49.71; }
+   11% { stroke-dasharray: 42.51 95.69; stroke-dashoffset: 49.16; }
+   12% { stroke-dasharray: 42.73 95.47; stroke-dashoffset: 48.60; }
+   13% { stroke-dasharray: 42.97 95.23; stroke-dashoffset: 48.04; }
+   14% { stroke-dasharray: 43.23 94.97; stroke-dashoffset: 47.49; }
+   15% { stroke-dasharray: 43.52 94.68; stroke-dashoffset: 46.93; }
+   16% { stroke-dasharray: 43.83 94.37; stroke-dashoffset: 46.37; }
+   17% { stroke-dasharray: 44.17 94.03; stroke-dashoffset: 45.82; }
+   18% { stroke-dasharray: 44.54 93.66; stroke-dashoffset: 45.26; }
+   19% { stroke-dasharray: 44.94 93.26; stroke-dashoffset: 44.70; }
+   20% { stroke-dasharray: 45.38 92.82; stroke-dashoffset: 44.15; }
+   21% { stroke-dasharray: 45.84 92.36; stroke-dashoffset: 43.59; }
+   22% { stroke-dasharray: 46.34 91.86; stroke-dashoffset: 43.03; }
+   23% { stroke-dasharray: 46.87 91.33; stroke-dashoffset: 42.48; }
+   24% { stroke-dasharray: 47.45 90.75; stroke-dashoffset: 41.92; }
+   25% { stroke-dasharray: 48.06 90.14; stroke-dashoffset: 41.36; }
+   26% { stroke-dasharray: 48.71 89.49; stroke-dashoffset: 40.81; }
+   27% { stroke-dasharray: 49.41 88.79; stroke-dashoffset: 40.25; }
+   28% { stroke-dasharray: 50.16 88.04; stroke-dashoffset: 39.69; }
+   29% { stroke-dasharray: 50.95 87.25; stroke-dashoffset: 39.14; }
+   30% { stroke-dasharray: 51.80 86.40; stroke-dashoffset: 38.58; }
+   31% { stroke-dasharray: 52.70 85.50; stroke-dashoffset: 38.02; }
+   32% { stroke-dasharray: 53.66 84.54; stroke-dashoffset: 37.47; }
+   33% { stroke-dasharray: 54.68 83.52; stroke-dashoffset: 36.91; }
+   34% { stroke-dasharray: 55.76 82.44; stroke-dashoffset: 36.35; }
+   35% { stroke-dasharray: 56.92 81.28; stroke-dashoffset: 35.80; }
+   36% { stroke-dasharray: 58.15 80.05; stroke-dashoffset: 35.24; }
+   37% { stroke-dasharray: 59.46 78.74; stroke-dashoffset: 34.68; }
+   38% { stroke-dasharray: 60.85 77.35; stroke-dashoffset: 34.13; }
+   39% { stroke-dasharray: 62.33 75.87; stroke-dashoffset: 33.57; }
+   40% { stroke-dasharray: 63.90 74.30; stroke-dashoffset: 33.01; }
+   41% { stroke-dasharray: 65.57 72.63; stroke-dashoffset: 32.46; }
+   42% { stroke-dasharray: 67.35 70.85; stroke-dashoffset: 31.90; }
+   43% { stroke-dasharray: 69.24 68.96; stroke-dashoffset: 31.34; }
+   44% { stroke-dasharray: 71.24 66.96; stroke-dashoffset: 30.79; }
+   45% { stroke-dasharray: 73.35 64.85; stroke-dashoffset: 30.23; }
+   46% { stroke-dasharray: 75.58 62.62; stroke-dashoffset: 29.67; }
+   47% { stroke-dasharray: 77.92 60.28; stroke-dashoffset: 29.12; }
+   48% { stroke-dasharray: 80.37 57.83; stroke-dashoffset: 28.56; }
+   49% { stroke-dasharray: 82.86 55.34; stroke-dashoffset: 27.95; }
+   50% { stroke-dasharray: 85.32 52.88; stroke-dashoffset: 27.22; }
+   51% { stroke-dasharray: 87.70 50.50; stroke-dashoffset: 26.36; }
+   52% { stroke-dasharray: 89.97 48.23; stroke-dashoffset: 25.35; }
+   53% { stroke-dasharray: 92.07 46.13; stroke-dashoffset: 24.18; }
+   54% { stroke-dasharray: 93.95 44.25; stroke-dashoffset: 22.83; }
+   55% { stroke-dasharray: 95.56 42.64; stroke-dashoffset: 21.28; }
+   56% { stroke-dasharray: 96.84 41.36; stroke-dashoffset: 19.49; }
+   57% { stroke-dasharray: 97.74 40.46; stroke-dashoffset: 17.45; }
+   58% { stroke-dasharray: 98.21 39.99; stroke-dashoffset: 15.13; }
+   59% { stroke-dasharray: 98.23 39.97; stroke-dashoffset: 12.51; }
+   60% { stroke-dasharray: 97.76 40.44; stroke-dashoffset: 9.56; }
+   61% { stroke-dasharray: 96.80 41.40; stroke-dashoffset: 6.28; }
+   62% { stroke-dasharray: 95.37 42.83; stroke-dashoffset: 2.68; }
+   63% { stroke-dasharray: 93.50 44.70; stroke-dashoffset: -1.21; }
+   64% { stroke-dasharray: 91.28 46.92; stroke-dashoffset: -5.31; }
+   65% { stroke-dasharray: 88.79 49.41; stroke-dashoffset: -9.55; }
+   66% { stroke-dasharray: 86.14 52.06; stroke-dashoffset: -13.82; }
+   67% { stroke-dasharray: 83.42 54.78; stroke-dashoffset: -18.05; }
+   68% { stroke-dasharray: 80.72 57.48; stroke-dashoffset: -22.15; }
+   69% { stroke-dasharray: 78.08 60.12; stroke-dashoffset: -26.09; }
+   70% { stroke-dasharray: 75.55 62.65; stroke-dashoffset: -29.83; }
+   71% { stroke-dasharray: 73.14 65.06; stroke-dashoffset: -33.36; }
+   72% { stroke-dasharray: 70.86 67.34; stroke-dashoffset: -36.68; }
+   73% { stroke-dasharray: 68.70 69.50; stroke-dashoffset: -39.81; }
+   74% { stroke-dasharray: 66.67 71.53; stroke-dashoffset: -42.75; }
+   75% { stroke-dasharray: 64.75 73.45; stroke-dashoffset: -45.51; }
+   76% { stroke-dasharray: 62.93 75.27; stroke-dashoffset: -48.10; }
+   77% { stroke-dasharray: 61.21 76.99; stroke-dashoffset: -50.54; }
+   78% { stroke-dasharray: 59.58 78.62; stroke-dashoffset: -52.85; }
+   79% { stroke-dasharray: 58.04 80.16; stroke-dashoffset: -55.02; }
+   80% { stroke-dasharray: 56.56 81.64; stroke-dashoffset: -57.07; }
+   81% { stroke-dasharray: 55.17 83.03; stroke-dashoffset: -59.01; }
+   82% { stroke-dasharray: 53.89 84.31; stroke-dashoffset: -60.85; }
+   83% { stroke-dasharray: 52.70 85.50; stroke-dashoffset: -62.60; }
+   84% { stroke-dasharray: 51.60 86.60; stroke-dashoffset: -64.26; }
+   85% { stroke-dasharray: 50.58 87.62; stroke-dashoffset: -65.83; }
+   86% { stroke-dasharray: 49.64 88.56; stroke-dashoffset: -67.33; }
+   87% { stroke-dasharray: 48.77 89.43; stroke-dashoffset: -68.76; }
+   88% { stroke-dasharray: 47.96 90.24; stroke-dashoffset: -70.12; }
+   89% { stroke-dasharray: 47.22 90.98; stroke-dashoffset: -71.42; }
+   90% { stroke-dasharray: 46.53 91.67; stroke-dashoffset: -72.66; }
+   91% { stroke-dasharray: 45.91 92.29; stroke-dashoffset: -73.85; }
+   92% { stroke-dasharray: 45.33 92.87; stroke-dashoffset: -74.98; }
+   93% { stroke-dasharray: 44.81 93.39; stroke-dashoffset: -76.06; }
+   94% { stroke-dasharray: 44.33 93.87; stroke-dashoffset: -77.10; }
+   95% { stroke-dasharray: 43.89 94.31; stroke-dashoffset: -78.09; }
+   96% { stroke-dasharray: 43.50 94.70; stroke-dashoffset: -79.04; }
+   97% { stroke-dasharray: 43.15 95.05; stroke-dashoffset: -79.95; }
+   98% { stroke-dasharray: 42.83 95.37; stroke-dashoffset: -80.82; }
+   99% { stroke-dasharray: 42.56 95.64; stroke-dashoffset: -81.65; }
+  100% { stroke-dasharray: 41.46 96.74; stroke-dashoffset: -82.92; }
+}
+
+/* Size variants */
+.xsmall {
+  width: 24px;
+  height: 24px;
+}
+
+.small {
+  width: 32px;
+  height: 32px;
+}
+
+.medium {
+  width: 48px;
+  height: 48px;
+}
+
+.large {
+  width: 72px;
+  height: 72px;
+}

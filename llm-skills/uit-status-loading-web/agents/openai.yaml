@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Toolkit for Meta Ray-Ban Display Status and Loading"
+  short_description: "Build progress, loading, and status UI"
+  default_prompt: "Use $uit-status-loading-web to implement this status or loading state."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Toolkit for Meta Ray-Ban Display Controls"
+  short_description: "Build settings, value controls, and tiles"
+  default_prompt: "Use $uit-controls-web to implement this toolkit control flow."

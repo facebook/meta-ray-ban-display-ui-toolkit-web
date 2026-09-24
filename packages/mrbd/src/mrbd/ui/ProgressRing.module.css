@@ -1,0 +1,80 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/**
+ * ProgressRing CSS
+ * Circular progress indicator.
+ *
+ * Uses SVG circles with stroke-dasharray/offset for the progress arc.
+ * The track (background) is a full circle; the progress arc fills clockwise
+ * from the top (12 o'clock position).
+ *
+ * Colors use theme CSS variables:
+ * - Track: var(--uit-color-background-track)
+ * - Progress: var(--uit-color-control-active)
+ */
+
+.progressRing {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progressbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.ringSvg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Track (background circle) - always a full circle */
+.ringTrack {
+  fill: none;
+  stroke: var(--uit-color-background-track, rgba(255, 255, 255, 0.251));
+  stroke-linecap: round;
+}
+
+/* Progress arc (foreground) - fills based on stroke-dashoffset */
+.ringProgress {
+  fill: none;
+  stroke: var(--uit-color-control-active, rgba(255, 255, 255, 0.749));
+  stroke-linecap: round;
+  /* stroke-dasharray and stroke-dashoffset set via inline styles */
+  /* transition set via inline styles when animated=true */
+}
+
+/* Visually-hidden live region: announced by screen readers, not rendered visually */
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+/* Size variants */
+.small {
+  width: 48px;
+  height: 48px;
+}
+
+.large {
+  width: 100px;
+  height: 100px;
+}

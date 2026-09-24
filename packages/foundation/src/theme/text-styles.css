@@ -1,0 +1,128 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+/* Complete text appearances for CSS and TextAppearance consumers. */
+
+.uit-text-numeral1 {
+  font-family: 'Noto Sans Local', 'Noto Sans', system-ui, sans-serif;
+  font-size: 80px;
+  line-height: 80px;
+  font-weight: 500;
+}
+
+.uit-text-numeral2 {
+  font-family: 'Noto Sans Local', 'Noto Sans', system-ui, sans-serif;
+  font-size: 64px;
+  line-height: 64px;
+  font-weight: 500;
+}
+
+.uit-text-display1 {
+  font-family: 'Noto Sans Local', 'Noto Sans', system-ui, sans-serif;
+  font-size: 64px;
+  line-height: 84px;
+  font-weight: 400;
+}
+
+.uit-text-heading1 {
+  font-family: 'Noto Sans Local', 'Noto Sans', system-ui, sans-serif;
+  font-size: 40px;
+  line-height: 48px;
+  font-weight: 700;
+}
+
+.uit-text-heading2 {
+  font-family: 'Noto Sans Local', 'Noto Sans', system-ui, sans-serif;
+  font-size: 36px;
+  line-height: 44px;
+  font-weight: 700;
+}
+
+.uit-text-body1 {
+  font-family: 'Noto Sans Local', 'Noto Sans', system-ui, sans-serif;
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 400;
+}
+
+.uit-text-body1-emphasized {
+  font-family: 'Noto Sans Local', 'Noto Sans', system-ui, sans-serif;
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 700;
+}
+
+.uit-text-body2 {
+  font-family: 'Noto Sans Local', 'Noto Sans', system-ui, sans-serif;
+  font-size: 28px;
+  line-height: 36px;
+  font-weight: 400;
+}
+
+.uit-text-body2-emphasized {
+  font-family: 'Noto Sans Local', 'Noto Sans', system-ui, sans-serif;
+  font-size: 28px;
+  line-height: 36px;
+  font-weight: 700;
+}
+
+.uit-text-label {
+  font-family: 'Noto Sans Local', 'Noto Sans', system-ui, sans-serif;
+  font-size: 24px;
+  line-height: 32px;
+  padding-block: 0.5px;
+  font-weight: 400;
+}
+
+.uit-text-label-emphasized {
+  font-family: 'Noto Sans Local', 'Noto Sans', system-ui, sans-serif;
+  font-size: 24px;
+  line-height: 32px;
+  padding-block: 0.5px;
+  font-weight: 700;
+}
+
+.uit-text-meta1 {
+  font-family: 'Noto Sans Local', 'Noto Sans', system-ui, sans-serif;
+  font-size: 24px;
+  line-height: 32px;
+  padding-block: 0.5px;
+  font-weight: 400;
+}
+
+.uit-text-meta1-emphasized {
+  font-family: 'Noto Sans Local', 'Noto Sans', system-ui, sans-serif;
+  font-size: 24px;
+  line-height: 32px;
+  padding-block: 0.5px;
+  font-weight: 500;
+}
+
+.uit-text-meta2 {
+  font-family: 'Noto Sans Local', 'Noto Sans', system-ui, sans-serif;
+  font-size: 22px;
+  line-height: 28px;
+  padding-block: 1.5px;
+  font-weight: 400;
+}
+
+.uit-text-meta2-emphasized {
+  font-family: 'Noto Sans Local', 'Noto Sans', system-ui, sans-serif;
+  font-size: 22px;
+  line-height: 28px;
+  padding-block: 1.5px;
+  font-weight: 500;
+}
+
+.uit-text-meta3 {
+  font-family: 'Noto Sans Local', 'Noto Sans', system-ui, sans-serif;
+  font-size: 18px;
+  line-height: 24px;
+  padding-block: 1px;
+  font-weight: 400;
+}

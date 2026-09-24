@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Toolkit for Meta Ray-Ban Display Media Browser App"
+  short_description: "Build responsive media browsing applications"
+  default_prompt: "Use $uit-media-browser-app-web to build a polished responsive media collection and detail app."

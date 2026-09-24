@@ -1,0 +1,21 @@
+@wearables-ui-toolkit/androidx-shapes
+
+This product includes software developed as part of the Android Open Source
+Project (https://source.android.com/):
+
+  AndroidX graphics-shapes (androidx.graphics.shapes)
+  Copyright 2022 The Android Open Source Project
+  Licensed under the Apache License, Version 2.0.
+
+This package is a TypeScript port of that software. Modifications — including
+translation from Kotlin to TypeScript, JavaScript data-model adaptation, API
+surface reduction, and SVG path serialization — were made by Meta Platforms,
+Inc. and are licensed under the Apache License, Version 2.0.
+
+The derived source files are:
+
+  src/AndroidXShapes.ts
+  src/AndroidXShapes.types.ts
+
+See UPSTREAM.md for the upstream source location and a detailed description of
+the port.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Toolkit for Meta Ray-Ban Display Tabbed Controls App"
+  short_description: "Build focused paged controls and settings"
+  default_prompt: "Use $uit-tabbed-controls-app-web to build this paged controls application."

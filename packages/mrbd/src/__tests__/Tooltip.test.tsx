@@ -39,8 +39,10 @@ function rect(left: number, top: number, width: number, height: number): DOMRect
 
 function TooltipHarness({
   position,
+  tracksAnchorScale,
 }: {
   position: TooltipPosition;
+  tracksAnchorScale?: boolean;
 }) {
   const anchorRef = useRef<HTMLButtonElement>(null);
 
@@ -54,6 +56,7 @@ function TooltipHarness({
         isVisible
         text="A tooltip that should stay readable"
         position={position}
+        tracksAnchorScale={tracksAnchorScale}
         shouldAutoDismiss={false}
       />
     </div>
@@ -156,7 +159,14 @@ describe('Tooltip placement', () => {
       return rect(0, 0, 0, 0);
     });
 
-    render(<TooltipHarness position={TooltipPosition.ANCHORED_BOTTOM} />);
+    // Only the tracksAnchorScale rAF loop re-measures without a scroll/resize
+    // event; the default path's post-show frames race the anchor move below.
+    render(
+      <TooltipHarness
+        position={TooltipPosition.ANCHORED_BOTTOM}
+        tracksAnchorScale
+      />,
+    );
     const tooltip = await screen.findByRole('tooltip');
     await waitFor(() => expect(tooltip.style.left).toBe('280px'));
 

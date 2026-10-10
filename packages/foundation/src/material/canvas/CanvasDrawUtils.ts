@@ -16,6 +16,8 @@
  * a shader or filter are reproduced with short offscreen passes.
  */
 
+import { drawWithCanvasBlur, supportsNativeCanvasFilter } from './CanvasBlur';
+
 export type BlendMode = GlobalCompositeOperation;
 
 export interface GradientStop {
@@ -308,6 +310,87 @@ export interface ClippedImageParams {
   blend?: BlendMode;
 }
 
+interface BlurredImageCacheEntry {
+  key: string;
+  canvas: HTMLCanvasElement;
+  pixels: number;
+}
+
+const blurredImageCache = new Map<HTMLImageElement, BlurredImageCacheEntry>();
+const unreadableImageCache = new WeakMap<HTMLImageElement, { key: string; retryAt: number }>();
+const UNREADABLE_IMAGE_RETRY_MS = 1_000;
+const MAX_BLURRED_IMAGE_CACHE_PIXELS = 4_000_000;
+const MAX_BLURRED_IMAGE_CACHE_ENTRIES = 8;
+let blurredImageCachePixels = 0;
+
+function getBlurredImage(
+  ctx: CanvasRenderingContext2D,
+  image: HTMLImageElement,
+  p: ClippedImageParams,
+  draw: (target: CanvasRenderingContext2D) => void,
+): HTMLCanvasElement | false | null {
+  const m = ctx.getTransform();
+  const key = [
+    ctx.canvas.width, ctx.canvas.height,
+    m.a, m.b, m.c, m.d, m.e, m.f,
+    ctx.imageSmoothingEnabled, ctx.imageSmoothingQuality,
+    p.width, p.height, p.fit, p.blurPx,
+    image.currentSrc, image.crossOrigin, image.complete,
+    image.naturalWidth, image.naturalHeight,
+  ].join('|');
+  const existing = blurredImageCache.get(image);
+  if (existing?.key === key) {
+    blurredImageCache.delete(image);
+    blurredImageCache.set(image, existing);
+    return existing.canvas;
+  }
+  if (existing != null) {
+    blurredImageCache.delete(image);
+    blurredImageCachePixels -= existing.pixels;
+  }
+  const unreadable = unreadableImageCache.get(image);
+  if (unreadable?.key === key && Date.now() < unreadable.retryAt) {
+    return false;
+  }
+
+  const canvas = document.createElement('canvas');
+  canvas.width = ctx.canvas.width;
+  canvas.height = ctx.canvas.height;
+  const offscreen = canvas.getContext('2d');
+  if (offscreen == null) {
+    return null;
+  }
+  offscreen.setTransform(m);
+  offscreen.imageSmoothingEnabled = ctx.imageSmoothingEnabled;
+  offscreen.imageSmoothingQuality = ctx.imageSmoothingQuality;
+  const blurred = drawWithCanvasBlur(offscreen, p.blurPx ?? 0, draw);
+  if (!blurred) {
+    unreadableImageCache.set(image, { key, retryAt: Date.now() + UNREADABLE_IMAGE_RETRY_MS });
+    return false;
+  }
+  unreadableImageCache.delete(image);
+
+  const pixels = canvas.width * canvas.height;
+  // Keep an oversized image as the sole entry: dropping it would recompute the
+  // most expensive blur on every focus/alpha frame. Limit entry count as well
+  // as pixels so tiny images do not retain unbounded source elements.
+  while (
+    blurredImageCache.size > 0 &&
+    (blurredImageCachePixels + pixels > MAX_BLURRED_IMAGE_CACHE_PIXELS ||
+      blurredImageCache.size >= MAX_BLURRED_IMAGE_CACHE_ENTRIES)
+  ) {
+    const oldest = blurredImageCache.keys().next().value;
+    if (oldest == null) {
+      break;
+    }
+    blurredImageCachePixels -= blurredImageCache.get(oldest)!.pixels;
+    blurredImageCache.delete(oldest);
+  }
+  blurredImageCache.set(image, { key, canvas, pixels });
+  blurredImageCachePixels += pixels;
+  return canvas;
+}
+
 /** Draw an image clipped to the shape path, optionally blurred. */
 export function drawImageClipped(
   ctx: CanvasRenderingContext2D,
@@ -328,19 +411,41 @@ export function drawImageClipped(
   ctx.globalCompositeOperation = p.blend ?? 'source-over';
   ctx.globalAlpha = p.alpha;
   ctx.clip(p.path);
-  if (p.blurPx != null && p.blurPx > 0) {
-    ctx.filter = `blur(${p.blurPx}px)`;
+  const fitsCover = (p.fit ?? 'cover') === 'cover' && naturalW > 0 && naturalH > 0;
+  const draw = (target: CanvasRenderingContext2D) => {
+    if (fitsCover) {
+      const scale = Math.max(p.width / naturalW, p.height / naturalH);
+      const drawW = naturalW * scale;
+      const drawH = naturalH * scale;
+      const dx = (p.width - drawW) / 2;
+      const dy = (p.height - drawH) / 2;
+      target.drawImage(p.image, dx, dy, drawW, drawH);
+    } else {
+      target.drawImage(p.image, 0, 0, p.width, p.height);
+    }
+  };
+  if (
+    p.blurPx != null && p.blurPx > 0 &&
+    !supportsNativeCanvasFilter() &&
+    typeof HTMLImageElement !== 'undefined' &&
+    p.image instanceof HTMLImageElement
+  ) {
+    const blurred = getBlurredImage(ctx, p.image, p, draw);
+    if (blurred === false) {
+      draw(ctx);
+      ctx.restore();
+      return;
+    }
+    if (blurred != null) {
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.drawImage(blurred, 0, 0);
+      ctx.restore();
+      ctx.restore();
+      return;
+    }
   }
-  if ((p.fit ?? 'cover') === 'cover' && naturalW > 0 && naturalH > 0) {
-    const scale = Math.max(p.width / naturalW, p.height / naturalH);
-    const drawW = naturalW * scale;
-    const drawH = naturalH * scale;
-    const dx = (p.width - drawW) / 2;
-    const dy = (p.height - drawH) / 2;
-    ctx.drawImage(p.image, dx, dy, drawW, drawH);
-  } else {
-    ctx.drawImage(p.image, 0, 0, p.width, p.height);
-  }
+  drawWithCanvasBlur(ctx, p.blurPx ?? 0, draw);
   ctx.restore();
 }
 
@@ -493,9 +598,9 @@ function renderInnerGlowBitmap(
   }
 
   // Blur the outside flood inward, shifted by the directional offset.
-  tctx.filter = `blur(${sigma}px)`;
-  tctx.drawImage(outside.canvas, offsetX, offsetY, paddedW, paddedH);
-  tctx.filter = 'none';
+  drawWithCanvasBlur(tctx, sigma, target => {
+    target.drawImage(outside.canvas, offsetX, offsetY, paddedW, paddedH);
+  });
   // Keep only the inward bleed (inside the shape).
   tctx.globalCompositeOperation = 'destination-in';
   tctx.save();

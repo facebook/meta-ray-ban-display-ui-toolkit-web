@@ -11,6 +11,7 @@ import { Utility } from '../../colors/Colors';
 import { ContainerMaterialLayer, LayerPlacement } from '../ContainerMaterial';
 import type { CanvasLayerDrawParams } from '../ContainerMaterial.types';
 import type { GradientStop } from '../canvas/CanvasDrawUtils';
+import { drawWithCanvasBlur } from '../canvas/CanvasBlur';
 import type { RadialMultiplier } from './LayerSupport';
 
 export interface BlurredRadialGradientLayerConfig {
@@ -145,23 +146,21 @@ function createBitmap(
   source.ctx.fillRect(-cover, -cover, cover * 2, cover * 2);
   source.ctx.restore();
 
-  if (blurRadius > 0) {
-    // Canvas filter lengths are device-space values and do not inherit the
-    // context transform, so scale the logical radius explicitly.
-    target.ctx.filter = `blur(${blurRadius * dpr}px)`;
-  }
-  target.ctx.drawImage(
-    source.canvas,
-    0,
-    0,
-    source.canvas.width,
-    source.canvas.height,
-    0,
-    0,
-    logicalWidth,
-    logicalHeight,
-  );
-  target.ctx.filter = 'none';
+  // Canvas filter lengths are device-space values and do not inherit the
+  // context transform, so scale the logical radius explicitly.
+  drawWithCanvasBlur(target.ctx, blurRadius > 0 ? blurRadius * dpr : 0, ctx => {
+    ctx.drawImage(
+      source.canvas,
+      0,
+      0,
+      source.canvas.width,
+      source.canvas.height,
+      0,
+      0,
+      logicalWidth,
+      logicalHeight,
+    );
+  });
 
   return { canvas: target.canvas, logicalWidth, logicalHeight };
 }

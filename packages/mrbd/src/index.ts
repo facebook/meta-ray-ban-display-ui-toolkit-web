@@ -176,6 +176,7 @@ export type {
   BlendMode,
   GradientStop,
 } from '@wearables-ui-toolkit/foundation';
+export { drawWithCanvasBlur } from '@wearables-ui-toolkit/foundation/internal';
 export {
   getInsetStrokePath2D,
   getPath2DForPathD,

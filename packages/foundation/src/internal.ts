@@ -16,3 +16,4 @@ export {
 export type { ScrollMetrics } from './components/private/FadingEdges';
 export { PanelInternal } from './components/private/PanelInternal';
 export { getTextStyleClass } from './components/private/TextViewStyles';
+export { drawWithCanvasBlur, supportsNativeCanvasFilter } from './material/canvas/CanvasBlur';

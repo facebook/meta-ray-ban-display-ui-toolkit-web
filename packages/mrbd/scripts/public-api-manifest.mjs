@@ -263,6 +263,10 @@ export const publicApiSections = [
         ],
       },
       {
+        source: '@wearables-ui-toolkit/foundation/internal',
+        values: ['drawWithCanvasBlur'],
+      },
+      {
         source: '@wearables-ui-toolkit/foundation',
         values: [
           'getInsetStrokePath2D',

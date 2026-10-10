@@ -13,6 +13,7 @@ import {
   type CanvasLayerDrawParams,
 } from '@wearables-ui-toolkit/foundation';
 import { Utility } from '@wearables-ui-toolkit/foundation/colors/Colors';
+import { drawWithCanvasBlur, supportsNativeCanvasFilter } from '@wearables-ui-toolkit/foundation/internal';
 import {
   colorAlpha,
   createWebAppIconTokenScale,
@@ -177,12 +178,27 @@ function createBlurredMask(
   if (output == null) {
     return null;
   }
-  output.context.filter = `blur(${blurRadius * dpr}px)`;
-  // Repeated source-over draws preserve alpha through the wide blur.
-  for (let pass = 0; pass < passes; pass += 1) {
-    output.context.drawImage(source.canvas, 0, 0, size, size);
+  if (passes > 1 && !supportsNativeCanvasFilter()) {
+    // A canvas filter blurs each source draw before compositing it onto the
+    // destination. All passes draw the same source, so reuse one blurred bitmap.
+    const singlePass = createCanvas(size, dpr);
+    if (singlePass == null) {
+      return null;
+    }
+    drawWithCanvasBlur(singlePass.context, blurRadius * dpr, target => {
+      target.drawImage(source.canvas, 0, 0, size, size);
+    });
+    for (let pass = 0; pass < passes; pass += 1) {
+      output.context.drawImage(singlePass.canvas, 0, 0, size, size);
+    }
+    return output;
   }
-  output.context.filter = 'none';
+  // Native filters blur each repeated draw; keep that rendering path unchanged.
+  for (let pass = 0; pass < passes; pass += 1) {
+    drawWithCanvasBlur(output.context, blurRadius * dpr, target => {
+      target.drawImage(source.canvas, 0, 0, size, size);
+    });
+  }
   return output;
 }
 

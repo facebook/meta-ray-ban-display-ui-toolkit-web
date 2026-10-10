@@ -21,6 +21,7 @@ import { VisualState } from '../base/Interactions';
 import { MaterialColors, Gray } from '../colors/Colors';
 import { AnimationDurations, createTransition } from '../motion/Animations';
 import { strokeSolid } from './canvas/CanvasDrawUtils';
+import { drawWithCanvasBlur } from './canvas/CanvasBlur';
 import {
   AnimatableRadialGradientContainerMaterialLayer,
   SolidColorContainerMaterialLayer,
@@ -172,8 +173,10 @@ export function createTextInputContainerMaterial(
     canvas: HTMLCanvasElement;
     dpr: number;
     height: number;
+    retryAt: number;
     width: number;
   }>();
+  const FAILED_BLUR_RETRY_MS = 1_000;
   const idleInnerShadow = createLayer(
     'text-input-idle-shadow',
     LayerPlacement.BACKGROUND,
@@ -207,13 +210,12 @@ export function createTextInputContainerMaterial(
         const paddedH = p.height + pad * 2;
 
         const cachedShadow = idleShadowCache.get(p.path);
-        let blurred = cachedShadow?.canvas ?? null;
-        if (
-          cachedShadow == null ||
-          cachedShadow.width !== p.width ||
-          cachedShadow.height !== p.height ||
-          cachedShadow.dpr !== dpr
-        ) {
+        const sameGeometry = cachedShadow != null &&
+          cachedShadow.width === p.width &&
+          cachedShadow.height === p.height &&
+          cachedShadow.dpr === dpr;
+        let blurred = sameGeometry ? cachedShadow.canvas : null;
+        if (!sameGeometry || (cachedShadow!.retryAt > 0 && Date.now() >= cachedShadow!.retryAt)) {
           const off = document.createElement('canvas');
           off.width = Math.ceil(paddedW * dpr);
           off.height = Math.ceil(paddedH * dpr);
@@ -237,13 +239,25 @@ export function createTextInputContainerMaterial(
             return;
           }
           bctx.scale(dpr, dpr);
-          bctx.filter = `blur(${sigma}px)`;
-          bctx.drawImage(off, 0, 0, paddedW, paddedH);
-          bctx.filter = 'none';
+          const succeeded = drawWithCanvasBlur(bctx, sigma, target => {
+            target.drawImage(off, 0, 0, paddedW, paddedH);
+          });
+          if (!succeeded) {
+            bctx.save();
+            bctx.setTransform(1, 0, 0, 1, 0, 0);
+            bctx.clearRect(0, 0, off.width, off.height);
+            bctx.shadowColor = 'black';
+            bctx.shadowBlur = sigma * 2;
+            bctx.shadowOffsetX = -(off.width + 1);
+            // Keep the source outside the bitmap so only its softened shadow is visible.
+            bctx.drawImage(off, off.width + 1, 0);
+            bctx.restore();
+          }
           idleShadowCache.set(p.path, {
             canvas: blurred,
             dpr,
             height: p.height,
+            retryAt: succeeded ? 0 : Date.now() + FAILED_BLUR_RETRY_MS,
             width: p.width,
           });
         }

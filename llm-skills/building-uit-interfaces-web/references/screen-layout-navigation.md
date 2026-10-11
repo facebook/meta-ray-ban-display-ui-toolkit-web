@@ -209,6 +209,20 @@ history that the system Back path can traverse. Use `HashRouter` only when a
 static-hosting constraint requires it and the actual host provides a separately
 verified Back bridge; JavaScript hash history alone is not sufficient proof.
 
+For a Next.js App Router application, use the equivalent adapter from
+`@wearables-ui-toolkit/mrbd/next`: `NextNavigationProvider` > `App` >
+`NextPageTransition` in the glasses route's client layout, with a render
+function that returns the screen for `{pathname}`. Do not pass the layout's
+`children` through the transition; Next.js resolves them from the current
+route, so the outgoing page would render the incoming screen.
+
+With any other router, compose `useBackNavigation`, `PageTransition`,
+`RoutePreloadProvider`, and `useNavigationFocusRetention(routeKey)` in the
+routed shell. The focus hold is required on every route change: the browser on
+the glasses moves focus to the document root, then to the first focusable
+element, while it applies same-document history. Both adapters hold focus
+automatically.
+
 - Ordinary forward navigation must push a history entry. Do not use `replace` except for a genuine redirect or boundary fallback.
 - Test with the WebApp host's routed Back/Escape input, not only
   `history.back()`, router calls, or desktop browser buttons. Raw Android

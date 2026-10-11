@@ -49,6 +49,64 @@ Mount `Root` with React DOM's `createRoot`. Replace `DomainProvider` with the
 application's durable state provider, or omit that wrapper when no state must
 survive route transitions. Keep it outside `ReactRouterPageTransition`.
 
+### Next.js App Router
+
+`@wearables-ui-toolkit/mrbd/next` is the Next.js equivalent of the React
+Router adapter: `NextNavigationProvider` (Back through `router.back()`,
+`fallbackHref` at the first entry, push repair, preloading, focus retention),
+`NextPageTransition`, `NextPreloadLink`, `useNextNavigation`, and
+`useNextPageTransition`. History position comes from the browser Navigation
+API when available, otherwise from an index the provider records in history
+state (`getNextHistoryIndex`).
+
+Next.js resolves a layout's `children` from the current route, so
+`NextPageTransition` only accepts a render function. Render the shell from the
+glasses layout and every screen from the transition's `pathname`; an optional
+catch-all page that returns `null` declares the URLs:
+
+```tsx
+// app/glasses/[[...screen]]/page.tsx returns null.
+// app/glasses/layout.tsx renders <GlassesShell /> and ignores children.
+'use client';
+
+import {App} from '@wearables-ui-toolkit/mrbd';
+import {
+  NextNavigationProvider,
+  NextPageTransition,
+} from '@wearables-ui-toolkit/mrbd/next';
+
+export function GlassesShell() {
+  return (
+    <NextNavigationProvider fallbackHref="/glasses">
+      <App>
+        <DomainProvider>
+          <NextPageTransition>
+            {({pathname}) => renderScreen(pathname)}
+          </NextPageTransition>
+        </DomainProvider>
+      </App>
+    </NextNavigationProvider>
+  );
+}
+```
+
+The public `examples/next-navigation` sample (https://github.com/facebook/meta-ray-ban-display-ui-toolkit-web/tree/main/examples/next-navigation)
+is a complete, device-validated reference for this structure.
+
+Separate Next.js pages under a layout with `NextNavigationProvider` and `App`
+also work when no page motion is needed; they keep Back, preloading, and
+focus retention.
+
+### Other routers
+
+Compose the primitives the adapters use: `useBackNavigation` (router back, or
+a fallback route at the first entry; return `false` when nothing can be done),
+`PageTransition` with a page key and a history-derived direction,
+`RoutePreloadProvider`, and `useNavigationFocusRetention(routeKey)` with the
+router's location key or pathname. Without a router, call
+`preserveFocusedInteractableDuringNavigation()` immediately before each
+history change.
+
 ## Page and Header
 
 Page exposes header content directly: text/max lines/metadata/icon, rich Avatar/duo/badge/status, loading, show/hide, and system-bar content inset. Its root/header placement remains full screen; `enableSystemBarInset` affects child content.
@@ -154,7 +212,7 @@ PaginationIndicator shows zero-based position in dot/text mode and does not navi
 
 ## Focus model
 
-Interactable owners register with the focus coordinator. Initial focus chooses the top-left eligible connected control on the active page. Focus handoff coordinates outgoing/incoming material origins within a route. Page transitions retain/restore ownership rather than allowing a temporary body focus to clear visual state.
+Interactable owners register with the focus coordinator. Initial focus chooses the top-left eligible connected control on the active page. Focus handoff coordinates outgoing/incoming material origins within a route. Page transitions retain/restore ownership rather than allowing a temporary body focus to clear visual state. The navigation focus hold (`useNavigationFocusRetention`, built into both router providers) keeps the focused control through the browser's root focus during same-document history changes.
 
 When directional input occurs:
 

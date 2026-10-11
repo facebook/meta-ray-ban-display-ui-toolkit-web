@@ -79,7 +79,7 @@ Use named imports so bundlers can remove unused icons:
 import { airplaneFilled } from '@wearables-ui-toolkit/icons';
 ```
 
-Install React Router only when the application uses the router integration:
+Install React Router only when the application uses the React Router integration:
 
 ```bash
 npm install react-router-dom@^7.17.0
@@ -92,6 +92,18 @@ import {
   ReactRouterPreloadLink,
 } from '@wearables-ui-toolkit/mrbd/react-router';
 ```
+
+Next.js App Router applications use the equivalent integration, which relies on the application's existing `next` dependency. The [Next.js navigation sample](examples/next-navigation/) shows it in a complete app:
+
+```tsx
+import {
+  NextNavigationProvider,
+  NextPageTransition,
+  NextPreloadLink,
+} from '@wearables-ui-toolkit/mrbd/next';
+```
+
+Applications on any other router compose `PageTransition`, `useBackNavigation`, `RoutePreloadProvider`, and `useNavigationFocusRetention` from the package root. See [route navigation](https://wearables.developer.meta.com/docs/develop/webapps/design/guides/route-navigation/) for each approach.
 
 Import components from the package root or a supported component subpath:
 
@@ -110,7 +122,7 @@ After completing these steps, the application can render its first toolkit scree
 - **Directional focus navigation:** coordinated focus movement, focus retention, scrolling handoff, and overlay behavior.
 - **Semantic styling:** role-based colors, typography, spacing, corner radii, materials, and motion that applications can theme through public tokens.
 - **Accessible interaction:** component semantics, state communication, reduced-motion support, and labeling APIs.
-- **Application infrastructure:** the `App` shell, page transitions, route preloading, portals, toasts, and optional React Router integration.
+- **Application infrastructure:** the `App` shell, page transitions, route preloading, navigation focus retention, portals, toasts, and optional React Router and Next.js App Router integrations.
 
 ## Samples and utilities
 

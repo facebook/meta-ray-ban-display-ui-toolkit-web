@@ -16,11 +16,13 @@ npm install @wearables-ui-toolkit/foundation react@^19.2.7 react-dom@^19.2.7
 
 Foundation requires Node.js 18 or later and ships ECMAScript modules with TypeScript declarations. Its `@wearables-ui-toolkit/androidx-shapes` dependency installs transitively.
 
-Install React Router only when using the optional router integration:
+Install React Router only when using the optional React Router integration:
 
 ```bash
 npm install react-router-dom@^7.17.0
 ```
+
+The optional Next.js App Router integration uses the application's existing `next` dependency (`^15.0.0 || ^16.0.0`).
 
 ## Use Foundation
 
@@ -47,7 +49,7 @@ Render Foundation content inside `App`. It loads the component and token styles 
 - **Directional focus:** traversal, focus sections, focus retention, Back navigation, and handoff between containers.
 - **Scrolling and paging:** scroll views, vertical lists, pagers, carousels, and focus-aware visibility behavior.
 - **Motion:** durations, interpolators, spring configurations, transitions, and reduced-motion support.
-- **Application infrastructure:** page transitions, route preloading, floating portals, and optional React Router helpers.
+- **Application infrastructure:** page transitions, route preloading, navigation focus retention for any router, floating portals, and optional React Router and Next.js App Router helpers.
 
 Use the public props, composition points, semantic tokens, materials, and motion APIs to customize an interface. Generated class names and component internals are not compatibility surfaces.
 
@@ -58,6 +60,7 @@ Use the public props, composition points, semantic tokens, materials, and motion
 | `@wearables-ui-toolkit/foundation` | The complete Foundation API. |
 | `@wearables-ui-toolkit/foundation/<path>` | Fine-grained modules such as `components/Container`. |
 | `@wearables-ui-toolkit/foundation/react-router` | Optional React Router integration. |
+| `@wearables-ui-toolkit/foundation/next` | Optional Next.js App Router integration. |
 | `@wearables-ui-toolkit/foundation/styles.css` | Compatibility stylesheet; `App` loads it automatically. |
 
 Only paths declared by the package are public. Do not import files from `dist`. For TypeScript, use a module-resolution mode that understands package `exports`, such as `"bundler"`, `"node16"`, or `"nodenext"`.

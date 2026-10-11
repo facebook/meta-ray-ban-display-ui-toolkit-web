@@ -198,8 +198,10 @@ Use this map for the common production shell without inspecting package files:
   `ProgressIndicator`, `TextView`, `TextStyle`, and `Toast` from
   `@wearables-ui-toolkit/mrbd`.
 - Import `ReactRouterNavigationProvider` and
-  `ReactRouterPageTransition` from `@wearables-ui-toolkit/mrbd/react-router`. They
-  are never root-package exports.
+  `ReactRouterPageTransition` from `@wearables-ui-toolkit/mrbd/react-router`, or
+  `NextNavigationProvider` and `NextPageTransition` from
+  `@wearables-ui-toolkit/mrbd/next` in a Next.js App Router app. They are never
+  root-package exports.
 - Render the application inside `App`, which loads the toolkit stylesheet.
 - `Page` receives concise `headerText`, optional `headerMetadata`, and route
   content as children.
@@ -274,8 +276,12 @@ these rules with generic web conventions.
   full-viewport containing block.
 - Use the canonical routed shell in this order: `BrowserRouter` >
   `ReactRouterNavigationProvider` > the toolkit `App` > durable application providers >
-  `ReactRouterPageTransition` > `Routes location={location}`. Keep state that
-  must survive navigation outside the transition. `App` already owns Toast
+  `ReactRouterPageTransition` > `Routes location={location}`. In a Next.js App
+  Router app, use `NextNavigationProvider` > `App` > durable providers >
+  `NextPageTransition` rendering each screen from `pathname` (see
+  `../uit-navigation-focus-web/references/navigation-components.md`). With any
+  other router, call `useNavigationFocusRetention` in the routed shell. Keep
+  state that must survive navigation outside the transition. `App` already owns Toast
   presentation; never mount `ToastContainer`.
 - Every ordinary route uses `Page`; every tabbed route uses
   `SubNavigationPager` instead of `Page`. Never combine them. Configure Header

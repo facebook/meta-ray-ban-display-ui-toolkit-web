@@ -6,7 +6,7 @@
       "name": "building-uit-interfaces-web",
       "description": "Build, revise, or review polished production Meta Ray-Ban Display React interfaces with the public `@wearables-ui-toolkit/mrbd` library. Use for UI Toolkit for Meta Ray-Ban Display applications, routes, layouts, focus/D-pad navigation, materials, responsive sizing, overlays, accessibility, performance, or visual validation. Covers component selection, compliant composition, semantic tokens, filled icons, additive-display legibility, incorrect patterns, and device-ready testing. Assume no prior toolkit knowledge.",
       "file_count": 11,
-      "sha256": "sha256:ceab44e19d421c981850e2ac9037eea82d062e46910cc63bcf2148ed37d5c4b9"
+      "sha256": "sha256:c635d89df7f3d19ae9ed8ca71f9e9ae68bc494ec14a3a89045a7a3b6164db393"
     },
     {
       "name": "uit-accessibility-testing-web",
@@ -64,9 +64,9 @@
     },
     {
       "name": "uit-navigation-focus-web",
-      "description": "Build, debug, or review UI Toolkit for Meta Ray-Ban Display App, Page, Header, ScrollView, VerticalList, Pager, SubNavigationPager, SubNavigation, PaginationIndicator, SwipeIndicator, route transitions, React Router integration, focus coordination, focus restoration, partial focus, rubber-band feedback, boundary scrolling, fading edges, and scrollbars.",
+      "description": "Build, debug, or review UI Toolkit for Meta Ray-Ban Display App, Page, Header, ScrollView, VerticalList, Pager, SubNavigationPager, SubNavigation, PaginationIndicator, SwipeIndicator, route transitions, React Router and Next.js App Router integration, navigation focus retention for any router, focus coordination, focus restoration, partial focus, rubber-band feedback, boundary scrolling, fading edges, and scrollbars.",
       "file_count": 3,
-      "sha256": "sha256:68635d87f51a8473ec694e19461847866a48fc85eeae42931c268841689f0769"
+      "sha256": "sha256:3c345541275de48537dda0001c8e5f3d571da98e4aebe1f1ddacea2afa7a3b7b"
     },
     {
       "name": "uit-operational-pager-app-web",
@@ -144,7 +144,7 @@
       "name": "wearables-ui-toolkit-web",
       "description": "Discover and route to the complete UI Toolkit for Meta Ray-Ban Display skill library for building production Meta Ray-Ban Display React applications with `@wearables-ui-toolkit/mrbd`. Use first for any broad, ambiguous, multi-component, or unfamiliar toolkit task; for architecture decisions; or when an agent needs to locate the right component, material, navigation, accessibility, validation, or design-system skill.",
       "file_count": 7,
-      "sha256": "sha256:5d57606c93c3cf5be4a5942f4a9103376a00fd538a68055a445760c3f61cd3a4"
+      "sha256": "sha256:a0480360faeb53750cc86c031ba8bc2495df5588d458fd90b6caeefa4a0b4501"
     }
   ],
   "targets": [

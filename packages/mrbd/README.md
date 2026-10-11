@@ -21,6 +21,7 @@ Explore the hosted [samples and utilities](https://facebook.github.io/meta-ray-b
 | `react` | `^19.2.7` peer dependency |
 | `react-dom` | `^19.2.7` peer dependency |
 | `react-router-dom` | `^7.17.0` — optional peer dependency, needed only for the `@wearables-ui-toolkit/mrbd/react-router` subpath |
+| `next` | `^15.0.0 \|\| ^16.0.0` — optional peer dependency, needed only for the `@wearables-ui-toolkit/mrbd/next` subpath |
 | Node | `>=18` |
 | Module format | **ESM only.** The package ships ECMAScript modules; there is no CommonJS build. |
 
@@ -34,7 +35,7 @@ Install the main package and its React peer dependencies:
 npm install @wearables-ui-toolkit/mrbd react@^19.2.7 react-dom@^19.2.7
 ```
 
-The main package installs Foundation and its shape dependency transitively. Install `react-router-dom@^7.17.0` only when using the router integration subpath, and install `@wearables-ui-toolkit/icons` only when the application uses the optional icon catalog. Each component owns its CSS module, and `App` automatically loads the packaged component styles and semantic design tokens.
+The main package installs Foundation and its shape dependency transitively. Install `react-router-dom@^7.17.0` only when using the React Router integration subpath, and install `@wearables-ui-toolkit/icons` only when the application uses the optional icon catalog. Each component owns its CSS module, and `App` automatically loads the packaged component styles and semantic design tokens.
 
 See the [installation guide](https://wearables.developer.meta.com/docs/develop/webapps/design/getting-started/installation/) for package and TypeScript setup.
 
@@ -90,11 +91,13 @@ Install the icon catalog when the application uses toolkit icons:
 npm install @wearables-ui-toolkit/icons
 ```
 
-Install React Router only when using the router integration:
+Install React Router only when using the React Router integration:
 
 ```bash
 npm install react-router-dom@^7.17.0
 ```
+
+The Next.js App Router integration uses the application's existing `next` dependency.
 
 ## AI coding skills
 
@@ -116,6 +119,7 @@ Every toolkit surface must render inside `App`. It loads the packaged styles, es
 | `@wearables-ui-toolkit/mrbd/styles.css` | Self-contained compatibility bundle of Foundation and MRBD component styles. |
 | `@wearables-ui-toolkit/mrbd/<Component>` | Component subpaths for Meta Ray-Ban Display glasses, for example `@wearables-ui-toolkit/mrbd/Button`. |
 | `@wearables-ui-toolkit/mrbd/react-router` | Optional React Router integration. |
+| `@wearables-ui-toolkit/mrbd/next` | Optional Next.js App Router integration. |
 
 ```ts
 import { Button } from '@wearables-ui-toolkit/mrbd/Button';
@@ -123,7 +127,7 @@ import { Button } from '@wearables-ui-toolkit/mrbd/Button';
 
 Per-component subpaths cover the Meta Ray-Ban Display components and their related exports. The root entry point also re-exports the lower-level foundation API. Most applications can import everything from the main package; advanced integrations can import foundation primitives directly from `@wearables-ui-toolkit/foundation` and its documented subpaths.
 
-The router subpath adds back navigation, history-aware page transitions, and route preloading on top of React Router:
+The router subpaths add back navigation, history-aware page transitions, route preloading, and navigation focus retention on top of React Router or the Next.js App Router:
 
 ```tsx
 import {
@@ -134,6 +138,18 @@ import {
 ```
 
 It also exports `useReactRouterNavigation`, `useReactRouterPageTransition`, `getBrowserHistoryIndex`, and `getPageTransitionDirectionForHistory`.
+
+```tsx
+import {
+  NextNavigationProvider,
+  NextPageTransition,
+  NextPreloadLink,
+} from '@wearables-ui-toolkit/mrbd/next';
+```
+
+The Next.js subpath also exports `useNextNavigation`, `useNextPageTransition`, `getNextHistoryIndex`, `getBrowserNavigationEntryIndex`, and `getPageTransitionDirectionForHistoryIndex`. Because Next.js resolves a layout's `children` from the current route, `NextPageTransition` takes a render function that returns each screen from the transition's `pathname`. The [Next.js navigation sample](https://github.com/facebook/meta-ray-ban-display-ui-toolkit-web/tree/main/examples/next-navigation) shows the complete structure.
+
+With any other router, compose `PageTransition`, `useBackNavigation`, and `RoutePreloadProvider` from the main entry point, and call `useNavigationFocusRetention` with the router's location key or pathname. Embedded browsers on the glasses can move focus to the document root during same-document navigation; the hook keeps the focused control's state through every route change, as both router subpaths do automatically. See [route navigation](https://wearables.developer.meta.com/docs/develop/webapps/design/guides/route-navigation/) for complete shells.
 
 ## What the package exports
 
@@ -147,7 +163,7 @@ It also exports `useReactRouterNavigation`, `useReactRouterPageTransition`, `get
 | Screens and navigation chrome | `Page`, `Header`, `SubNavigation`, `SubNavigationPager`, `ActionHint` |
 | Overlays and feedback | `Modal`, `Toast`, `ToastContainer`, `useToast`, `Tooltip`, `useTooltip`, `TooltipContainer`, `ContextMenu`, `ContextMenuItemView`, `ButtonContextMenuItemView`, `EmojiContextMenuItemView`, `VerticalMenu`, `VerticalMenuButton`, `getVerticalMenuAnchorProps` |
 | Status and progress | `ProgressRing`, `ProgressIndicator`, `CircularProgressBar`, `IndeterminateLoader`, `PaginationIndicator`, `SwipeIndicator`, `VolumeIndicator`, `ZoomIndicator`, `Avatar`, `AppBadge`, `NotificationBadge` |
-| Focus and routing | `FocusNavigationProvider`, `useFocusNavigation`, `useBackNavigation`, `preserveFocusedInteractableDuringNavigation`, `PageTransition`, `DefaultPageTransitionConfig`, `InAppPageTransitionConfig`, `AppSwitchPageTransitionConfig`, `RoutePreloadProvider`, `RoutePreloadTarget`, `useRoutePreloader`, `useRoutePreloadTarget`, `createPreloadableLazyComponent` |
+| Focus and routing | `FocusNavigationProvider`, `useFocusNavigation`, `useBackNavigation`, `useNavigationFocusRetention`, `preserveFocusedInteractableDuringNavigation`, `PageTransition`, `DefaultPageTransitionConfig`, `InAppPageTransitionConfig`, `AppSwitchPageTransitionConfig`, `RoutePreloadProvider`, `RoutePreloadTarget`, `useRoutePreloader`, `useRoutePreloadTarget`, `createPreloadableLazyComponent` |
 | Motion | `AnimationDurations`, `Interpolators`, `SpringConfigs`, `createTransition`, `reducedMotionDuration`, `useSpringAnimation`, `usePrefersReducedMotion` |
 | Materials | `ContainerMaterial`, `MaterialLibrary`, `createDefaultContainerMaterial`, `createBackgroundImageBlurContainerMaterial`, `createClockPillContainerMaterial`, `createReducedOpacityStaticContainerMaterial`, `createStatusIndicatorPanelContainerMaterial`, `createLayer`, `CornerRadius`, `LayerPlacement`, the typed material layer classes, the default layer factories, shape providers, and Canvas drawing primitives |
 | Interaction primitives | `InteractableBase`, `State`, `VisualState`, `ContentScaleInsets`, `getContentScaleForState`, `Platform`, `TooltipMode`, `PartialFocusSupportedAxis` |

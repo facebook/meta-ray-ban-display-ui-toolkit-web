@@ -598,7 +598,7 @@ function renderInnerGlowBitmap(
   }
 
   // Blur the outside flood inward, shifted by the directional offset.
-  drawWithCanvasBlur(tctx, sigma, target => {
+  drawWithCanvasBlur(tctx, sigma * p.dpr, target => {
     target.drawImage(outside.canvas, offsetX, offsetY, paddedW, paddedH);
   });
   // Keep only the inward bleed (inside the shape).
@@ -807,6 +807,7 @@ export interface DropShadowParams {
   blur: number;
   offsetX: number;
   offsetY: number;
+  dpr?: number;
 }
 
 /**
@@ -821,9 +822,9 @@ export function drawDropShadow(
 ): void {
   ctx.save();
   ctx.shadowColor = p.color;
-  ctx.shadowBlur = p.blur;
-  ctx.shadowOffsetX = p.offsetX;
-  ctx.shadowOffsetY = p.offsetY;
+  ctx.shadowBlur = p.blur * (p.dpr ?? 1);
+  ctx.shadowOffsetX = p.offsetX * (p.dpr ?? 1);
+  ctx.shadowOffsetY = p.offsetY * (p.dpr ?? 1);
   ctx.fillStyle = '#000000';
   ctx.fill(p.path);
   ctx.shadowColor = 'transparent';

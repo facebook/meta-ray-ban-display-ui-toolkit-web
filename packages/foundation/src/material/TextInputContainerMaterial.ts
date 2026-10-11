@@ -247,7 +247,7 @@ export function createTextInputContainerMaterial(
             bctx.setTransform(1, 0, 0, 1, 0, 0);
             bctx.clearRect(0, 0, off.width, off.height);
             bctx.shadowColor = 'black';
-            bctx.shadowBlur = sigma * 2;
+            bctx.shadowBlur = sigma * 2 * dpr;
             bctx.shadowOffsetX = -(off.width + 1);
             // Keep the source outside the bitmap so only its softened shadow is visible.
             bctx.drawImage(off, off.width + 1, 0);

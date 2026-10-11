@@ -60,6 +60,7 @@ export class DropShadowContainerMaterialLayer extends ContainerMaterialLayer {
       blur: this.blur,
       offsetX: this.offsetX,
       offsetY: this.offsetY,
+      dpr: params.dpr,
     });
     ctx.restore();
   }

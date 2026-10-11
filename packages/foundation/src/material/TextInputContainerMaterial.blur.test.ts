@@ -104,4 +104,32 @@ describe('text input idle shadow cache', () => {
     expect(context.drawImage).toHaveBeenCalledTimes(5);
     expect(context.drawImage.mock.calls.filter(([, x]) => x > 0)).toHaveLength(2);
   });
+
+  it('scales the native shadow fallback blur in physical pixels', () => {
+    vi.spyOn(canvasBlur, 'drawWithCanvasBlur').mockReturnValue(false);
+    const context = {
+      canvas: { width: 100, height: 50 },
+      save: vi.fn(), restore: vi.fn(), clip: vi.fn(), drawImage: vi.fn(),
+      clearRect: vi.fn(), setTransform: vi.fn(), scale: vi.fn(),
+      translate: vi.fn(), stroke: vi.fn(),
+    };
+    vi.spyOn(document, 'createElement').mockImplementation(() => ({
+      width: 0, height: 0, getContext: () => context,
+    } as unknown as HTMLCanvasElement));
+    const material = createTextInputContainerMaterial(() => new ContainerMaterial({ layers: [] }));
+    const layer = material.getBackgroundLayers().find(item => item.id === 'text-input-idle-shadow');
+    const params = {
+      state: VisualState.DEFAULT,
+      width: 50,
+      height: 20,
+      dpr: 2,
+      path: {} as Path2D,
+      lerpState: (valueForState: (state: VisualState) => number) => valueForState(VisualState.DEFAULT),
+    };
+    layer!.drawCanvas!(
+      context as unknown as CanvasRenderingContext2D,
+      params as Parameters<NonNullable<typeof layer.drawCanvas>>[1],
+    );
+    expect(context.shadowBlur).toBe(16);
+  });
 });

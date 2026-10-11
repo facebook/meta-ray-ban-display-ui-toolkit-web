@@ -62,7 +62,7 @@ export class ImageContentContainerMaterialLayer extends ContainerMaterialLayer {
       width: params.width,
       height: params.height,
       fit: this.fit,
-      blurPx: this.blurPx,
+      blurPx: this.blurPx == null ? undefined : this.blurPx * params.dpr,
       alpha,
       blend: this.blendMode,
     });

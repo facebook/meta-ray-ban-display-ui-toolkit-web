@@ -8,7 +8,11 @@
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { setNativeCanvasFilterSupportForTesting } from './CanvasBlur';
-import { drawImageClipped } from './CanvasDrawUtils';
+import * as canvasBlur from './CanvasBlur';
+import { drawDropShadow, drawImageClipped, drawInnerGlow } from './CanvasDrawUtils';
+import * as canvasDrawUtils from './CanvasDrawUtils';
+import { ImageContentContainerMaterialLayer } from '../layers/ImageContentContainerMaterialLayer';
+import { VisualState } from '../../base/Interactions';
 
 function createContext(canvas: HTMLCanvasElement) {
   return {
@@ -20,6 +24,10 @@ function createContext(canvas: HTMLCanvasElement) {
     getTransform: () => ({ a: 2, b: 0, c: 0, d: 2, e: 0, f: 0 }),
     setTransform: vi.fn(),
     drawImage: vi.fn(),
+    fill: vi.fn(),
+    fillRect: vi.fn(),
+    stroke: vi.fn(),
+    translate: vi.fn(),
     save: vi.fn(),
     restore: vi.fn(),
     clip: vi.fn(),
@@ -36,6 +44,52 @@ function createContext(canvas: HTMLCanvasElement) {
 afterEach(() => {
   setNativeCanvasFilterSupportForTesting(null);
   vi.restoreAllMocks();
+});
+
+describe('device-pixel canvas effects', () => {
+  it('scales drop-shadow blur and offsets at DPR 2 but preserves DPR 1', () => {
+    const ctx = createContext({ width: 80, height: 80 } as HTMLCanvasElement);
+    const shadow = { path: {} as Path2D, color: 'black', blur: 8, offsetX: 3, offsetY: -4 };
+    drawDropShadow(ctx as unknown as CanvasRenderingContext2D, { ...shadow, dpr: 2 });
+    expect([ctx.shadowBlur, ctx.shadowOffsetX, ctx.shadowOffsetY]).toEqual([16, 6, -8]);
+    drawDropShadow(ctx as unknown as CanvasRenderingContext2D, { ...shadow, dpr: 1 });
+    expect([ctx.shadowBlur, ctx.shadowOffsetX, ctx.shadowOffsetY]).toEqual([8, 3, -4]);
+  });
+
+  it('uses physical-pixel sigma for an inner glow', () => {
+    const blur = vi.spyOn(canvasBlur, 'drawWithCanvasBlur').mockReturnValue(true);
+    vi.spyOn(document, 'createElement').mockImplementation(() => {
+      const canvas = { width: 0, height: 0 } as HTMLCanvasElement;
+      canvas.getContext = vi.fn(() => createContext(canvas)) as unknown as HTMLCanvasElement['getContext'];
+      return canvas;
+    });
+    const target = createContext({ width: 160, height: 80 } as HTMLCanvasElement);
+    drawInnerGlow(target as unknown as CanvasRenderingContext2D, {
+      path: {} as Path2D, width: 80, height: 40, color: 'white',
+      blurRadius: 20, sigmaScale: 0.5, dpr: 2, alpha: 1,
+      shapeKey: 'dpr-regression-inner-glow',
+    });
+    expect(blur).toHaveBeenCalledWith(expect.anything(), 20, expect.any(Function));
+  });
+  it('passes a device-pixel blur length for image content', () => {
+    const draw = vi.spyOn(canvasDrawUtils, 'drawImageClipped').mockImplementation(() => {});
+    const image = document.createElement('img');
+    const layer = new ImageContentContainerMaterialLayer({ id: 'image', imageUrl: '/image', blurPx: 6 });
+    const params = {
+      state: VisualState.DEFAULT,
+      path: {} as Path2D,
+      width: 80,
+      height: 40,
+      dpr: 2,
+      assets: { getImage: () => image },
+      lerpState: (valueForState: (state: VisualState) => number) => valueForState(VisualState.DEFAULT),
+    } as Parameters<NonNullable<typeof layer.drawCanvas>>[1];
+    layer.drawCanvas!(createContext({ width: 160, height: 80 } as HTMLCanvasElement) as unknown as CanvasRenderingContext2D, params);
+    expect(draw).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ blurPx: 12 }));
+    params.dpr = 1;
+    layer.drawCanvas!(createContext({ width: 80, height: 40 } as HTMLCanvasElement) as unknown as CanvasRenderingContext2D, params);
+    expect(draw).toHaveBeenLastCalledWith(expect.anything(), expect.objectContaining({ blurPx: 6 }));
+  });
 });
 
 describe('Safari clipped-image blur cache', () => {

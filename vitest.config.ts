@@ -124,6 +124,7 @@ export default defineConfig({
       'packages/mrbd/src/**/*.{test,spec}.{ts,tsx}',
       'examples/launcher/src/**/*.{test,spec}.{ts,tsx}',
       'examples/messaging/src/**/*.{test,spec}.{ts,tsx}',
+      'examples/next-navigation/src/**/*.{test,spec}.{ts,tsx}',
       'examples/shared/**/*.{test,spec}.{ts,tsx}',
       'tools/**/*.{test,spec}.{ts,tsx}',
     ],

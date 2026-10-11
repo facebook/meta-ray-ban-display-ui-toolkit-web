@@ -149,6 +149,7 @@ Use the [samples and utilities page](https://facebook.github.io/meta-ray-ban-dis
 | Launcher | [Open](https://facebook.github.io/meta-ray-ban-display-ui-toolkit-web/launcher/) | `yarn workspace @meta/wearables-ui-toolkit-mrbd-example-launcher dev` |
 | Alpha launcher | [Open](https://facebook.github.io/meta-ray-ban-display-ui-toolkit-web/alpha-launcher/) | `yarn workspace @meta/wearables-ui-toolkit-mrbd-alpha-launcher dev` |
 | Messaging | [Open](https://facebook.github.io/meta-ray-ban-display-ui-toolkit-web/messaging/) | `yarn workspace @meta/wearables-ui-toolkit-mrbd-messaging-demo dev` |
+| Next.js navigation | Run locally | `yarn workspace @meta/wearables-ui-toolkit-mrbd-next-navigation dev` |
 
 Pushes to `main` publish the hosted samples and utility index to GitHub Pages.
 

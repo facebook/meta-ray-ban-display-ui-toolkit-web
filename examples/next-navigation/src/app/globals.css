@@ -1,0 +1,21 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+:root,
+html,
+body,
+#root {
+  inline-size: 100%;
+  block-size: 100%;
+  margin: 0;
+  background-color: var(--uit-color-background-window);
+}
+
+* {
+  box-sizing: border-box;
+}

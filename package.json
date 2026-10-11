@@ -9,11 +9,11 @@
   ],
   "scripts": {
     "build": "yarn workspace @wearables-ui-toolkit/androidx-shapes build && yarn workspace @wearables-ui-toolkit/icons build && yarn workspace @wearables-ui-toolkit/foundation build && yarn workspace @wearables-ui-toolkit/mrbd build && yarn workspace @meta/wearables-ui-toolkit-mrbd-alpha-launcher build",
-    "build:all": "yarn terminology:check && yarn build && yarn workspace @meta/wearables-ui-toolkit-mrbd-gallery build && yarn workspace @meta/wearables-ui-toolkit-mrbd-example-launcher build && yarn workspace @meta/wearables-ui-toolkit-mrbd-messaging-demo build && yarn workspace @meta/wearables-ui-toolkit-pages-index build",
+    "build:all": "yarn terminology:check && yarn build && yarn workspace @meta/wearables-ui-toolkit-mrbd-gallery build && yarn workspace @meta/wearables-ui-toolkit-mrbd-example-launcher build && yarn workspace @meta/wearables-ui-toolkit-mrbd-messaging-demo build && yarn workspace @meta/wearables-ui-toolkit-mrbd-next-navigation build && yarn workspace @meta/wearables-ui-toolkit-pages-index build",
     "build:gallery": "yarn workspace @meta/wearables-ui-toolkit-mrbd-gallery build",
     "pages:build": "node tools/build-pages.mjs",
     "test": "vitest run",
-    "test:public": "vitest run packages/icons/src packages/foundation/src packages/mrbd/src examples/alpha-launcher/src examples/gallery/src examples/launcher/src examples/messaging/src examples/shared",
+    "test:public": "vitest run packages/icons/src packages/foundation/src packages/mrbd/src examples/alpha-launcher/src examples/gallery/src examples/launcher/src examples/messaging/src examples/next-navigation/src examples/shared",
     "test:watch": "vitest",
     "license:check": "node tools/validate-license.mjs",
     "skills:check": "node --test tools/install-skills.test.mjs && node tools/export-skills.mjs --check",

@@ -89,11 +89,15 @@ const SOURCE_EXTENSIONS = new Set([
 ]);
 const EXCLUDED_DIRECTORY_NAMES = new Set([
   '.git',
+  '.next',
   'build',
   'coverage',
   'dist',
   'node_modules',
 ]);
+
+// Next.js regenerates this file on every build; it is not checked in.
+const GENERATED_FILE_NAMES = new Set(['next-env.d.ts']);
 
 function toRepositoryPath(root, path) {
   return relative(root, path).split(sep).join('/');
@@ -125,7 +129,10 @@ function collectPolicyFiles(root, directory = root) {
     if (entry.name === 'package.json') {
       packageFiles.push(path);
     }
-    if (SOURCE_EXTENSIONS.has(extname(entry.name))) {
+    if (
+      SOURCE_EXTENSIONS.has(extname(entry.name)) &&
+      !GENERATED_FILE_NAMES.has(entry.name)
+    ) {
       sourceFiles.push(path);
     }
   }

@@ -71,6 +71,7 @@ export default defineConfig({
         id === 'react' ||
         id === 'react-dom' ||
         id === 'react-router-dom' ||
+        id === 'next' || id.startsWith('next/') ||
         id === 'react/jsx-runtime' ||
         id === 'react/compiler-runtime' ||
         id === FOUNDATION_PACKAGE || id.startsWith(`${FOUNDATION_PACKAGE}/`),

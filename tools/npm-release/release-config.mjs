@@ -17,9 +17,11 @@ const PACKAGE_ENTRY_POINTS = Object.freeze({
 const REACT_PEERS = Object.freeze({
   react: '^19.2.7',
   'react-dom': '^19.2.7',
+  next: '^15.0.0 || ^16.0.0',
   'react-router-dom': '^7.17.0',
 });
 const ROUTER_PEER_META = Object.freeze({
+  next: Object.freeze({ optional: true }),
   'react-router-dom': Object.freeze({ optional: true }),
 });
 

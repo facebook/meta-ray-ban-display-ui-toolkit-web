@@ -869,7 +869,10 @@ function consumerPeerDependencies(root, includeRouter) {
     '@types/react-dom',
     'react',
     'react-dom',
-    ...(includeRouter ? ['react-router', 'react-router-dom'] : []),
+    // Next.js declarations import Node types; Next.js applications install them.
+    ...(includeRouter
+      ? ['@types/node', 'next', 'react-router', 'react-router-dom']
+      : []),
   ]);
 }
 
@@ -909,8 +912,10 @@ const CONSUMERS = [
       `import { Container } from '@wearables-ui-toolkit/foundation';\n` +
       `import { Container as ContainerSubpath } from '@wearables-ui-toolkit/foundation/components/Container';\n` +
       `import { ReactRouterNavigationProvider } from '@wearables-ui-toolkit/foundation/react-router';\n` +
+      `import type { NextNavigationProviderProps } from '@wearables-ui-toolkit/foundation/next';\n` +
       `import '@wearables-ui-toolkit/foundation/styles.css';\n` +
-      `void Container; void ContainerSubpath; void ReactRouterNavigationProvider;\n`,
+      `const nextProps: NextNavigationProviderProps = { fallbackHref: '/' };\n` +
+      `void Container; void ContainerSubpath; void ReactRouterNavigationProvider; void nextProps;\n`,
   },
   {
     directPackage: '@wearables-ui-toolkit/mrbd',
@@ -928,8 +933,10 @@ const CONSUMERS = [
       `import { App, Button, Page } from '@wearables-ui-toolkit/mrbd';\n` +
       `import { Button as ButtonSubpath } from '@wearables-ui-toolkit/mrbd/Button';\n` +
       `import { ReactRouterNavigationProvider } from '@wearables-ui-toolkit/mrbd/react-router';\n` +
+      `import type { NextPageTransitionProps } from '@wearables-ui-toolkit/mrbd/next';\n` +
       `import '@wearables-ui-toolkit/mrbd/styles.css';\n` +
-      `void ButtonSubpath;\n` +
+      `const nextProps: NextPageTransitionProps = { children: () => null };\n` +
+      `void ButtonSubpath; void nextProps;\n` +
       `createRoot(document.getElementById('root')!).render(\n` +
       `  <BrowserRouter><ReactRouterNavigationProvider><App><Page><Button title="Continue" /></Page></App></ReactRouterNavigationProvider></BrowserRouter>,\n` +
       `);\n`,
@@ -1093,6 +1100,9 @@ function validateConsumers(
         ...registryArguments,
         'install',
         '--ignore-scripts',
+        // Fixtures run tsc and vite from the workspace. Bin links would chmod
+        // dependency files that remote execution mounts read-only.
+        '--no-bin-links',
         '--no-audit',
         '--no-fund',
         '--no-package-lock',

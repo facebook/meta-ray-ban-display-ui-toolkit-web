@@ -19,8 +19,8 @@ export { preserveFocusedInteractableDuringNavigation };
  * key. A URL-based key must include query and hash changes. The hook starts a
  * focus hold when the browser applies a history traversal (`popstate`) and
  * whenever `routeKey` changes
- * after the first render. The React Router navigation provider
- * calls it for you; call it directly when composing another router.
+ * after the first render. The React Router and Next.js navigation providers
+ * call it for you; call it directly when composing another router.
  */
 export function useNavigationFocusRetention(
   routeKey: string | null | undefined,

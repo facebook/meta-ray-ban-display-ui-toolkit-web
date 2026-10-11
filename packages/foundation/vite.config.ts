@@ -53,6 +53,8 @@ export default defineConfig({
         'react',
         'react-dom',
         'react-router-dom',
+        'next/link',
+        'next/navigation',
         'react/jsx-runtime',
         'react/compiler-runtime',
         '@wearables-ui-toolkit/androidx-shapes',

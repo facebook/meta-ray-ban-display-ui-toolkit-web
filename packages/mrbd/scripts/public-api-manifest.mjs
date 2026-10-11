@@ -945,6 +945,7 @@ export const packageSubpathExports = [
   { subpath: 'ReadMoreTextView', source: 'mrbd/ui/ReadMoreTextView' },
   { subpath: 'InputTextView', source: 'mrbd/ui/InputTextView' },
   { subpath: 'react-router', source: 'react-router/index' },
+  { subpath: 'next', source: 'next/index' },
   { subpath: 'Scrubber', source: 'mrbd/ui/Scrubber' },
   { subpath: 'Scrim', source: 'mrbd/ui/Scrim' },
   { subpath: 'ScrollView', source: '@wearables-ui-toolkit/foundation' },

@@ -156,6 +156,10 @@
       "types": "./dist/react-router/index.d.ts",
       "import": "./dist/react-router/index.js"
     },
+    "./next": {
+      "types": "./dist/next/index.d.ts",
+      "import": "./dist/next/index.js"
+    },
     "./Scrubber": {
       "types": "./dist/mrbd/ui/Scrubber.d.ts",
       "import": "./dist/mrbd/ui/Scrubber.js"
@@ -244,9 +248,13 @@
   "peerDependencies": {
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
+    "next": "^15.0.0 || ^16.0.0",
     "react-router-dom": "^7.17.0"
   },
   "peerDependenciesMeta": {
+    "next": {
+      "optional": true
+    },
     "react-router-dom": {
       "optional": true
     }
@@ -256,6 +264,7 @@
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "^5.1.2",
     "magic-string": "^0.30.21",
+    "next": "16.2.10",
     "react-router-dom": "7.17.0",
     "typescript": "^5.9.3",
     "vite": "^8.0.0"

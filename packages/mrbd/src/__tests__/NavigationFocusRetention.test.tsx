@@ -16,8 +16,20 @@ import {
   useNavigationFocusRetention,
 } from '@wearables-ui-toolkit/foundation';
 import { retargetNavigationFocusRetention } from '@wearables-ui-toolkit/foundation/base/FocusCoordinator';
+import { NextNavigationProvider } from '@wearables-ui-toolkit/foundation/next';
 import { ReactRouterNavigationProvider } from '@wearables-ui-toolkit/foundation/react-router';
 import { ControlTile } from '../mrbd/ui/ControlTile';
+
+const nextRouter = vi.hoisted(() => ({
+  back: vi.fn(),
+  pathname: '/',
+  replace: vi.fn(),
+}));
+
+vi.mock('next/navigation', () => ({
+  usePathname: () => nextRouter.pathname,
+  useRouter: () => nextRouter,
+}));
 
 let browserRoot: HTMLElement | null = null;
 
@@ -33,6 +45,7 @@ afterEach(() => {
   vi.useRealTimers();
   browserRoot?.remove();
   browserRoot = null;
+  nextRouter.pathname = '/';
   window.history.replaceState(null, '', '/');
 });
 
@@ -305,3 +318,70 @@ describe('ReactRouterNavigationProvider', () => {
   });
 });
 
+describe('NextNavigationProvider', () => {
+  it.each([
+    ['pushState', '/lists?sort=date'],
+    ['replaceState', '/lists?sort=date'],
+    ['pushState', '/lists#details'],
+    ['replaceState', '/lists#details'],
+  ] as const)('holds focus for same-path %s to %s before a browser root reset', async (method, url) => {
+    const root = createBrowserRoot();
+    nextRouter.pathname = '/lists';
+    window.history.replaceState(null, '', '/lists');
+    const delegate = window.history[method];
+    window.history[method] = function(this: History, data: unknown, unused: string, href?: string | URL | null) {
+      const result = delegate.call(this, data, unused, href);
+      root.focus();
+      return result;
+    };
+    const view = render(<NextNavigationProvider><Screen /></NextNavigationProvider>, {container: root});
+    try {
+      const tile = screen.getByRole('button', {name: 'Brightness'});
+      act(() => tile.focus());
+      await act(async () => {
+        window.history[method]({...window.history.state}, '', url);
+        await Promise.resolve();
+      });
+      expect(window.location.pathname).toBe('/lists');
+      expect(document.activeElement).toBe(tile);
+    } finally {
+      view.unmount();
+      window.history[method] = delegate;
+    }
+  });
+
+  it('does not hold focus for same-URL history state bookkeeping', async () => {
+    const root = createBrowserRoot();
+    nextRouter.pathname = '/lists';
+    window.history.replaceState(null, '', '/lists');
+    render(<NextNavigationProvider><Screen /></NextNavigationProvider>, {container: root});
+
+    await focusTileThenSimulateBrowserRootFocus(root, () => {
+      act(() => window.history.replaceState({...window.history.state}, '', '/lists'));
+    });
+
+    expect(document.activeElement).toBe(root);
+  });
+
+  it('holds focus across App Router route changes', async () => {
+    const root = createBrowserRoot();
+    nextRouter.pathname = '/lists';
+    const view = render(
+      <NextNavigationProvider>
+        <Screen />
+      </NextNavigationProvider>,
+      { container: root },
+    );
+
+    const tile = await focusTileThenSimulateBrowserRootFocus(root, () => {
+      nextRouter.pathname = '/lists/groceries';
+      view.rerender(
+        <NextNavigationProvider>
+          <Screen />
+        </NextNavigationProvider>,
+      );
+    });
+
+    expect(document.activeElement).toBe(tile);
+  });
+});

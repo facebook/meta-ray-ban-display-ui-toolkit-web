@@ -102,7 +102,10 @@ export const publicApiSections = [
       },
       {
         source: '@wearables-ui-toolkit/foundation',
-        values: ['preserveFocusedInteractableDuringNavigation'],
+        values: [
+          'preserveFocusedInteractableDuringNavigation',
+          'useNavigationFocusRetention',
+        ],
       },
       {
         source: '@wearables-ui-toolkit/foundation',

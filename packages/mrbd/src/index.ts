@@ -64,7 +64,10 @@ export {
   useFocusNavigation,
 } from '@wearables-ui-toolkit/foundation';
 export type { FocusNavigationProviderProps } from '@wearables-ui-toolkit/foundation';
-export { preserveFocusedInteractableDuringNavigation } from '@wearables-ui-toolkit/foundation';
+export {
+  preserveFocusedInteractableDuringNavigation,
+  useNavigationFocusRetention,
+} from '@wearables-ui-toolkit/foundation';
 export {
   AppSwitchPageTransitionConfig,
   DefaultPageTransitionConfig,

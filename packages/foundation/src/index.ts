@@ -71,7 +71,10 @@ export {
   useFocusNavigation,
 } from './navigation/FocusNavigationProvider';
 export type { FocusNavigationProviderProps } from './navigation/FocusNavigationProvider';
-export { preserveFocusedInteractableDuringNavigation } from './navigation/FocusRetention';
+export {
+  preserveFocusedInteractableDuringNavigation,
+  useNavigationFocusRetention,
+} from './navigation/FocusRetention';
 export {
   AppSwitchPageTransitionConfig,
   DefaultPageTransitionConfig,

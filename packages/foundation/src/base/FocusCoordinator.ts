@@ -54,6 +54,7 @@ let initialFocusRequestId = 0;
 let lastBlurredInteractableElement: HTMLElement | null = null;
 let lastBlurredInteractableTimestamp = 0;
 let pendingFocusClearRafId: number | null = null;
+let focusRestoreQueued = false;
 /**
  * Ceiling on how far retargeting may push the current hold.
  *
@@ -369,37 +370,14 @@ export function shouldRetainFocusedInteractableOnBlur(
   }
 
   const targetElement = elementFromFocusTarget(nextTarget);
-  if (
-    isNavigationFocusRetentionActive() &&
-    isNavigationFocusTargetReachable(element) &&
-    (
-      navigationFocusRetentionElement == null ||
-      navigationFocusRetentionElement === element
-    ) &&
-    (
-      targetElement == null ||
-      isFocusAtApplicationBoundaryForTarget(element, targetElement)
-    )
-  ) {
+  if (getFocusRetentionTarget(targetElement) === element) {
     return true;
   }
-  if (targetElement == null) {
-    return element.closest(PAGE_TRANSITION_ELEMENT_SELECTOR) != null;
-  }
 
-  if (
-    targetElement === element ||
-    activeElementHasFocusOwner(targetElement) ||
-    targetElement.getAttribute('role') != null
-  ) {
-    return false;
-  }
-
-  return (
-    isPageTransitionActive() ||
-    targetElement.closest(PAGE_TRANSITION_ELEMENT_SELECTOR) != null ||
-    targetElement.querySelector(PAGE_TRANSITION_ELEMENT_SELECTOR) != null
-  );
+  // A missing relatedTarget is provisional. Defer the visual clear until
+  // reconciliation can distinguish a root reset from a deliberate focus exit.
+  return targetElement == null &&
+    element.closest(PAGE_TRANSITION_ELEMENT_SELECTOR) != null;
 }
 
 function attachFocusListeners(): void {
@@ -447,8 +425,16 @@ function isUnownedPageTransitionFocusElement(activeElement: HTMLElement): boolea
   );
 }
 
-function isFocusEffectivelyEmpty(): boolean {
-  const active = document.activeElement;
+function isDeliberateFocusTarget(active: Element | null): boolean {
+  return active instanceof HTMLElement &&
+    active !== document.body &&
+    active !== document.documentElement &&
+    (active.tabIndex >= 0 || active.getAttribute('role') != null);
+}
+
+function isFocusEffectivelyEmpty(
+  active: Element | null = document.activeElement,
+): boolean {
   if (active == null || active === document.body || active === document.documentElement) {
     return true;
   }
@@ -466,6 +452,10 @@ function isFocusEffectivelyEmpty(): boolean {
     isFocusAtApplicationBoundaryForTarget(navigationTarget, active)
   ) {
     return true;
+  }
+
+  if (isDeliberateFocusTarget(active)) {
+    return false;
   }
 
   if (isUnownedPageTransitionFocusElement(active)) {
@@ -533,100 +523,63 @@ function isFocusOnExitingPage(): boolean {
   return active.closest('[data-page-transition-phase="exiting"]') != null;
 }
 
-/**
- * Whether the active owner's focus loss is a transition artifact the
- * coordinator should undo, rather than a real focus exit.
- *
- * While a page transition is running — or the owner sits on the page being
- * torn down — any empty focus is an artifact of the swap and is recovered.
- *
- * Outside a transition the test is deliberately narrower. A same-document
- * navigation can park focus on a non-focusable ancestor such as the
- * application root, which is recoverable. Focus deliberately moved to
- * `document.body` (a background click, an explicit `blur()`) is a real exit:
- * recovering it would mean that content inside a `PageTransition` page — which
- * is most application content — could never release focus at all.
- */
-function shouldRetainTransitionFocusOwner(): boolean {
-  if (activeFocusOwner == null || !activeFocusOwner.element.isConnected) {
-    return false;
+function getFocusRetentionTarget(
+  activeElement: Element | null = document.activeElement,
+): HTMLElement | null {
+  const owner = activeFocusOwner;
+  const navigationTarget = navigationFocusRetentionElement ?? owner?.element;
+
+  // An explicit hold owns the target, including structural targets with no
+  // interactable owner. Transition recovery must not pick a different owner.
+  if (isNavigationFocusRetentionActive() && navigationTarget != null) {
+    return isNavigationFocusTargetReachable(navigationTarget) &&
+      (activeElement == null ||
+        isFocusAtApplicationBoundaryForTarget(navigationTarget, activeElement))
+      ? navigationTarget
+      : null;
+  }
+
+  if (
+    owner == null ||
+    !owner.element.isConnected ||
+    isDeliberateFocusTarget(activeElement)
+  ) {
+    return null;
   }
 
   if (
     isPageTransitionActive() ||
-    activeFocusOwner.element.closest(EXITING_PAGE_SELECTOR) != null
+    owner.element.closest(EXITING_PAGE_SELECTOR) != null
   ) {
-    return isFocusEffectivelyEmpty();
+    return isFocusEffectivelyEmpty(activeElement) ? owner.element : null;
   }
 
-  return (
-    activeFocusOwner.element.closest(PAGE_TRANSITION_ELEMENT_SELECTOR) != null &&
-    isFocusParkedOnContainerAncestor(activeFocusOwner.element)
-  );
+  // An idle page may recover focus parked on an ancestor, but a deliberate
+  // blur to the body must remain a real focus exit.
+  return owner.element.closest(PAGE_TRANSITION_ELEMENT_SELECTOR) != null &&
+    isFocusParkedOnContainerAncestor(owner.element, activeElement)
+    ? owner.element
+    : null;
 }
 
-function navigationFocusRetentionTargetsOwner(owner: FocusOwner): boolean {
-  return (
-    navigationFocusRetentionElement == null ||
-    navigationFocusRetentionElement === owner.element
-  );
-}
-
-function shouldRetainNavigationFocusOwner(): boolean {
-  return (
-    isNavigationFocusRetentionActive() &&
-    activeFocusOwner != null &&
-    isNavigationFocusTargetReachable(activeFocusOwner.element) &&
-    navigationFocusRetentionTargetsOwner(activeFocusOwner) &&
-    isFocusAtApplicationBoundaryForTarget(activeFocusOwner.element)
-  );
-}
-
-function restoreFocusToRetainedOwner(
-  owner: FocusOwner,
-  retainForNavigation: boolean,
-  retainForTransition: boolean,
-): void {
-  queueMicrotask(() => {
-    const canRestoreForNavigation =
-      retainForNavigation && shouldRetainNavigationFocusOwner();
-    const canRestoreForTransition =
-      retainForTransition && shouldRetainTransitionFocusOwner();
-    if (
-      activeFocusOwner !== owner ||
-      document.activeElement === owner.element ||
-      (!canRestoreForNavigation && !canRestoreForTransition)
-    ) {
-      return;
-    }
-
-    owner.element.focus({ preventScroll: true });
-  });
-}
-
-function restoreFocusToRetargetedNavigationElement(): void {
-  const target = navigationFocusRetentionElement;
-  if (
-    target == null ||
-    target === activeFocusOwner?.element ||
-    !isNavigationFocusRetentionActive() ||
-    !isFocusAtApplicationBoundaryForTarget(target)
-  ) {
-    return;
+function restoreRetainedFocus(): boolean {
+  if (getFocusRetentionTarget() == null) {
+    return false;
   }
 
-  queueMicrotask(() => {
-    if (
-      navigationFocusRetentionElement !== target ||
-      !isNavigationFocusRetentionActive() ||
-      document.activeElement === target ||
-      !isFocusAtApplicationBoundaryForTarget(target)
-    ) {
-      return;
-    }
-
-    target.focus({ preventScroll: true });
-  });
+  if (!focusRestoreQueued) {
+    focusRestoreQueued = true;
+    queueMicrotask(() => {
+      focusRestoreQueued = false;
+      // Re-resolve after page restoration or a user focus move: a queued
+      // recovery must never revive a superseded target.
+      const target = getFocusRetentionTarget();
+      if (target != null && document.activeElement !== target) {
+        target.focus({ preventScroll: true });
+      }
+    });
+  }
+  return true;
 }
 
 function clearFocusedOwner(owner: FocusOwner): void {
@@ -648,14 +601,7 @@ function scheduleFocusedOwnerClear(owner: FocusOwner): void {
       return;
     }
 
-    const retainForNavigation = shouldRetainNavigationFocusOwner();
-    const retainForTransition = shouldRetainTransitionFocusOwner();
-    if (retainForNavigation || retainForTransition) {
-      restoreFocusToRetainedOwner(
-        owner,
-        retainForNavigation,
-        retainForTransition,
-      );
+    if (restoreRetainedFocus()) {
       scheduleInitialFocusIfNeeded();
       return;
     }
@@ -812,7 +758,6 @@ function rectForHandoff(element: HTMLElement): PartialFocusHandoffRect {
 
 function reconcileFocusedInteractable(): void {
   const activeElement = document.activeElement;
-  restoreFocusToRetargetedNavigationElement();
   const activeOwner =
     activeElement instanceof HTMLElement ? focusOwners.get(activeElement) : undefined;
 
@@ -824,19 +769,12 @@ function reconcileFocusedInteractable(): void {
     return;
   }
 
-  if (activeFocusOwner != null && activeFocusOwner.element !== activeElement) {
-    const retainForNavigation = shouldRetainNavigationFocusOwner();
-    const retainForTransition = shouldRetainTransitionFocusOwner();
-    if (retainForNavigation || retainForTransition) {
-      restoreFocusToRetainedOwner(
-        activeFocusOwner,
-        retainForNavigation,
-        retainForTransition,
-      );
-      scheduleInitialFocusIfNeeded();
-      return;
-    }
+  if (restoreRetainedFocus()) {
+    scheduleInitialFocusIfNeeded();
+    return;
+  }
 
+  if (activeFocusOwner != null && activeFocusOwner.element !== activeElement) {
     if (isFocusEffectivelyEmpty()) {
       scheduleFocusedOwnerClear(activeFocusOwner);
       return;

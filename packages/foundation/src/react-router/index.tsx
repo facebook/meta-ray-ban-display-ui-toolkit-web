@@ -31,6 +31,7 @@ import {
   type To,
 } from 'react-router-dom';
 import { useBackNavigation } from '../navigation/BackNavigation';
+import { useNavigationFocusRetention } from '../navigation/FocusRetention';
 import { useComposedRef } from '../utils/useComposedRef';
 import { PageTransition } from '../navigation/PageTransition';
 import type {
@@ -305,6 +306,7 @@ export function ReactRouterNavigationProvider({
   }, [fallbackTo, getHistoryIndex, location, navigate]);
 
   useBackNavigation(navigateBack);
+  useNavigationFocusRetention(location.key);
 
   const locationKey = getDefaultTransitionKey(location);
   useEffect(() => {

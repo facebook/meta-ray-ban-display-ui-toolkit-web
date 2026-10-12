@@ -310,6 +310,9 @@ export function dispatchPartialFocusHandoff(
 
 export function claimFocusedInteractable(nextOwner: FocusOwner): void {
   cancelPendingFocusClear();
+  if (hostFocusRetention != null && hostFocusRetention.element !== nextOwner.element) {
+    clearHostFocusRetention();
+  }
 
   if (
     isNavigationFocusRetentionWindowActive() &&
@@ -380,9 +383,176 @@ export function shouldRetainFocusedInteractableOnBlur(
     element.closest(PAGE_TRANSITION_ELEMENT_SELECTOR) != null;
 }
 
+const HOST_FOCUS_RETENTION_MS = 120;
+interface HostFocusRetentionPolicy {
+  getRoot: () => HTMLElement | null;
+  preserve: boolean;
+}
+const hostFocusRetentionPolicies = new Set<HostFocusRetentionPolicy>();
+let hostFocusRetention: {
+  element: HTMLElement;
+  policy: HostFocusRetentionPolicy | null;
+  url: string;
+  page: Element | null;
+  pageKey: string | null;
+  resumed: boolean;
+} | null = null;
+let hostFocusRetentionTimeoutId: number | null = null;
+
+function clearHostFocusRetention(): void {
+  if (hostFocusRetentionTimeoutId != null) {
+    window.clearTimeout(hostFocusRetentionTimeoutId);
+    hostFocusRetentionTimeoutId = null;
+  }
+  hostFocusRetention = null;
+}
+
+function getHostFocusRetentionPolicy(element: Element): HostFocusRetentionPolicy | null {
+  let owner: HTMLElement | null = null;
+  let policy: HostFocusRetentionPolicy | null = null;
+  for (const candidate of hostFocusRetentionPolicies) {
+    const root = candidate.getRoot();
+    if (root != null && root.contains(element) && (owner == null || owner.contains(root))) {
+      owner = root;
+      policy = candidate;
+    }
+  }
+  return policy;
+}
+
+function invalidateHostFocusRetentionPolicy(): void {
+  if (
+    hostFocusRetention != null &&
+    getHostFocusRetentionPolicy(hostFocusRetention.element) !== hostFocusRetention.policy
+  ) {
+    clearHostFocusRetention();
+  }
+}
+
+export function registerHostFocusRetentionPolicy(
+  getRoot: () => HTMLElement | null,
+  preserve: boolean,
+): () => void {
+  const policy = { getRoot, preserve };
+  hostFocusRetentionPolicies.add(policy);
+  invalidateHostFocusRetentionPolicy();
+  return () => {
+    if (hostFocusRetentionPolicies.delete(policy)) {
+      invalidateHostFocusRetentionPolicy();
+    }
+  };
+}
+
+function getHostFocusRetentionElement(): HTMLElement | null {
+  const retention = hostFocusRetention;
+  if (retention == null) {
+    return null;
+  }
+  if (
+    getHostFocusRetentionPolicy(retention.element) !== retention.policy ||
+    (document.activeElement instanceof HTMLElement &&
+      !isFocusAtApplicationBoundaryForTarget(retention.element) &&
+      getHostFocusRetentionPolicy(document.activeElement) !== retention.policy) ||
+    !isNavigationFocusTargetReachable(retention.element) ||
+    retention.element.closest(EXITING_PAGE_SELECTOR) != null ||
+    window.location.href !== retention.url ||
+    retention.element.closest(PAGE_TRANSITION_ELEMENT_SELECTOR) !== retention.page ||
+    (retention.page?.getAttribute('data-page-transition-key') ?? null) !== retention.pageKey
+  ) {
+    clearHostFocusRetention();
+    return null;
+  }
+  return retention.element;
+}
+
+function rememberHostFocus(event: FocusEvent): void {
+  if (event.target !== event.currentTarget) {
+    return;
+  }
+  clearHostFocusRetention();
+  const element = document.activeElement;
+  if (
+    !(element instanceof HTMLElement) ||
+    !isDeliberateFocusTarget(element) ||
+    !isNavigationFocusTargetReachable(element) ||
+    (!focusOwners.has(element) &&
+      !Array.from(autoFocusFirstRoots.keys()).some(root =>
+        root !== element && root.contains(element)))
+  ) {
+    return;
+  }
+  const policy = getHostFocusRetentionPolicy(element);
+  if (policy?.preserve === false) {
+    return;
+  }
+  const page = element.closest(PAGE_TRANSITION_ELEMENT_SELECTOR);
+  hostFocusRetention = {
+    element,
+    policy,
+    url: window.location.href,
+    page,
+    pageKey: page?.getAttribute('data-page-transition-key') ?? null,
+    resumed: false,
+  };
+  cancelPendingFocusClear();
+}
+
+function retainHostFocus(event: FocusEvent): void {
+  const element = getHostFocusRetentionElement();
+  if (element == null || hostFocusRetention == null) {
+    return;
+  }
+  if (event.target === event.currentTarget) {
+    if (hostFocusRetention.resumed) {
+      return;
+    }
+    if (
+      document.activeElement !== element &&
+      document.activeElement !== findTopLeftFocusOwner(hostFocusRetention.policy?.getRoot() ?? getActiveAutoFocusRoot())?.element &&
+      !isFocusAtApplicationBoundaryForTarget(element)
+    ) {
+      clearHostFocusRetention();
+      return;
+    }
+    hostFocusRetention.resumed = true;
+    hostFocusRetentionTimeoutId = window.setTimeout(
+      clearHostFocusRetention,
+      HOST_FOCUS_RETENTION_MS,
+    );
+    if (document.activeElement !== element) {
+      element.focus({ preventScroll: true });
+    }
+    return;
+  }
+  if (!hostFocusRetention.resumed || event.target === element) {
+    return;
+  }
+
+  // A host's initial-focus reset has no previous DOM target. Direct page
+  // focus moves keep their relatedTarget and must supersede this recovery.
+  if (
+    event.relatedTarget != null ||
+    event.target !== findTopLeftFocusOwner(hostFocusRetention.policy?.getRoot() ?? getActiveAutoFocusRoot())?.element
+  ) {
+    clearHostFocusRetention();
+    return;
+  }
+  element.focus({ preventScroll: true });
+  if (document.activeElement !== event.target) {
+    event.stopImmediatePropagation();
+  } else {
+    clearHostFocusRetention();
+  }
+}
+
 function attachFocusListeners(): void {
   if (focusListenersAttached) return;
   focusListenersAttached = true;
+  window.addEventListener('blur', rememberHostFocus, true);
+  window.addEventListener('focus', retainHostFocus, true);
+  window.addEventListener('focusin', retainHostFocus, true);
+  document.addEventListener('keydown', clearHostFocusRetention, true);
+  document.addEventListener('pointerdown', clearHostFocusRetention, true);
   document.addEventListener('focusin', reconcileFocusedInteractable);
   document.addEventListener('focusout', reconcileFocusedInteractable);
 }
@@ -390,6 +560,12 @@ function attachFocusListeners(): void {
 function detachFocusListeners(): void {
   if (!focusListenersAttached) return;
   focusListenersAttached = false;
+  clearHostFocusRetention();
+  window.removeEventListener('blur', rememberHostFocus, true);
+  window.removeEventListener('focus', retainHostFocus, true);
+  window.removeEventListener('focusin', retainHostFocus, true);
+  document.removeEventListener('keydown', clearHostFocusRetention, true);
+  document.removeEventListener('pointerdown', clearHostFocusRetention, true);
   document.removeEventListener('focusin', reconcileFocusedInteractable);
   document.removeEventListener('focusout', reconcileFocusedInteractable);
 }
@@ -485,8 +661,9 @@ function getActiveAutoFocusRoot(): HTMLElement | null {
   return Array.from(autoFocusFirstRoots.keys()).find(root => root.isConnected) ?? null;
 }
 
-function findTopLeftFocusOwner(): FocusOwner | null {
-  const root = getActiveAutoFocusRoot();
+function findTopLeftFocusOwner(
+  root: HTMLElement | null = getActiveAutoFocusRoot(),
+): FocusOwner | null {
   if (root == null) {
     return null;
   }
@@ -664,10 +841,21 @@ function scheduleInitialFocusIfNeeded(): void {
       claimFocusedInteractable(topLeft);
       topLeft.applyFocus(true);
     });
+    if (
+      requestId !== initialFocusRequestId ||
+      !topLeft.element.isConnected ||
+      focusOwners.get(topLeft.element) !== topLeft
+    ) {
+      return false;
+    }
+    if (!isFocusEffectivelyEmpty() && !isFocusOnExitingPage()) {
+      reconcileFocusedInteractable();
+      return requestId === initialFocusRequestId;
+    }
     topLeft.element.focus({ preventScroll: true });
     // The focusin listener reconciles browser focus after the visual state has
     // already been applied, so the first painted focused frame is not default.
-    return true;
+    return requestId === initialFocusRequestId;
   };
 
   queueMicrotask(() => {
@@ -691,6 +879,9 @@ export function registerFocusOwner(owner: FocusOwner): void {
 }
 
 export function unregisterFocusOwner(element: HTMLElement): void {
+  if (hostFocusRetention?.element === element) {
+    clearHostFocusRetention();
+  }
   const wasActive = activeFocusOwner?.element === element;
   focusOwners.delete(element);
   releaseFocusedInteractable(element);

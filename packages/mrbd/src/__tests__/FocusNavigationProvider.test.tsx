@@ -6,8 +6,9 @@
  *
  */
 
-import { useRef } from 'react';
+import { type ComponentProps, useLayoutEffect, useRef, useState } from 'react';
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -35,6 +36,7 @@ import { ScrollView } from '@wearables-ui-toolkit/foundation/components/ScrollVi
 import type { ContainerMaterial } from '@wearables-ui-toolkit/foundation';
 import { MaterialLibrary } from '@wearables-ui-toolkit/foundation/material/MaterialLibrary';
 import { FocusNavigationProvider } from '@wearables-ui-toolkit/foundation/navigation/FocusNavigationProvider';
+import { preserveFocusedInteractableDuringNavigation } from '@wearables-ui-toolkit/foundation/base/FocusCoordinator';
 
 function rect(
   left: number,
@@ -331,7 +333,574 @@ function PointerEventsNoneAncestorHarness() {
   );
 }
 
+function InitialFocusRedirectHarness({
+  fromLayoutEffect,
+  onPrepare,
+  onInitialDomFocus,
+  preserveFocusOnHostReturn,
+}: {
+  fromLayoutEffect: boolean;
+  onPrepare: () => void;
+  onInitialDomFocus: () => void;
+  preserveFocusOnHostReturn?: boolean;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [redirectRequested, setRedirectRequested] = useState(false);
+
+  useLayoutEffect(() => {
+    if (redirectRequested) inputRef.current?.focus();
+  }, [redirectRequested]);
+
+  return (
+    <div ref={containerRef}>
+      <FocusNavigationProvider containerRef={containerRef} autoFocusFirst preserveFocusOnHostReturn={preserveFocusOnHostReturn}>
+        <InteractableBase
+          as="button"
+          onFocus={onInitialDomFocus}
+          onStateChange={(_, next) => {
+            if (next.state !== VisualState.FOCUSED) return;
+            onPrepare();
+            if (fromLayoutEffect) setRedirectRequested(true);
+            else inputRef.current?.focus();
+          }}
+        >
+          Initial action
+        </InteractableBase>
+        <input ref={inputRef} aria-label="Requested input" />
+      </FocusNavigationProvider>
+    </div>
+  );
+}
+
+function ReplacedInitialFocusHarness({ onPrepare }: { onPrepare: () => void }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [replaced, setReplaced] = useState(false);
+
+  return (
+    <div ref={containerRef}>
+      <FocusNavigationProvider containerRef={containerRef} autoFocusFirst>
+        <InteractableBase
+          key={replaced ? 'replacement' : 'original'}
+          as="button"
+          data-testid={replaced ? 'replacement-owner' : 'original-owner'}
+          onStateChange={replaced ? undefined : (_, next) => {
+            if (next.state !== VisualState.FOCUSED) return;
+            onPrepare();
+            setReplaced(true);
+          }}
+        >
+          {replaced ? 'Replacement action' : 'Original action'}
+        </InteractableBase>
+      </FocusNavigationProvider>
+    </div>
+  );
+}
+
+function HostResumeProviderLifecycleHarness({ mounted }: { mounted: boolean }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  return (
+    <div ref={containerRef}>
+      {mounted && <FocusNavigationProvider containerRef={containerRef} autoFocusFirst>{null}</FocusNavigationProvider>}
+      <InteractableBase as="button">Initial action</InteractableBase>
+      <InteractableBase as="button">Selected action</InteractableBase>
+    </div>
+  );
+}
+
+function HostResumeScopesHarness({
+  nested,
+  outerPreserve,
+  innerPreserve,
+}: {
+  nested: boolean;
+  outerPreserve: boolean;
+  innerPreserve: boolean;
+}) {
+  const inner = (
+    <FocusNavigationProvider preserveFocusOnHostReturn={innerPreserve} autoFocusFirst>
+      <InteractableBase as="button">Inner initial action</InteractableBase>
+      <InteractableBase as="button">Inner selected action</InteractableBase>
+    </FocusNavigationProvider>
+  );
+  return (
+    <>
+      <FocusNavigationProvider preserveFocusOnHostReturn={outerPreserve} autoFocusFirst>
+        <InteractableBase as="button">Outer initial action</InteractableBase>
+        <InteractableBase as="button">Outer selected action</InteractableBase>
+        {nested && inner}
+      </FocusNavigationProvider>
+      {!nested && inner}
+    </>
+  );
+}
+
+function HostResumeFocusHarness({
+  pageKey,
+  showSelected = true,
+  onInitialFocus,
+  preserveFocusOnHostReturn,
+  useExternalContainer = true,
+  autoFocusFirst = true,
+  onCommit,
+}: {
+  pageKey?: string;
+  showSelected?: boolean;
+  onInitialFocus?: () => void;
+  preserveFocusOnHostReturn?: boolean;
+  useExternalContainer?: boolean;
+  autoFocusFirst?: boolean;
+  onCommit?: () => void;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => { onCommit?.(); }, [onCommit]);
+  return (
+    <div ref={containerRef} data-page-transition-key={pageKey}>
+      <FocusNavigationProvider
+        containerRef={useExternalContainer ? containerRef : undefined}
+        autoFocusFirst={autoFocusFirst}
+        preserveFocusOnHostReturn={preserveFocusOnHostReturn}
+      >
+        <InteractableBase as="button" onFocus={onInitialFocus}>Initial action</InteractableBase>
+        {showSelected && <InteractableBase as="button">Selected action</InteractableBase>}
+        <InteractableBase as="button">Next action</InteractableBase>
+        <input aria-label="Requested input" />
+      </FocusNavigationProvider>
+    </div>
+  );
+}
+
+describe('host Resume focus retention', () => {
+  async function setup(
+    pageKey?: string,
+    onInitialFocus?: () => void,
+    props: Partial<ComponentProps<typeof HostResumeFocusHarness>> = {},
+  ) {
+    vi.useFakeTimers();
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(
+      function (this: HTMLElement) {
+        const top = this.tagName !== 'BUTTON' ? 0
+          : this.textContent?.toLowerCase().includes('selected action') ? 60
+          : this.textContent === 'Next action' ? 120 : 0;
+        return rect(0, top, 200, this.tagName === 'BUTTON' ? 40 : 240);
+      },
+    );
+    const view = render(<HostResumeFocusHarness pageKey={pageKey} onInitialFocus={onInitialFocus} {...props} />);
+    await act(async () => { await Promise.resolve(); });
+    const initial = screen.getByRole('button', { name: 'Initial action' });
+    const selected = screen.getByRole('button', { name: 'Selected action' });
+    act(() => { selected.focus(); });
+    return { view, initial, selected };
+  }
+
+  afterEach(() => { vi.useRealTimers(); });
+
+  it.each([undefined, 'root'])('preserves selected focus across repeated native entry resets (page %s)', async pageKey => {
+    const onInitialFocus = vi.fn();
+    const { view, initial, selected } = await setup(pageKey, onInitialFocus);
+    onInitialFocus.mockClear();
+    try {
+      act(() => { fireEvent.blur(window); });
+      expect(selected).toHaveFocus();
+      act(() => {
+        fireEvent.focus(window);
+        selected.blur();
+        initial.focus();
+        selected.blur();
+        initial.focus();
+      });
+      expect(selected).toHaveFocus();
+      expect(onInitialFocus).not.toHaveBeenCalled();
+      act(() => { vi.advanceTimersByTime(1000); });
+      expect(selected).toHaveFocus();
+    } finally { view.unmount(); }
+  });
+
+  function setNativeFocusWhileInactive(element: HTMLElement): void {
+    const suppressPageEvent = (event: Event) => event.stopImmediatePropagation();
+    const eventTypes = ['blur', 'focusout', 'focus', 'focusin'];
+    for (const type of eventTypes) window.addEventListener(type, suppressPageEvent, true);
+    try { element.focus(); }
+    finally {
+      for (const type of eventTypes) window.removeEventListener(type, suppressPageEvent, true);
+    }
+  }
+
+  it.each([
+    [undefined, true, true], [true, true, true], [false, true, true],
+    [undefined, false, true], [true, false, true], [false, false, true],
+    [undefined, true, false], [true, true, false], [false, true, false],
+    [undefined, false, false], [true, false, false], [false, false, false],
+  ] as const)('applies host-return policy %s with external container %s and pre-return reset %s', async (preserve, external, resetBeforeReturn) => {
+    const { view, initial, selected } = await setup('root', undefined, {
+      preserveFocusOnHostReturn: preserve,
+      useExternalContainer: external,
+    });
+    try {
+      act(() => {
+        fireEvent.blur(window);
+        if (resetBeforeReturn) setNativeFocusWhileInactive(initial);
+        fireEvent.focus(window);
+        if (!resetBeforeReturn) {
+          selected.blur();
+          initial.focus();
+        }
+      });
+      expect(preserve === false ? initial : selected).toHaveFocus();
+      act(() => { vi.advanceTimersByTime(1000); });
+      expect(preserve === false ? initial : selected).toHaveFocus();
+    } finally { view.unmount(); }
+  });
+
+  it('keeps initial focus and directional navigation enabled when host recovery is disabled', async () => {
+    const onInitialFocus = vi.fn();
+    const { view, selected } = await setup('root', onInitialFocus, {
+      preserveFocusOnHostReturn: false,
+    });
+    try {
+      expect(onInitialFocus).toHaveBeenCalledOnce();
+      fireEvent.keyDown(selected, { key: 'ArrowDown' });
+      expect(screen.getByRole('button', { name: 'Next action' })).toHaveFocus();
+    } finally { view.unmount(); }
+  });
+
+  it('keeps route focus retention enabled when host recovery is disabled', async () => {
+    const { view, selected } = await setup('root', undefined, {
+      preserveFocusOnHostReturn: false,
+    });
+    const release = preserveFocusedInteractableDuringNavigation(selected);
+    try {
+      await act(async () => { selected.blur(); await Promise.resolve(); });
+      act(() => { vi.advanceTimersByTime(32); });
+      expect(selected).toHaveFocus();
+    } finally { release(); view.unmount(); }
+  });
+
+  it.each([false, true])('controls host recovery independently of initial autofocus (preserve %s)', async preserve => {
+    const onInitialFocus = vi.fn();
+    const { view, initial, selected } = await setup('root', onInitialFocus, {
+      preserveFocusOnHostReturn: preserve,
+      autoFocusFirst: false,
+    });
+    try {
+      expect(onInitialFocus).not.toHaveBeenCalled();
+      act(() => {
+        fireEvent.blur(window);
+        setNativeFocusWhileInactive(initial);
+        fireEvent.focus(window);
+      });
+      expect(preserve ? selected : initial).toHaveFocus();
+    } finally { view.unmount(); }
+  });
+
+  it.each([false, true])('retires pending recovery when disabled after Resume %s, before ancestor layout effects run', async resumed => {
+    const { view, initial, selected } = await setup('root');
+    try {
+      await act(async () => {
+        fireEvent.blur(window);
+        if (resumed) fireEvent.focus(window);
+        else setNativeFocusWhileInactive(initial);
+      });
+      await act(async () => {
+        view.rerender(
+          <HostResumeFocusHarness
+            pageKey="root"
+            preserveFocusOnHostReturn={false}
+            onCommit={() => {
+              if (resumed) {
+                selected.blur();
+                initial.focus();
+              } else {
+                fireEvent.focus(window);
+              }
+              expect(initial).toHaveFocus();
+            }}
+          />,
+        );
+      });
+      expect(initial).toHaveFocus();
+      await act(async () => {
+        view.rerender(<HostResumeFocusHarness pageKey="root" preserveFocusOnHostReturn />);
+      });
+      await act(async () => { fireEvent.focus(window); vi.advanceTimersByTime(1000); });
+      expect(initial).toHaveFocus();
+      await act(async () => {
+        selected.focus();
+        fireEvent.blur(window);
+        setNativeFocusWhileInactive(initial);
+        fireEvent.focus(window);
+      });
+      expect(selected).toHaveFocus();
+    } finally { view.unmount(); }
+  });
+
+  it('does not invent a saved selection when enabled during a host round trip', async () => {
+    const { view, initial, selected } = await setup('root', undefined, {
+      preserveFocusOnHostReturn: false,
+    });
+    try {
+      act(() => { fireEvent.blur(window); setNativeFocusWhileInactive(initial); });
+      view.rerender(<HostResumeFocusHarness pageKey="root" preserveFocusOnHostReturn />);
+      act(() => { fireEvent.focus(window); });
+      expect(initial).toHaveFocus();
+      act(() => {
+        selected.focus();
+        fireEvent.blur(window);
+        setNativeFocusWhileInactive(initial);
+        fireEvent.focus(window);
+      });
+      expect(selected).toHaveFocus();
+    } finally { view.unmount(); }
+  });
+
+  it('retires a snapshot when its provider unmounts without removing the selected control', async () => {
+    const { view } = await setup();
+    view.rerender(<HostResumeProviderLifecycleHarness mounted />);
+    await act(async () => { await Promise.resolve(); });
+    const initial = screen.getByRole('button', { name: 'Initial action' });
+    const selected = screen.getByRole('button', { name: 'Selected action' });
+    try {
+      act(() => { selected.focus(); fireEvent.blur(window); });
+      view.rerender(<HostResumeProviderLifecycleHarness mounted={false} />);
+      expect(selected.isConnected).toBe(true);
+      act(() => { setNativeFocusWhileInactive(initial); fireEvent.focus(window); });
+      expect(initial).toHaveFocus();
+      view.rerender(<HostResumeProviderLifecycleHarness mounted />);
+      act(() => { fireEvent.focus(window); });
+      expect(initial).toHaveFocus();
+    } finally { view.unmount(); }
+  });
+
+  it.each([
+    [false, false, 'Outer'], [false, false, 'Inner'],
+    [false, true, 'Outer'], [false, true, 'Inner'],
+    [true, false, 'Outer'], [true, false, 'Inner'],
+    [true, true, 'Outer'], [true, true, 'Inner'],
+  ] as const)('scopes recovery with nested %s, outer preservation %s and selection in %s', async (nested, outerPreserve, scope) => {
+    const { view } = await setup();
+    view.rerender(<HostResumeScopesHarness nested={nested} outerPreserve={outerPreserve} innerPreserve={!outerPreserve} />);
+    await act(async () => { await Promise.resolve(); });
+    const initial = screen.getByRole('button', { name: `${scope} initial action` });
+    const selected = screen.getByRole('button', { name: `${scope} selected action` });
+    const preserve = scope === 'Outer' ? outerPreserve : !outerPreserve;
+    try {
+      act(() => {
+        selected.focus();
+        fireEvent.blur(window);
+        setNativeFocusWhileInactive(initial);
+        fireEvent.focus(window);
+      });
+      expect(preserve ? selected : initial).toHaveFocus();
+    } finally { view.unmount(); }
+  });
+
+  it.each([false, true])('keeps a pending inner selection when an unrelated outer policy changes (nested %s)', async nested => {
+    const { view } = await setup();
+    view.rerender(<HostResumeScopesHarness nested={nested} outerPreserve innerPreserve />);
+    await act(async () => { await Promise.resolve(); });
+    const initial = screen.getByRole('button', { name: 'Inner initial action' });
+    const selected = screen.getByRole('button', { name: 'Inner selected action' });
+    try {
+      act(() => { selected.focus(); fireEvent.blur(window); });
+      view.rerender(<HostResumeScopesHarness nested={nested} outerPreserve={false} innerPreserve />);
+      act(() => { setNativeFocusWhileInactive(initial); fireEvent.focus(window); });
+      expect(selected).toHaveFocus();
+    } finally { view.unmount(); }
+  });
+
+  it('leaves a control selected in another provider alone during host return', async () => {
+    const { view } = await setup();
+    view.rerender(<HostResumeScopesHarness nested={false} outerPreserve innerPreserve={false} />);
+    await act(async () => { await Promise.resolve(); });
+    const selected = screen.getByRole('button', { name: 'Outer selected action' });
+    const requested = screen.getByRole('button', { name: 'Inner initial action' });
+    try {
+      act(() => {
+        selected.focus();
+        fireEvent.blur(window);
+        setNativeFocusWhileInactive(requested);
+        fireEvent.focus(window);
+      });
+      expect(requested).toHaveFocus();
+    } finally { view.unmount(); }
+  });
+
+  it.each([undefined, 'root'])('restores a native entry reset that precedes window focus (page %s)', async pageKey => {
+    const onInitialFocus = vi.fn();
+    const { view, initial, selected } = await setup(pageKey, onInitialFocus);
+    onInitialFocus.mockClear();
+    try {
+      act(() => { fireEvent.blur(window); });
+      act(() => { setNativeFocusWhileInactive(initial); });
+      expect(initial).toHaveFocus();
+      act(() => { fireEvent.focus(window); });
+      expect(selected).toHaveFocus();
+      expect(onInitialFocus).not.toHaveBeenCalled();
+      act(() => { vi.advanceTimersByTime(1000); });
+      expect(selected).toHaveFocus();
+    } finally { view.unmount(); }
+  });
+
+  it.each(['Next action', 'Requested input'])('keeps a non-entry target selected while outside the page: %s', async name => {
+    const { view } = await setup('root');
+    const requested = screen.getByRole(name === 'Requested input' ? 'textbox' : 'button', { name });
+    try {
+      act(() => { fireEvent.blur(window); });
+      act(() => { setNativeFocusWhileInactive(requested); });
+      act(() => { fireEvent.focus(window); vi.advanceTimersByTime(1000); });
+      expect(requested).toHaveFocus();
+    } finally { view.unmount(); }
+  });
+
+  it.each(['Initial action', 'Next action', 'Requested input'])('respects an explicit focus request for %s after Resume', async name => {
+    const { view } = await setup('root');
+    const requested = screen.getByRole(name === 'Requested input' ? 'textbox' : 'button', { name });
+    try {
+      act(() => {
+        fireEvent.blur(window);
+        fireEvent.focus(window);
+        requested.focus();
+      });
+      act(() => { vi.advanceTimersByTime(1000); });
+      expect(requested).toHaveFocus();
+    } finally { view.unmount(); }
+  });
+
+  it('does not override an ordinary input selected after an empty-focus interval', async () => {
+    const { view, selected } = await setup('root');
+    const input = screen.getByRole('textbox', { name: 'Requested input' });
+    try {
+      act(() => {
+        fireEvent.blur(window);
+        fireEvent.focus(window);
+        selected.blur();
+        input.focus();
+      });
+      await act(async () => { await Promise.resolve(); });
+      act(() => { vi.advanceTimersByTime(1000); });
+      expect(input).toHaveFocus();
+    } finally { view.unmount(); }
+  });
+
+  it.each(['keydown', 'pointerdown'])('retires Resume recovery when %s expresses new input', async type => {
+    const { view, initial, selected } = await setup('root');
+    try {
+      act(() => {
+        fireEvent.blur(window);
+        fireEvent.focus(window);
+        if (type === 'keydown') fireEvent.keyDown(selected, { key: 'a' });
+        else fireEvent.pointerDown(selected, { button: 0 });
+        selected.blur();
+        initial.focus();
+      });
+      expect(initial).toHaveFocus();
+    } finally { view.unmount(); }
+  });
+
+  it('expires Resume recovery rather than retaining focus indefinitely', async () => {
+    const { view, initial, selected } = await setup('root');
+    try {
+      act(() => {
+        fireEvent.blur(window);
+        fireEvent.focus(window);
+        vi.advanceTimersByTime(121);
+        selected.blur();
+        initial.focus();
+      });
+      expect(initial).toHaveFocus();
+    } finally { view.unmount(); }
+  });
+
+  it('leaves deliberate idle body blur outside a host round trip alone', async () => {
+    const { view, selected } = await setup('root');
+    try {
+      act(() => { selected.blur(); });
+      await act(async () => { await Promise.resolve(); });
+      act(() => { vi.advanceTimersByTime(1000); });
+      expect(document.body).toHaveFocus();
+    } finally { view.unmount(); }
+  });
+
+  it.each(['removed', 'changed page'])('discards the saved selection when it is %s while the host owns input', async change => {
+    const { view, initial, selected } = await setup('root');
+    try {
+      act(() => { fireEvent.blur(window); });
+      view.rerender(<HostResumeFocusHarness pageKey={change === 'changed page' ? 'destination' : 'root'} showSelected={change !== 'removed'} />);
+      act(() => {
+        fireEvent.focus(window);
+        if (selected.isConnected) selected.blur();
+        initial.focus();
+      });
+      expect(initial).toHaveFocus();
+      act(() => { vi.advanceTimersByTime(1000); });
+      expect(initial).toHaveFocus();
+    } finally { view.unmount(); }
+  });
+});
+
 describe('FocusNavigationProvider', () => {
+  it.each([
+    ['preparation callback', false, undefined],
+    ['preparation layout effect', true, undefined],
+    ['preparation callback', false, false],
+    ['preparation layout effect', true, false],
+  ] as const)('respects focus selected by an initial-focus %s (layout %s, preserve %s)', async (_, fromLayoutEffect, preserveFocusOnHostReturn) => {
+    vi.useFakeTimers();
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(
+      function () { return rect(0, 0, 200, 200); },
+    );
+    const onPrepare = vi.fn();
+    const onInitialDomFocus = vi.fn();
+    const view = render(
+      <InitialFocusRedirectHarness
+        fromLayoutEffect={fromLayoutEffect}
+        onPrepare={onPrepare}
+        onInitialDomFocus={onInitialDomFocus}
+        preserveFocusOnHostReturn={preserveFocusOnHostReturn}
+      />,
+    );
+
+    try {
+      await act(async () => { await Promise.resolve(); });
+      expect(onPrepare).toHaveBeenCalled();
+      expect(screen.getByRole('textbox', { name: 'Requested input' })).toHaveFocus();
+      expect(onInitialDomFocus).not.toHaveBeenCalled();
+      act(() => { vi.advanceTimersByTime(32); });
+      expect(screen.getByRole('textbox', { name: 'Requested input' })).toHaveFocus();
+    } finally {
+      view.unmount();
+      vi.useRealTimers();
+    }
+  });
+
+  it('keeps the replacement owner fallback after initial-focus preparation unmounts its target', async () => {
+    vi.useFakeTimers();
+    let replacementReady = false;
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(
+      function (this: HTMLElement) {
+        return this.dataset.testid === 'replacement-owner' && !replacementReady
+          ? rect(0, 0, 0, 0)
+          : rect(0, 0, 200, 200);
+      },
+    );
+    const onPrepare = vi.fn();
+    const view = render(<ReplacedInitialFocusHarness onPrepare={onPrepare} />);
+
+    try {
+      await act(async () => { await Promise.resolve(); });
+      expect(onPrepare).toHaveBeenCalled();
+      expect(screen.queryByRole('button', { name: 'Original action' })).toBeNull();
+      const replacement = screen.getByRole('button', { name: 'Replacement action' });
+      expect(replacement).not.toHaveFocus();
+      replacementReady = true;
+      act(() => { vi.advanceTimersByTime(32); });
+      expect(replacement).toHaveFocus();
+    } finally {
+      view.unmount();
+      vi.useRealTimers();
+    }
+  });
+
   it('keeps directional events scoped to the provider that owns focus', () => {
     render(<MultipleProviderHarness />);
 

@@ -20,6 +20,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
 } from 'react';
@@ -34,7 +35,10 @@ import {
   SCROLL_VIEW_SELECTOR,
   type FocusNavigationDirection as Direction,
 } from '../base/FocusNavigationEvents';
-import { registerAutoFocusFirstOwner } from '../base/FocusCoordinator';
+import {
+  registerAutoFocusFirstOwner,
+  registerHostFocusRetentionPolicy,
+} from '../base/FocusCoordinator';
 import { withPreRecordedFocusChange } from '../base/InteractableFastScrollTracker';
 
 interface FocusNavigationContextValue {
@@ -103,6 +107,11 @@ export interface FocusNavigationProviderProps {
    * native focus order or the host application.
    */
   autoFocusFirst?: boolean;
+  /**
+   * Recover the selected control after a temporary host focus return. On by
+   * default. Disable when the application manages host-return focus itself.
+   */
+  preserveFocusOnHostReturn?: boolean;
 }
 
 interface FocusSearchFromOriginDetail {
@@ -678,6 +687,7 @@ export function FocusNavigationProvider({
   containerRef,
   blockTabNavigation = false,
   autoFocusFirst = false,
+  preserveFocusOnHostReturn = true,
 }: FocusNavigationProviderProps) {
   const internalRef = useRef<HTMLDivElement>(null);
   const isActive = enabled;
@@ -685,6 +695,10 @@ export function FocusNavigationProvider({
   const getContainer = useCallback((): HTMLElement | null => {
     return containerRef?.current ?? internalRef.current;
   }, [containerRef]);
+
+  useLayoutEffect(() => {
+    return registerHostFocusRetentionPolicy(getContainer, preserveFocusOnHostReturn);
+  }, [getContainer, preserveFocusOnHostReturn]);
 
   useEffect(() => {
     if (!(enabled && autoFocusFirst)) {

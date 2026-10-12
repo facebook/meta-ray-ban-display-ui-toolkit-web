@@ -552,6 +552,41 @@ function isDocumentFocusEffectivelyEmpty(): boolean {
   return !isElementFocusable(activeElement);
 }
 
+const INTERACTIVE_FOCUS_ROLES = new Set([
+  'button', 'checkbox', 'combobox', 'grid', 'gridcell', 'link', 'listbox', 'menu', 'menubar',
+  'menuitem', 'menuitemcheckbox', 'menuitemradio', 'option', 'radio', 'radiogroup',
+  'scrollbar', 'searchbox', 'slider', 'spinbutton', 'switch', 'tab', 'tablist',
+  'textbox', 'tree', 'treegrid', 'treeitem',
+]);
+
+function isDeliberateRestorationFocus(element: Element | null): boolean {
+  if (
+    element == null ||
+    element === document.body ||
+    element === document.documentElement
+  ) {
+    return false;
+  }
+  if (
+    element.matches('h1, h2, h3, h4, h5, h6, [role="heading"]') ||
+    INTERACTIVE_FOCUS_ROLES.has(element.getAttribute('role') ?? '') ||
+    element.closest(
+      'button, input, select, textarea, a[href], area[href], summary, iframe, audio[controls], video[controls]',
+    ) != null
+  ) {
+    return true;
+  }
+  for (let current: Element | null = element; current != null; current = current.parentElement) {
+    if (
+      current instanceof HTMLElement &&
+      (current.isContentEditable || getFocusOwner(current) != null)
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function capturePageTransitionState(
   pageElement: HTMLElement,
   fallbackFocusedElement: HTMLElement | null = null,
@@ -584,6 +619,7 @@ function restorePageTransitionState(
   pageElement: HTMLElement,
   snapshot: PageTransitionStateSnapshot | undefined,
   initialFocus: PageTransitionInitialFocus,
+  pendingCleanups: Set<() => void>,
 ): boolean {
   const focusableElements = getFocusableElements(pageElement);
   const restoredFocusedElement =
@@ -606,23 +642,52 @@ function restorePageTransitionState(
     return false;
   }
 
-  // Track whether the first blur/focus cycle has already run. The cycle
-  // produces the correct material glow (DEFAULT->FOCUSED transition) so
-  // we must let it execute once. Subsequent retries (rAF, setTimeout)
-  // would repeat the blur/focus and cause visible flicker without adding
-  // any visual benefit — once the first call succeeds, the element
-  // already has full focus + material state.
+  // DOM focus and toolkit focus-state synchronization complete independently.
+  let focusLandedOnce = isFocusWithinElement(focusTarget);
   let focusSyncCompleted = false;
+  let restorationSuperseded = false;
+  const restorationDocument = pageElement.ownerDocument;
+  const finishRestoration = () => {
+    restorationSuperseded = true;
+    restorationDocument.removeEventListener('keydown', finishRestoration, true);
+    restorationDocument.removeEventListener('pointerdown', finishRestoration, true);
+    restorationDocument.removeEventListener('focusin', handleSupersedingFocus, true);
+    pendingCleanups.delete(finishRestoration);
+  };
+  const handleSupersedingFocus = () => {
+    if (
+      focusLandedOnce &&
+      !isFocusWithinElement(focusTarget) &&
+      isDeliberateRestorationFocus(restorationDocument.activeElement)
+    ) {
+      finishRestoration();
+    }
+  };
+  pendingCleanups.add(finishRestoration);
+  restorationDocument.addEventListener('keydown', finishRestoration, true);
+  restorationDocument.addEventListener('pointerdown', finishRestoration, true);
+  restorationDocument.addEventListener('focusin', handleSupersedingFocus, true);
 
   const syncRestoredFocus = () => {
-    if (typeof document === 'undefined' || !focusTarget.isConnected) {
+    if (
+      typeof document === 'undefined' ||
+      !focusTarget.isConnected ||
+      restorationSuperseded
+    ) {
       return;
     }
 
-    if (
-      focusSyncCompleted &&
-      (isFocusWithinElement(focusTarget) || !isDocumentFocusEffectivelyEmpty())
-    ) {
+    const targetHasFocus = isFocusWithinElement(focusTarget);
+    if (focusLandedOnce && !targetHasFocus) {
+      if (isDeliberateRestorationFocus(document.activeElement)) {
+        finishRestoration();
+        return;
+      }
+      if (!isDocumentFocusEffectivelyEmpty()) {
+        return;
+      }
+    }
+    if (focusSyncCompleted && targetHasFocus) {
       return;
     }
 
@@ -632,6 +697,7 @@ function restorePageTransitionState(
       }
       const focusLanded = focusRestoredElement(focusTarget);
       if (focusLanded) {
+        focusLandedOnce = true;
         focusSyncCompleted = syncFocusOwnerForRestoredFocus(focusTarget);
       }
       applyScrollSnapshot(pageElement, snapshot);
@@ -644,7 +710,10 @@ function restorePageTransitionState(
   window.setTimeout(syncRestoredFocus, 75);
   window.setTimeout(syncRestoredFocus, 150);
   window.setTimeout(syncRestoredFocus, 300);
-  window.setTimeout(syncRestoredFocus, 550);
+  window.setTimeout(() => {
+    syncRestoredFocus();
+    finishRestoration();
+  }, 550);
   return true;
 }
 
@@ -772,6 +841,17 @@ export const PageTransition = memo(function PageTransition({
   );
   const restoredScrollEntryIdsRef = useRef<Set<number>>(new Set());
   const restoredFocusEntryIdsRef = useRef<Set<number>>(new Set());
+  const focusRestorationCleanupsRef = useRef<Set<() => void>>(new Set());
+  useLayoutEffect(() => {
+    const cleanups = focusRestorationCleanupsRef.current;
+    const restoredEntryIds = restoredFocusEntryIdsRef.current;
+    return () => {
+      for (const cleanup of cleanups) {
+        cleanup();
+      }
+      restoredEntryIds.clear();
+    };
+  }, []);
   const entriesRef = useRef<PageTransitionEntry[]>([
     createEntry(transitionKey, children, 'idle', 0),
   ]);
@@ -995,10 +1075,14 @@ export const PageTransition = memo(function PageTransition({
       return;
     }
 
+    for (const cleanup of focusRestorationCleanupsRef.current) {
+      cleanup();
+    }
     const focusRestored = restorePageTransitionState(
       pageElement,
       pageStateSnapshotsRef.current.get(activeEntry.transitionKey),
       initialFocus,
+      focusRestorationCleanupsRef.current,
     );
 
     // Only mark focus as restored if a target was actually focused. When the

@@ -13,6 +13,7 @@ import {
   it,
   vi,
 } from 'vitest';
+import { StrictMode } from 'react';
 import {
   act,
   fireEvent,
@@ -28,6 +29,7 @@ import { ScrollView } from '@wearables-ui-toolkit/foundation/components/ScrollVi
 import { Container } from '@wearables-ui-toolkit/foundation/components/Container';
 import { Pager } from '@wearables-ui-toolkit/foundation/components/Pager';
 import { State } from '@wearables-ui-toolkit/foundation/base/Interactions';
+import { FocusNavigationProvider } from '@wearables-ui-toolkit/foundation/navigation/FocusNavigationProvider';
 
 describe('PageTransition', () => {
   afterEach(() => {
@@ -752,6 +754,264 @@ describe('PageTransition', () => {
     expect(document.activeElement).toBe(
       screen.getByRole('group', { name: 'Page 2 of 2' }),
     );
+  });
+
+  it('keeps transition entry focus and retirement of superseded retries with host recovery disabled', () => {
+    vi.useFakeTimers();
+    render(
+      <FocusNavigationProvider preserveFocusOnHostReturn={false}>
+        <PageTransition transitionKey="menu">
+          <button>Page action</button>
+          <input aria-label="Requested field" />
+        </PageTransition>
+      </FocusNavigationProvider>,
+    );
+    expect(screen.getByRole('button', { name: 'Page action' })).toHaveFocus();
+    const requested = screen.getByRole('textbox', { name: 'Requested field' });
+    act(() => { requested.focus(); vi.advanceTimersByTime(75); });
+    expect(requested).toHaveFocus();
+    act(() => { requested.blur(); vi.advanceTimersByTime(600); });
+    expect(document.body).toHaveFocus();
+  });
+
+  it.each([0, 75, 150, 300])(
+    'keeps a new plain-element focus after %i ms of restoration retries',
+    delay => {
+      vi.useFakeTimers();
+      render(
+        <PageTransition transitionKey="menu">
+          <button>First action</button>
+          <button>Second action</button>
+        </PageTransition>,
+      );
+      const first = screen.getByRole('button', { name: 'First action' });
+      const second = screen.getByRole('button', { name: 'Second action' });
+      expect(document.activeElement).toBe(first);
+
+      act(() => {
+        vi.advanceTimersByTime(delay);
+        second.focus();
+      });
+      expect(document.activeElement).toBe(second);
+
+      act(() => {
+        vi.advanceTimersByTime(600);
+      });
+      expect(document.activeElement).toBe(second);
+    },
+  );
+
+  it.each([
+    ['plain div', 'div', undefined],
+    ['plain span', 'span', undefined],
+    ['group', 'div', 'group'],
+    ['status', 'div', 'status'],
+    ['progressbar', 'div', 'progressbar'],
+  ] as const)(
+    'resumes restoration after temporary focus on a tabbable %s',
+    (_name, Content, role) => {
+      vi.useFakeTimers();
+      render(
+        <PageTransition transitionKey="menu">
+          <button>Page action</button>
+          <Content role={role} tabIndex={0}>Temporary content</Content>
+        </PageTransition>,
+      );
+      const pageAction = screen.getByRole('button', { name: 'Page action' });
+      const temporary = screen.getByText('Temporary content');
+      expect(pageAction).toHaveFocus();
+      act(() => {
+        temporary.focus();
+        vi.advanceTimersByTime(75);
+      });
+      expect(temporary).toHaveFocus();
+      act(() => {
+        temporary.blur();
+        vi.advanceTimersByTime(600);
+      });
+      expect(pageAction).toHaveFocus();
+    },
+  );
+
+  it.each([0, -1])(
+    'retires restoration after an application focuses a heading with tabIndex %i',
+    tabIndex => {
+      vi.useFakeTimers();
+      render(
+        <PageTransition transitionKey="menu">
+          <button>Page action</button>
+          <h2 tabIndex={tabIndex}>Requested heading</h2>
+        </PageTransition>,
+      );
+      const heading = screen.getByRole('heading', { name: 'Requested heading' });
+      act(() => {
+        heading.focus();
+        vi.advanceTimersByTime(75);
+      });
+      expect(heading).toHaveFocus();
+      act(() => {
+        heading.blur();
+        vi.advanceTimersByTime(600);
+      });
+      expect(document.body).toHaveFocus();
+    },
+  );
+
+  it.each([0, -1])(
+    'retires restoration after focus moves outside the page with tabIndex %i',
+    tabIndex => {
+      vi.useFakeTimers();
+      render(
+        <div>
+          <PageTransition transitionKey="menu">
+            <button>Page action</button>
+          </PageTransition>
+          <input aria-label="Outside field" tabIndex={tabIndex} />
+        </div>,
+      );
+      const pageAction = screen.getByRole('button', { name: 'Page action' });
+      const outside = screen.getByRole('textbox', { name: 'Outside field' });
+      expect(pageAction).toHaveFocus();
+      act(() => {
+        outside.focus();
+        vi.advanceTimersByTime(75);
+      });
+      expect(outside).toHaveFocus();
+      act(() => {
+        outside.blur();
+        vi.advanceTimersByTime(600);
+      });
+      expect(document.body).toHaveFocus();
+    },
+  );
+
+  it.each(['button', 'checkbox', 'slider', 'textbox', 'heading'])(
+    'retires restoration for a programmatically focused ARIA %s even between retries',
+    role => {
+      vi.useFakeTimers();
+      render(
+        <PageTransition transitionKey="menu">
+          <button>Page action</button>
+          <div
+            role={role}
+            tabIndex={-1}
+            aria-label="Requested widget"
+            aria-checked={role === 'checkbox' ? false : undefined}
+            aria-valuenow={role === 'slider' ? 5 : undefined}
+            aria-level={role === 'heading' ? 2 : undefined}
+          />
+        </PageTransition>,
+      );
+      const requested = screen.getByRole(role, { name: 'Requested widget' });
+      act(() => { requested.focus(); });
+      expect(requested).toHaveFocus();
+      act(() => {
+        requested.blur();
+        vi.advanceTimersByTime(600);
+      });
+      expect(document.body).toHaveFocus();
+    },
+  );
+
+  it.each(['keydown', 'pointerdown'])(
+    'retires restoration when %s selects an otherwise passive container',
+    event => {
+      vi.useFakeTimers();
+      render(
+        <PageTransition transitionKey="menu">
+          <button>Page action</button>
+          <div tabIndex={0}>Custom focus target</div>
+        </PageTransition>,
+      );
+      const requested = screen.getByText('Custom focus target');
+      act(() => {
+        requested.focus();
+        if (event === 'keydown') {
+          fireEvent.keyDown(requested, { key: 'Enter' });
+        } else {
+          fireEvent.pointerDown(requested);
+        }
+      });
+      expect(requested).toHaveFocus();
+      act(() => {
+        requested.blur();
+        vi.advanceTimersByTime(600);
+      });
+      expect(document.body).toHaveFocus();
+    },
+  );
+
+  it('does not extend retries when passive focus outlasts the restoration window', () => {
+    vi.useFakeTimers();
+    render(
+      <PageTransition transitionKey="menu">
+        <button>Page action</button>
+        <div tabIndex={0}>Temporary content</div>
+      </PageTransition>,
+    );
+    const temporary = screen.getByText('Temporary content');
+    act(() => {
+      temporary.focus();
+      vi.advanceTimersByTime(600);
+    });
+    expect(temporary).toHaveFocus();
+    act(() => {
+      temporary.blur();
+      vi.advanceTimersByTime(600);
+    });
+    expect(document.body).toHaveFocus();
+  });
+
+  it('resumes passive-container restoration after Strict Mode effect replay', () => {
+    vi.useFakeTimers();
+    render(
+      <StrictMode>
+        <PageTransition transitionKey="menu">
+          <button>Page action</button>
+          <div tabIndex={0}>Temporary content</div>
+        </PageTransition>
+      </StrictMode>,
+    );
+    const temporary = screen.getByText('Temporary content');
+    act(() => {
+      temporary.focus();
+      vi.advanceTimersByTime(75);
+    });
+    expect(temporary).toHaveFocus();
+    act(() => {
+      temporary.blur();
+      vi.advanceTimersByTime(600);
+    });
+    expect(screen.getByRole('button', { name: 'Page action' })).toHaveFocus();
+  });
+
+  it('still recovers plain-element focus parked on the route shell', () => {
+    vi.useFakeTimers();
+    const root = document.createElement('div');
+    root.tabIndex = -1;
+    document.body.append(root);
+    try {
+      render(
+        <PageTransition transitionKey="menu">
+          <button>Page action</button>
+        </PageTransition>,
+        { container: root },
+      );
+      const pageAction = screen.getByRole('button', { name: 'Page action' });
+      expect(document.activeElement).toBe(pageAction);
+
+      act(() => {
+        root.focus();
+      });
+      expect(document.activeElement).toBe(root);
+
+      act(() => {
+        vi.advanceTimersByTime(600);
+      });
+      expect(document.activeElement).toBe(pageAction);
+    } finally {
+      root.remove();
+    }
   });
 
   it('restores focused element and scroll position when returning to a page', () => {

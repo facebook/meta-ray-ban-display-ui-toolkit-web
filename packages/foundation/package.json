@@ -1,7 +1,7 @@
 {
   "name": "@wearables-ui-toolkit/foundation",
   "private": true,
-  "version": "129.0.0",
+  "version": "129.23.0",
   "description": "React primitives for UI Toolkit for Meta Ray-Ban Display",
   "type": "module",
   "sideEffects": [
@@ -51,7 +51,7 @@
     "prepack": "\"$npm_node_execpath\" ../../tools/npm-release/assert-validated-prepack.mjs && node scripts/generate-corner-radius-css.mjs --check && vite build && node scripts/verify-styles.mjs && tsc -p tsconfig.build.json && node scripts/verify-public-declarations.mjs"
   },
   "dependencies": {
-    "@wearables-ui-toolkit/androidx-shapes": "129.0.0"
+    "@wearables-ui-toolkit/androidx-shapes": "129.23.0"
   },
   "peerDependencies": {
     "react": "^19.2.7",

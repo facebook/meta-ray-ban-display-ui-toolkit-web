@@ -12,8 +12,8 @@
     "test": "vitest run src"
   },
   "dependencies": {
-    "@wearables-ui-toolkit/mrbd": "129.0.0",
-    "@wearables-ui-toolkit/icons": "129.0.0",
+    "@wearables-ui-toolkit/mrbd": "129.23.0",
+    "@wearables-ui-toolkit/icons": "129.23.0",
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "react-router-dom": "7.18.2"

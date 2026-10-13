@@ -1,7 +1,7 @@
 {
   "name": "@wearables-ui-toolkit/icons",
   "private": true,
-  "version": "129.0.0",
+  "version": "129.23.0",
   "type": "module",
   "description": "SVG icon assets for UI Toolkit for Meta Ray-Ban Display",
   "license": "SEE LICENSE IN LICENSE",

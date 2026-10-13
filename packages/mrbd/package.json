@@ -1,7 +1,7 @@
 {
   "name": "@wearables-ui-toolkit/mrbd",
   "private": true,
-  "version": "129.0.0",
+  "version": "129.23.0",
   "type": "module",
   "description": "React component library for UI Toolkit for Meta Ray-Ban Display",
   "license": "Apache-2.0",
@@ -243,7 +243,7 @@
   ],
   "author": "Meta Platforms, Inc.",
   "dependencies": {
-    "@wearables-ui-toolkit/foundation": "129.0.0"
+    "@wearables-ui-toolkit/foundation": "129.23.0"
   },
   "peerDependencies": {
     "react": "^19.2.7",

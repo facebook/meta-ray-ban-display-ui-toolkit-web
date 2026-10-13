@@ -1,7 +1,7 @@
 {
   "name": "@wearables-ui-toolkit/androidx-shapes",
   "private": true,
-  "version": "129.0.0",
+  "version": "129.23.0",
   "type": "module",
   "description": "TypeScript port of the AndroidX graphics-shapes RoundedPolygon geometry (Apache-2.0).",
   "license": "Apache-2.0",

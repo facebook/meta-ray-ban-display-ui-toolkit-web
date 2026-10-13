@@ -14,7 +14,7 @@
     "@astryxdesign/core": "0.6.2",
     "@astryxdesign/theme-neutral": "0.6.2",
     "@stylexjs/stylex": "0.19.1",
-    "@wearables-ui-toolkit/icons": "129.0.0",
+    "@wearables-ui-toolkit/icons": "129.23.0",
     "react": "19.2.7",
     "react-dom": "19.2.7"
   },

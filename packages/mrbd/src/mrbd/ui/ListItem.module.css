@@ -75,15 +75,16 @@
   box-sizing: border-box;
 }
 
-/**
- * Multi-line content distribution: top-align when subtitle maxLines > 1.
- * Content distribution switches to 24px
- * for vertical padding and top alignment.
- */
-.contentView.multiline {
-  align-items: flex-start;
+/** Expanded vertical padding for multiline subtitles and two-line titles. */
+.contentView.multiline,
+.contentView.multilineTitle {
   padding-top: var(--uit-spacing-large);
   padding-bottom: var(--uit-spacing-large);
+}
+
+/* Only multiline subtitles top-align the row content. */
+.contentView.multiline {
+  align-items: flex-start;
 }
 
 /**

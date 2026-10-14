@@ -177,9 +177,7 @@ export function getListItemLayoutState({
     hasIcon,
     hasLeading: hasAvatar || hasIcon,
     hasStatusIcons,
-    // Multiline is derived solely from the subtitle clamp. There is no
-    // app-level font-scale signal on the web (scaling is browser-level zoom/rem),
-    // so there is no large-font path that forces a 2-line title.
+    titleMaxLines: hasVisibleListItemText(effectiveSubtitle) ? 1 : 2,
     isMultiline: subtitleMaxLines > 1,
     showAccessoryTimestamp,
     showSubtitleTimestamp,

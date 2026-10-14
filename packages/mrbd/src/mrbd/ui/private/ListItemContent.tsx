@@ -9,6 +9,7 @@
 import {
   memo,
   useMemo,
+  type CSSProperties,
   type ReactNode,
 } from 'react';
 import { SliderBarInternal } from './SliderBarInternal';
@@ -117,8 +118,22 @@ export const ListItemContent = memo(function ListItemContent({
   sliderMaximumValue,
 }: ListItemContentProps) {
   const rootClassName = useMemo(
-    () => `${styles.contentView} ${layout.isMultiline ? styles.multiline : ''} ${className}`,
-    [className, layout.isMultiline],
+    () => [
+      styles.contentView,
+      layout.isMultiline ? styles.multiline : '',
+      layout.titleMaxLines > 1 ? styles.multilineTitle : '',
+      className,
+    ].filter(Boolean).join(' '),
+    [className, layout.isMultiline, layout.titleMaxLines],
+  );
+  const titleStyle = useMemo<CSSProperties | undefined>(
+    () => layout.titleMaxLines > 1 ? {
+      display: '-webkit-box',
+      WebkitBoxOrient: 'vertical',
+      WebkitLineClamp: layout.titleMaxLines,
+      whiteSpace: 'normal',
+    } : undefined,
+    [layout.titleMaxLines],
   );
 
   const sliderAriaLabel = useMemo(
@@ -173,7 +188,7 @@ export const ListItemContent = memo(function ListItemContent({
         <div className={styles.titleAccessoryContainer}>
           <div className={styles.titleSubtitleContainer}>
             {layout.effectiveTitle && (
-              <span className={styles.titleText}>{layout.effectiveTitle}</span>
+              <span className={styles.titleText} style={titleStyle}>{layout.effectiveTitle}</span>
             )}
 
             <ListItemSecondLine

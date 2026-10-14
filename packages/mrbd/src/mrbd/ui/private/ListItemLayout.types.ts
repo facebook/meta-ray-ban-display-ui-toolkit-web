@@ -49,6 +49,7 @@ export interface ListItemLayoutState {
   hasIcon: boolean;
   hasLeading: boolean;
   hasStatusIcons: boolean;
+  titleMaxLines: 1 | 2;
   isMultiline: boolean;
   showAccessoryTimestamp: boolean;
   showSubtitleTimestamp: boolean;

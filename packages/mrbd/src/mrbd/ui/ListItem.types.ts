@@ -61,6 +61,7 @@ export interface StatusIcon {
 export interface ListItemOwnProps {
   /** Class name applied to the row's internal content layout. */
   contentClassName?: string;
+  /** Primary text: up to two lines without a subtitle, otherwise one line. */
   title?: string;
   titleContentDescription?: string;
   subtitle?: string;

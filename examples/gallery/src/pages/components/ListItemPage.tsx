@@ -33,6 +33,11 @@ export function ListItemPage() {
       >
         <div className="gallery-listitem-group">
           <ListItem
+            title="Notification reminders for every upcoming community event"
+            icon={bellFilled}
+            onClick={() => {}}
+          />
+          <ListItem
             title="Saved places"
             subtitle="12 locations"
             icon={bookmarkFilled}
@@ -159,7 +164,7 @@ export function ListItemPage() {
       <GuidancePanel
         summary="ListItem is a complete interactive row for navigation, settings, selection, adjustment, or concise status. Its built-in slots establish the intended hierarchy and alignment."
         useWhen={<ul><li>Related rows share a consistent information structure.</li><li>A setting or choice benefits from a row-sized switch, radio target, or slider.</li><li>Concise metadata or status belongs beside one primary row action.</li></ul>}
-        capabilities={<ul><li>Optional title and supporting text, including one- or two-line subtitles, semantic subtitle colors, a secondary-line icon, and separate accessibility descriptions for each text field.</li><li>A leading icon or avatar. Avatars can use primary, secondary, and badge images or content, alternate shapes and placeholders, and a status indicator with an optional glyph.</li><li>Timestamps can appear centered or top-aligned in the trailing slot, or inline with the subtitle, with semantic text colors and a dedicated accessibility description.</li><li>Choose one primary trailing treatment: switch, radio button, timestamp, described status dot and status icons, focus-revealed or always-visible accessory icon, or the supported trailing tag.</li><li>Slider mode replaces the text area with a full-width adjustable value and supports configurable minimum, maximum, step percentage, value, and change handling.</li><li>Leading, secondary, accessory, and status icons support semantic tints. ListItem also inherits Container capabilities such as custom material, disabled state, click and focus-state handling, semantic HTML, and ARIA labeling.</li></ul>}
+        capabilities={<ul><li>Optional title and supporting text, including two-line titles without a subtitle, one- or two-line subtitles, semantic subtitle colors, a secondary-line icon, and separate accessibility descriptions for each text field.</li><li>A leading icon or avatar. Avatars can use primary, secondary, and badge images or content, alternate shapes and placeholders, and a status indicator with an optional glyph.</li><li>Timestamps can appear centered or top-aligned in the trailing slot, or inline with the subtitle, with semantic text colors and a dedicated accessibility description.</li><li>Choose one primary trailing treatment: switch, radio button, timestamp, described status dot and status icons, focus-revealed or always-visible accessory icon, or the supported trailing tag.</li><li>Slider mode replaces the text area with a full-width adjustable value and supports configurable minimum, maximum, step percentage, value, and change handling.</li><li>Leading, secondary, accessory, and status icons support semantic tints. ListItem also inherits Container capabilities such as custom material, disabled state, click and focus-state handling, semantic HTML, and ARIA labeling.</li></ul>}
         avoid={<ul><li>Adding margins or gaps between consecutive list items.</li><li>Adding another rounded container around each row.</li><li>Combining competing trailing modes or unrelated controls in one item.</li><li>Adding chevrons or arrows to indicate that a row opens another page.</li></ul>}
       />
     </GalleryPage>

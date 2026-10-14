@@ -134,6 +134,38 @@ describe('ListItem title and subtitle', () => {
     rerender(<ListItem title="Second" />);
     expect(container.textContent).toContain('Second');
   });
+
+  it.each([undefined, ''])('allows two title lines with subtitle %s', subtitle => {
+    const title = 'Notification reminders for every upcoming community event';
+    render(<ListItem title={title} subtitle={subtitle} />);
+
+    const text = screen.getByText(title);
+    expect(text).toHaveStyle({ whiteSpace: 'normal', display: '-webkit-box' });
+    expect(text.style.getPropertyValue('-webkit-line-clamp')).toBe('2');
+    expect(screen.getByRole('button', { name: title })).toBeInTheDocument();
+  });
+
+  it('updates the title clamp and accessible name when a subtitle is added or cleared', () => {
+    const title = 'Notification reminders for every upcoming community event';
+    const { rerender } = render(<ListItem title={title} />);
+    expect(screen.getByText(title).style.getPropertyValue('-webkit-line-clamp')).toBe('2');
+
+    rerender(<ListItem title={title} subtitle="Supporting description" />);
+    expect(screen.getByText(title).style.getPropertyValue('-webkit-line-clamp')).toBe('');
+    expect(screen.getByRole('button', { name: `${title}, Supporting description` })).toBeInTheDocument();
+
+    rerender(<ListItem title={title} subtitle="" />);
+    expect(screen.getByText(title).style.getPropertyValue('-webkit-line-clamp')).toBe('2');
+    expect(screen.getByRole('button', { name: title })).toBeInTheDocument();
+  });
+
+  it('keeps a one-line title when the subtitle contains whitespace', () => {
+    const title = 'Notification reminders for every upcoming community event';
+    render(<ListItem title={title} subtitle=" " />);
+
+    expect(screen.getByText(title).style.getPropertyValue('-webkit-line-clamp')).toBe('');
+    expect(screen.getByText(title)).not.toHaveStyle({ whiteSpace: 'normal' });
+  });
 });
 
 describe('ListItem leading slot', () => {

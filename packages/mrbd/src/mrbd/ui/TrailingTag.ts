@@ -7,9 +7,9 @@
  */
 
 /**
- * Trailing tag shown after a Button/ListItem title. A closed set, not
- * caller-supplied text. The displayed label is owned by the design system so it
- * stays consistent and localizable rather than accepting arbitrary strings.
+ * Trailing tag shown after a Button/ListItem title. The semantic tag stays a
+ * closed set. Host components can pass localized labels to the resolver while
+ * preserving the design-system-owned cases.
  */
 export const TrailingTag = {
   NONE: 'none',
@@ -18,11 +18,32 @@ export const TrailingTag = {
 
 export type TrailingTag = (typeof TrailingTag)[keyof typeof TrailingTag];
 
-const TRAILING_TAG_LABEL: Record<Exclude<TrailingTag, typeof TrailingTag.NONE>, string> = {
+/** Localized labels for the visible trailing-tag cases. */
+export type TrailingTagLabels = Partial<
+  Record<Exclude<TrailingTag, typeof TrailingTag.NONE>, string>
+>;
+
+const TRAILING_TAG_LABEL: Record<
+  Exclude<TrailingTag, typeof TrailingTag.NONE>,
+  string
+> = {
   [TrailingTag.BETA]: 'Beta',
 };
 
-/** Resolve a {@link TrailingTag} to its display label, or `null` for `NONE`. */
-export function getTrailingTagLabel(tag: TrailingTag): string | null {
-  return tag === TrailingTag.NONE ? null : TRAILING_TAG_LABEL[tag];
+/**
+ * Resolve a {@link TrailingTag} to its display label, or `null` for `NONE`.
+ * Localized labels override the built-in English fallbacks by semantic tag.
+ */
+export function getTrailingTagLabel(
+  tag: TrailingTag,
+  labels?: TrailingTagLabels,
+): string | null {
+  if (tag === TrailingTag.NONE) {
+    return null;
+  }
+
+  const localizedLabel = labels?.[tag];
+  return localizedLabel != null && localizedLabel.trim().length > 0
+    ? localizedLabel
+    : TRAILING_TAG_LABEL[tag];
 }

@@ -42,7 +42,11 @@ export function SwipeToRevealPage() {
           <SwipeToReveal actions={[archiveAction]}>
             <ListItem title="Trip notes" subtitle="Swipe to archive" icon={archiveFilled} />
           </SwipeToReveal>
-          <SwipeToReveal actions={[saveAction, archiveAction]}>
+          <SwipeToReveal
+            actions={[saveAction, archiveAction]}
+            actionsShownAnnouncement="Secondary actions available"
+            actionsHiddenAnnouncement="Secondary actions closed"
+          >
             <ListItem title="Trail recommendation" subtitle="Save or archive" icon={bookmarkFilled} />
           </SwipeToReveal>
           <ListItem
@@ -56,7 +60,7 @@ export function SwipeToRevealPage() {
       <GuidancePanel
         summary="SwipeToReveal adds one to three secondary actions behind a focusable child such as ListItem."
         useWhen={<ul><li>Common row actions should stay available without crowding the default layout.</li></ul>}
-        capabilities={<ul><li>One required action and up to two additional actions.</li></ul>}
+        capabilities={<ul><li>One required action and up to two additional actions.</li><li>Custom announcement strings for the app's supported languages.</li></ul>}
         avoid={<ul><li>Hiding the row's only essential action behind a gesture.</li><li>Using more than three reveal actions.</li></ul>}
       />
     </GalleryPage>

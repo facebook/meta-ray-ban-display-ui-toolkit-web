@@ -37,6 +37,18 @@ export interface SwipeToRevealProps extends Omit<
     SwipeToRevealAction?,
   ];
 
+  /**
+   * Polite live-region announcement when the action tray opens.
+   * @default 'Actions shown'
+   */
+  actionsShownAnnouncement?: string;
+
+  /**
+   * Polite live-region announcement when the action tray closes.
+   * @default 'Actions hidden'
+   */
+  actionsHiddenAnnouncement?: string;
+
   onKeyDownCapture?: KeyboardEventHandler<HTMLDivElement>;
   onKeyUpCapture?: KeyboardEventHandler<HTMLDivElement>;
 }

@@ -19,7 +19,7 @@
  * - Modes: TEXT, DOTS
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { PaginationIndicator, PaginationMode } from '../mrbd/ui/PaginationIndicator';
 import { calculatePaginationVisibleWindow } from '../mrbd/ui/private/PaginationIndicatorLayout';
@@ -93,6 +93,77 @@ describe('PaginationIndicator TEXT mode', () => {
       <PaginationIndicator mode={PaginationMode.TEXT} pageCount={5} currentPage={3} />
     );
     expect(container.textContent).toContain('4 of 5');
+  });
+
+  it('passes a one-based page to a custom text formatter', () => {
+    const formatText = vi.fn(
+      (displayPage: number, pageCount: number) =>
+        `${displayPage} sur ${pageCount}`,
+    );
+    render(
+      <PaginationIndicator
+        mode={PaginationMode.TEXT}
+        pageCount={5}
+        currentPage={2}
+        formatText={formatText}
+      />
+    );
+
+    expect(screen.getByText('3 sur 5')).toBeInTheDocument();
+    expect(formatText).toHaveBeenCalledWith(3, 5);
+  });
+
+  it('updates the label when the formatter or page state changes', () => {
+    const french = (displayPage: number, pageCount: number) =>
+      `${displayPage} sur ${pageCount}`;
+    const german = (displayPage: number, pageCount: number) =>
+      `${displayPage} von ${pageCount}`;
+    const { rerender } = render(
+      <PaginationIndicator pageCount={5} currentPage={2} formatText={french} />,
+    );
+    expect(screen.getByText('3 sur 5')).toBeInTheDocument();
+
+    rerender(
+      <PaginationIndicator pageCount={5} currentPage={2} formatText={german} />,
+    );
+    expect(screen.getByText('3 von 5')).toBeInTheDocument();
+
+    rerender(
+      <PaginationIndicator pageCount={7} currentPage={3} formatText={german} />,
+    );
+    expect(screen.getByText('4 von 7')).toBeInTheDocument();
+  });
+
+  it('formats only visible text across empty and dot-mode transitions', () => {
+    const formatText = vi.fn(
+      (displayPage: number, pageCount: number) =>
+        `${displayPage} sur ${pageCount}`,
+    );
+    const { container, rerender } = render(
+      <PaginationIndicator pageCount={0} formatText={formatText} />,
+    );
+    expect(container.firstElementChild).toBeNull();
+    expect(formatText).not.toHaveBeenCalled();
+
+    rerender(<PaginationIndicator pageCount={2} formatText={formatText} />);
+    expect(screen.getByText('1 sur 2')).toBeInTheDocument();
+    expect(formatText).toHaveBeenCalledWith(1, 2);
+
+    formatText.mockClear();
+    rerender(
+      <PaginationIndicator
+        mode={PaginationMode.DOTS}
+        pageCount={2}
+        formatText={formatText}
+      />,
+    );
+    expect(formatText).not.toHaveBeenCalled();
+    expect(container.querySelector('[class*="dotsContainer"]')?.children).toHaveLength(2);
+    expect(container.firstElementChild).not.toHaveAttribute('formatText');
+
+    rerender(<PaginationIndicator pageCount={0} formatText={formatText} />);
+    expect(container.firstElementChild).toBeNull();
+    expect(formatText).not.toHaveBeenCalled();
   });
 
   it('keeps the chip text to one stable line during page changes', () => {

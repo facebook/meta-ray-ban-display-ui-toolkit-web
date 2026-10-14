@@ -53,6 +53,8 @@ export const SwipeToReveal = memo(forwardRef<HTMLDivElement, SwipeToRevealProps>
     {
       children,
       actions,
+      actionsShownAnnouncement = 'Actions shown',
+      actionsHiddenAnnouncement = 'Actions hidden',
       className = '',
       onKeyDownCapture,
       onKeyUpCapture,
@@ -108,7 +110,9 @@ export const SwipeToReveal = memo(forwardRef<HTMLDivElement, SwipeToRevealProps>
 
       isRevealedRef.current = revealed;
       setIsRevealedState(revealed);
-      setAnnouncement(revealed ? 'Actions shown' : 'Actions hidden');
+      setAnnouncement(
+        revealed ? actionsShownAnnouncement : actionsHiddenAnnouncement,
+      );
       if (revealed) {
         setIsTrayVisible(true);
       }
@@ -120,7 +124,12 @@ export const SwipeToReveal = memo(forwardRef<HTMLDivElement, SwipeToRevealProps>
       if (!revealed && restoreSlotFocus) {
         focusFirstDescendant(slotRef.current);
       }
-    }, [slotAnimation, trayAnimation]);
+    }, [
+      actionsHiddenAnnouncement,
+      actionsShownAnnouncement,
+      slotAnimation,
+      trayAnimation,
+    ]);
 
     useLayoutEffect(() => {
       if (isRevealed) {

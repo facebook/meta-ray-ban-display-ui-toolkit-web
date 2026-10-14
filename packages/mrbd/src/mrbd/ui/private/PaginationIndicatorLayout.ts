@@ -34,8 +34,13 @@ export function getPaginationContainerClassName(
   return [baseClassName, className].filter(Boolean).join(' ');
 }
 
-export function getPaginationText(pageCount: number, currentPage: number): string {
-  return `${currentPage + 1} of ${pageCount}`;
+export function getPaginationText(
+  pageCount: number,
+  currentPage: number,
+  formatText: (displayPage: number, pageCount: number) => string =
+    (displayPage, totalPages) => `${displayPage} of ${totalPages}`,
+): string {
+  return formatText(currentPage + 1, pageCount);
 }
 
 export function getPaginationDotDiameter(

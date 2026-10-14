@@ -12,6 +12,10 @@ import { DemoSection } from '../../components/DemoSection';
 import { GalleryPage } from '../../components/GalleryPage';
 import { GuidancePanel } from '../../components/GuidancePanel';
 
+function formatPageText(displayPage: number, pageCount: number): string {
+  return `Page ${displayPage} of ${pageCount}`;
+}
+
 export function PaginationIndicatorPage() {
   const [page, setPage] = useState(1);
 
@@ -23,6 +27,12 @@ export function PaginationIndicatorPage() {
       >
         <div className="gallery-component-column gallery-component-column-centered">
           <PaginationIndicator mode={PaginationMode.TEXT} pageCount={5} currentPage={page} />
+          <PaginationIndicator
+            mode={PaginationMode.TEXT}
+            pageCount={5}
+            currentPage={page}
+            formatText={formatPageText}
+          />
           <PaginationIndicator mode={PaginationMode.DOTS} pageCount={5} currentPage={page} />
           <Button
             title="Next page"
@@ -34,7 +44,7 @@ export function PaginationIndicatorPage() {
       <GuidancePanel
         summary="PaginationIndicator displays the current zero-based page within a known page count."
         useWhen={<ul><li>Users need lightweight position context for a pager or carousel.</li></ul>}
-        capabilities={<ul><li>Compact dots or explicit text.</li></ul>}
+        capabilities={<ul><li>Compact dots or explicit text.</li><li>A custom formatter for localized text.</li></ul>}
         avoid={<ul><li>Using it as the navigation control itself.</li><li>Showing dots for so many pages that individual positions are unreadable.</li></ul>}
       />
     </GalleryPage>

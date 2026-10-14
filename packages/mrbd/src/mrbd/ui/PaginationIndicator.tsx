@@ -14,7 +14,7 @@
  * - TEXT: Displays "2 of 5" style text in a chip
  * - DOTS: Dot indicators with active highlight, overflow dots, and animated transitions
  *
- * Props: mode, pageCount, currentPage
+ * Props: mode, pageCount, currentPage, formatText
  */
 
 import {
@@ -59,6 +59,7 @@ export const PaginationIndicator = memo(forwardRef<HTMLDivElement, PaginationInd
       mode = PaginationMode.TEXT,
       pageCount = 0,
       currentPage = 0,
+      formatText,
       className = '',
       style = EMPTY_PAGINATION_STYLE,
       ...rest
@@ -81,6 +82,7 @@ export const PaginationIndicator = memo(forwardRef<HTMLDivElement, PaginationInd
           style={style}
           pageCount={pageCount}
           currentPage={currentPage}
+          formatText={formatText}
           rootProps={rest}
         />
       );
@@ -101,28 +103,37 @@ export const PaginationIndicator = memo(forwardRef<HTMLDivElement, PaginationInd
 
 /**
  * TEXT mode pagination indicator.
- * Displays "X / Y" text inside a real Chip component.
+ * Displays formatted page-position text inside a real Chip component.
  *
  * Renders a centered Chip child with the default DEEMPHASIZED style.
  * Not focusable, not exposed to accessibility.
- * Text comes from the label format string ("X of Y").
  */
 const TextPaginationIndicator = memo(forwardRef<
   HTMLDivElement,
   {
     pageCount: number;
     currentPage: number;
+    formatText?: (displayPage: number, pageCount: number) => string;
     className: string;
     style: CSSProperties;
     rootProps: HTMLAttributes<HTMLDivElement>;
   }
->(function TextPaginationIndicator({ pageCount, currentPage, className, style, rootProps }, ref) {
-  if (pageCount <= 0) return null;
-
+>(function TextPaginationIndicator({
+  pageCount,
+  currentPage,
+  formatText,
+  className,
+  style,
+  rootProps,
+}, ref) {
   const text = useMemo(
-    () => getPaginationText(pageCount, currentPage),
-    [currentPage, pageCount],
+    () => pageCount > 0
+      ? getPaginationText(pageCount, currentPage, formatText)
+      : '',
+    [currentPage, formatText, pageCount],
   );
+
+  if (pageCount <= 0) return null;
 
   return (
     <div

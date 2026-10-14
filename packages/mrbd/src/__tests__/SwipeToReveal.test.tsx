@@ -44,6 +44,67 @@ describe('SwipeToReveal', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Actions hidden');
   });
 
+  it('uses localized action-tray announcements', () => {
+    render(
+      <SwipeToReveal
+        actions={[{ icon, contentDescription: 'Delete', onClick: vi.fn() }]}
+        actionsShownAnnouncement="Actions affichées"
+        actionsHiddenAnnouncement="Actions masquées"
+      >
+        <ListItem title="Message" />
+      </SwipeToReveal>,
+    );
+    const slot = screen.getByRole('button', { name: 'Message' });
+    const action = screen.getByRole('button', { name: 'Delete', hidden: true });
+    slot.focus();
+
+    fireEvent.keyDown(slot, { key: 'ArrowRight' });
+    fireEvent.keyUp(slot, { key: 'ArrowRight' });
+    expect(screen.getByRole('status')).toHaveTextContent('Actions affichées');
+
+    fireEvent.keyDown(action, { key: 'ArrowLeft' });
+    fireEvent.keyUp(action, { key: 'ArrowLeft' });
+    expect(screen.getByRole('status')).toHaveTextContent('Actions masquées');
+  });
+
+  it('uses the latest announcement values after an app changes language', () => {
+    const actions = [{ icon, contentDescription: 'Delete', onClick: vi.fn() }] as const;
+    const { rerender } = render(
+      <SwipeToReveal
+        actions={actions}
+        actionsShownAnnouncement="Actions affichées"
+        actionsHiddenAnnouncement="Actions masquées"
+      >
+        <ListItem title="Message" />
+      </SwipeToReveal>,
+    );
+    const slot = screen.getByRole('button', { name: 'Message' });
+    slot.focus();
+    fireEvent.keyDown(slot, { key: 'ArrowRight' });
+    fireEvent.keyUp(slot, { key: 'ArrowRight' });
+    expect(screen.getByRole('status')).toHaveTextContent('Actions affichées');
+
+    rerender(
+      <SwipeToReveal
+        actions={actions}
+        actionsShownAnnouncement="Aktionen angezeigt"
+        actionsHiddenAnnouncement="Aktionen ausgeblendet"
+      >
+        <ListItem title="Message" />
+      </SwipeToReveal>,
+    );
+    const action = screen.getByRole('button', { name: 'Delete' });
+    fireEvent.keyDown(action, { key: 'ArrowLeft' });
+    fireEvent.keyUp(action, { key: 'ArrowLeft' });
+    expect(document.activeElement).toBe(slot);
+    expect(screen.getByRole('status')).toHaveTextContent('Aktionen ausgeblendet');
+
+    fireEvent.keyDown(slot, { key: 'ArrowRight' });
+    fireEvent.keyUp(slot, { key: 'ArrowRight' });
+    expect(document.activeElement).toBe(action);
+    expect(screen.getByRole('status')).toHaveTextContent('Aktionen angezeigt');
+  });
+
   it('moves between actions without hiding until left leaves the primary action', () => {
     render(
       <SwipeToReveal

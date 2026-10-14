@@ -40,6 +40,13 @@ export interface PaginationIndicatorProps extends HTMLAttributes<HTMLDivElement>
    */
   currentPage?: number;
 
+  /**
+   * Formats the visible label in TEXT mode. The first argument is the one-based
+   * display page and the second is the total page count.
+   * @default (displayPage, pageCount) => `${displayPage} of ${pageCount}`
+   */
+  formatText?: (displayPage: number, pageCount: number) => string;
+
   /** Additional CSS class */
   className?: string;
 

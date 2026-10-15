@@ -36,6 +36,19 @@ export function ButtonPage() {
         </ButtonGroup>
       </DemoSection>
       <DemoSection
+        title="Loading action"
+        description="The built-in loader occupies the leading slot while the configured icon remains available when loading ends."
+      >
+        <Button
+          title="Adding"
+          icon={bookmarkFilled}
+          alwaysShowText
+          disabled
+          showIconActiveIndicator
+          showLoader
+        />
+      </DemoSection>
+      <DemoSection
         title="Unavailable action"
         description="A persistent label keeps the unavailable action identifiable while the disabled treatment communicates that it cannot currently run."
       >
@@ -51,8 +64,8 @@ export function ButtonPage() {
       <GuidancePanel
         summary="Use Button for a direct action. The toolkit supplies its default material, shape, focus treatment, and content transition; pass another material when the control needs a different visual treatment."
         useWhen={<ul><li>An action should run immediately.</li><li>An icon, label, or short supporting subtitle clarifies the result.</li></ul>}
-        capabilities={<ul><li>Text, icon, avatar, subtitle, and reduced-opacity disabled states.</li><li>Disabled-click tooltips for unavailable-action feedback.</li><li>Default toolkit styling or any compatible material, including a custom material.</li><li>Focus and press animation without custom wrappers.</li></ul>}
-        avoid={<ul><li>Using a button as static status.</li><li>Placing buttons directly in a horizontal row; use ButtonRail for flexibility or ButtonGroup for a small connected set.</li><li>Placing a button inside another interactive surface.</li></ul>}
+        capabilities={<ul><li>Text, icon, avatar, subtitle, loading, and reduced-opacity disabled states.</li><li>A small built-in loader that temporarily replaces the configured leading accessory without replacing the button.</li><li>Disabled-click tooltips for unavailable-action feedback.</li><li>Default toolkit styling or any compatible material, including a custom material.</li><li>Focus and press animation without custom wrappers.</li></ul>}
+        avoid={<ul><li>Using a button as static status.</li><li>Overlaying a separate loader or replacing the button while work is active.</li><li>Placing buttons directly in a horizontal row; use ButtonRail for flexibility or ButtonGroup for a small connected set.</li><li>Placing a button inside another interactive surface.</li></ul>}
       />
     </GalleryPage>
   );

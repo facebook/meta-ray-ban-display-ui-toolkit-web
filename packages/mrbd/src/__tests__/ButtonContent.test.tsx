@@ -41,6 +41,7 @@ function renderContent(overrides = {}) {
       icon={{ uri: TEST_ICON_SRC }}
       applyIconTinting
       showIconActiveIndicator={false}
+      loaderIsAnimating
       iconRotation={0}
       title="Reply"
       hasText

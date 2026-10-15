@@ -38,6 +38,13 @@ export interface ButtonProps extends Omit<
    */
   iconTintColor?: IconTintColor;
   applyIconTinting?: boolean;
+  /**
+   * Replaces the leading icon or avatar with a small indeterminate loader. The
+   * configured accessory remains controlled by its props and reappears when
+   * loading ends.
+   * @default false
+   */
+  showLoader?: boolean;
   showIconActiveIndicator?: boolean;
   iconRotation?: number;
   /** Whether changes to `iconRotation` animate. Defaults to false. */
@@ -101,7 +108,9 @@ export interface ButtonHandle {
    * icon shrinks to scale 0, the icon/title are swapped while invisible, then
    * the new icon springs back up.
    *
-   * No-op unless `opts.endingIcon` is provided.
+   * No-op unless `opts.endingIcon` is provided. If the Button is showing its
+   * loader, the transition settles behind it and becomes visible when loading
+   * ends.
    */
   animateActionTransition(opts: ButtonActionTransitionOptions): void;
 

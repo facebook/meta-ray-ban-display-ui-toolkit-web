@@ -25,6 +25,10 @@ import { IconTintColor, getIconTintCSSVariable, getIconTintBlendMode } from '../
 import { TrailingTag, getTrailingTagLabel } from '../TrailingTag';
 import { Avatar, AvatarSize } from '../Avatar';
 import {
+  IndeterminateLoader,
+  IndeterminateLoaderSize,
+} from '../IndeterminateLoader';
+import {
   AVATAR_LEADING_MARGIN,
   ICON_VERTICAL_OFFSET,
   LeadingAccessoryRenderMode,
@@ -48,6 +52,7 @@ interface ButtonContentProps {
   iconTintColor?: IconTintColor;
   applyIconTinting: boolean;
   showIconActiveIndicator: boolean;
+  loaderIsAnimating: boolean;
   iconRotation: number;
   animateIconRotation?: boolean;
   iconRotationDuration?: number;
@@ -86,7 +91,7 @@ interface ButtonContentProps {
 
 /**
  * Button content viewport: an outer clipped container plus an inner
- * natural-width row containing icon/avatar, labels, and optional trailing tag.
+ * natural-width row containing icon/avatar/loader, labels, and optional trailing tag.
  */
 export const ButtonContent = memo(function ButtonContent({
   contentViewContainerRef,
@@ -98,6 +103,7 @@ export const ButtonContent = memo(function ButtonContent({
   iconTintColor,
   applyIconTinting,
   showIconActiveIndicator,
+  loaderIsAnimating,
   iconRotation,
   animateIconRotation = false,
   iconRotationDuration = 1000,
@@ -141,6 +147,14 @@ export const ButtonContent = memo(function ButtonContent({
       iconTintColor,
     ],
   );
+  const loaderStyle: CSSProperties = useMemo(
+    () => ({
+      marginLeft: iconLeadingMargin,
+      transform: `translateY(${ICON_VERTICAL_OFFSET}px) scale(${iconCounterScale})`,
+      transition: 'none',
+    }),
+    [iconCounterScale, iconLeadingMargin],
+  );
   const iconRotationStyle: CSSProperties = useMemo(
     () => ({
       transform: `rotate(${iconRotation}deg)`,
@@ -180,8 +194,13 @@ export const ButtonContent = memo(function ButtonContent({
     [shouldRenderTrailingTag, textLeadingMargin, textOpacity],
   );
   const iconIndicatorStyle = useMemo(
-    () => ({ visibility: showIconActiveIndicator ? 'visible' as const : 'hidden' as const }),
-    [showIconActiveIndicator],
+    () => ({
+      visibility:
+        renderMode === LeadingAccessoryRenderMode.ICON && showIconActiveIndicator
+          ? 'visible' as const
+          : 'hidden' as const,
+    }),
+    [renderMode, showIconActiveIndicator],
   );
   const trailingTagStyle: CSSProperties = useMemo(
     () => ({
@@ -205,6 +224,24 @@ export const ButtonContent = memo(function ButtonContent({
             <div className={styles.iconRotationContent} style={iconRotationStyle}>
               <div className={styles.iconImageView}>
                 {icon != null && <IconImage source={icon} />}
+              </div>
+              <div
+                className={styles.iconIndicator}
+                style={iconIndicatorStyle}
+              />
+            </div>
+          </div>
+        )}
+
+        {renderMode === LeadingAccessoryRenderMode.LOADER && (
+          <div className={styles.iconContent} style={loaderStyle}>
+            <div className={styles.iconRotationContent}>
+              <div className={styles.iconImageView}>
+                <IndeterminateLoader
+                  isAnimating={loaderIsAnimating}
+                  size={IndeterminateLoaderSize.SMALL}
+                  aria-hidden="true"
+                />
               </div>
               <div
                 className={styles.iconIndicator}

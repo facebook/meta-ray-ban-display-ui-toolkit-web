@@ -62,7 +62,10 @@ export function measureButtonNaturalContentWidth({
   outerContainer.style.transition = 'none';
   contentView.style.width = 'max-content';
 
-  const iconElement = renderMode === LeadingAccessoryRenderMode.ICON
+  const usesIconLayout =
+    renderMode === LeadingAccessoryRenderMode.ICON ||
+    renderMode === LeadingAccessoryRenderMode.LOADER;
+  const iconElement = usesIconLayout
     ? Array.from(contentView.children).find(
         (child): child is HTMLElement =>
           child instanceof HTMLElement &&
@@ -72,7 +75,7 @@ export function measureButtonNaturalContentWidth({
   const iconLeadingMargin = iconElement != null
     ? Number.parseFloat(window.getComputedStyle(iconElement).marginLeft) || 0
     : 0;
-  const expandedIconOffsetCorrection = renderMode === LeadingAccessoryRenderMode.ICON && hasText
+  const expandedIconOffsetCorrection = usesIconLayout && hasText
     ? Math.max(0, iconLeadingMargin - ICON_IMAGEVIEW_LEADING_MARGIN_WITH_TEXT)
     : 0;
 

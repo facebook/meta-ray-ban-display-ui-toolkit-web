@@ -61,6 +61,7 @@ export function getButtonMaxWidth(
     case LeadingAccessoryRenderMode.AVATAR:
       return BUTTON_TEXT_WITH_AVATAR_MAX_WIDTH;
     case LeadingAccessoryRenderMode.ICON:
+    case LeadingAccessoryRenderMode.LOADER:
       return BUTTON_TEXT_WITH_ICON_MAX_WIDTH;
     case LeadingAccessoryRenderMode.NONE:
       return BUTTON_TEXT_ONLY_MAX_WIDTH;
@@ -96,7 +97,11 @@ export function getButtonIconLeadingMargin(
   alwaysShowText: boolean,
 ): number {
   const expanded = isButtonStateExpanded(state);
-  if (renderMode === LeadingAccessoryRenderMode.ICON && !hasText) {
+  if (
+    (renderMode === LeadingAccessoryRenderMode.ICON ||
+      renderMode === LeadingAccessoryRenderMode.LOADER) &&
+    !hasText
+  ) {
     return ICON_IMAGEVIEW_LEADING_MARGIN_WITHOUT_TEXT;
   }
   if (expanded || alwaysShowText) {

@@ -45,7 +45,10 @@ describe('measureButtonNaturalContentWidth', () => {
     ).toBe(0);
   });
 
-  it('measures margin-box width and restores temporary styles', () => {
+  it.each([
+    LeadingAccessoryRenderMode.ICON,
+    LeadingAccessoryRenderMode.LOADER,
+  ])('measures margin-box width for %s mode and restores temporary styles', (renderMode) => {
     const outerContainer = document.createElement('div');
     const contentView = document.createElement('div');
     const icon = document.createElement('div');
@@ -73,7 +76,7 @@ describe('measureButtonNaturalContentWidth', () => {
     const measured = measureButtonNaturalContentWidth({
       outerContainer,
       contentView,
-      renderMode: LeadingAccessoryRenderMode.ICON,
+      renderMode,
       hasText: true,
       classNames,
     });

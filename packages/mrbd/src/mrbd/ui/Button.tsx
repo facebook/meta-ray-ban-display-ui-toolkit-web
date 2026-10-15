@@ -85,7 +85,7 @@ const ACTION_TRANSITION_TITLE_SWAP_DELAY_MS = 250;
 
 /**
  * Button component
- * Rich interactive button with icon/avatar and text
+ * Rich interactive button with icon/avatar/loading and text
  */
 export const Button = memo(forwardRef<ButtonHandle, ButtonProps>(
   function Button(
@@ -96,6 +96,7 @@ export const Button = memo(forwardRef<ButtonHandle, ButtonProps>(
       icon,
       iconTintColor,
       applyIconTinting = true,
+      showLoader = false,
       showIconActiveIndicator = false,
       iconRotation = 0,
       animateIconRotation = false,
@@ -131,11 +132,13 @@ export const Button = memo(forwardRef<ButtonHandle, ButtonProps>(
       // an unmeasured state. width stays BUTTON_MINIMUM_WIDTH (no measurement) but
       // remains numeric; containerWidth below drives the expanded first-paint box
       // until the mount measurement lands.
-      const initialRenderMode = hasAvatar
-        ? LeadingAccessoryRenderMode.AVATAR
-        : icon
-          ? LeadingAccessoryRenderMode.ICON
-          : LeadingAccessoryRenderMode.NONE;
+      const initialRenderMode = showLoader
+        ? LeadingAccessoryRenderMode.LOADER
+        : hasAvatar
+          ? LeadingAccessoryRenderMode.AVATAR
+          : icon
+            ? LeadingAccessoryRenderMode.ICON
+            : LeadingAccessoryRenderMode.NONE;
       return getButtonInitialAnimationValues({
         measuredContentWidth: 0,
         renderMode: initialRenderMode,
@@ -185,10 +188,11 @@ export const Button = memo(forwardRef<ButtonHandle, ButtonProps>(
      * Determine leading accessory render mode
      */
     const renderMode = useMemo<LeadingAccessoryRenderMode>(() => {
+      if (showLoader) return LeadingAccessoryRenderMode.LOADER;
       if (hasAvatar) return LeadingAccessoryRenderMode.AVATAR;
       if (effectiveIcon) return LeadingAccessoryRenderMode.ICON;
       return LeadingAccessoryRenderMode.NONE;
-    }, [effectiveIcon, hasAvatar]);
+    }, [effectiveIcon, hasAvatar, showLoader]);
 
     /**
      * Check if we have text content
@@ -869,6 +873,7 @@ export const Button = memo(forwardRef<ButtonHandle, ButtonProps>(
           iconTintColor={iconTintColor}
           applyIconTinting={applyIconTinting}
           showIconActiveIndicator={showIconActiveIndicator}
+          loaderIsAnimating={!prefersReducedMotion}
           iconRotation={iconRotation}
           animateIconRotation={animateIconRotation && !prefersReducedMotion}
           iconRotationDuration={iconRotationDuration}

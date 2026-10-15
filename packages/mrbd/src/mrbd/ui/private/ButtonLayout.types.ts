@@ -11,6 +11,7 @@ import type { State } from '@wearables-ui-toolkit/foundation/base/Interactions';
 export enum LeadingAccessoryRenderMode {
   NONE = 'none',
   ICON = 'icon',
+  LOADER = 'loader',
   AVATAR = 'avatar',
 }
 

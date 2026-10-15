@@ -25,6 +25,7 @@ import {
   galleryForestPhoto,
   galleryOverlookPhoto,
 } from '../../galleryAssets';
+import './ContainerPage.css';
 
 const coastPhoto = galleryCoastPhoto;
 const forestPhoto = galleryForestPhoto;
@@ -100,6 +101,25 @@ export function ContainerPage() {
         </Container>
       </DemoSection>
       <DemoSection
+        title="Caller-controlled translation"
+        description="Custom translation moves the surface without replacing the toolkit's edge feedback. Press an outer direction to see the rubber-band movement add to the resting offset."
+      >
+        <div className="gallery-custom-translation-frame">
+          <Container
+            aria-label="Open translated destination"
+            className="gallery-custom-translation-surface"
+            customTranslationX={12}
+            customTranslationY={8}
+            onClick={() => {}}
+          >
+            <div className="gallery-surface-content">
+              <TextView as="h2" textStyle={TextStyle.HEADING2}>Translated destination</TextView>
+              <TextView as="p" textStyle={TextStyle.BODY2} textColor={TextColor.SECONDARY}>The resting offset remains while focus feedback moves.</TextView>
+            </div>
+          </Container>
+        </div>
+      </DemoSection>
+      <DemoSection
         title="Content focus over image fills"
         description="The content-focus material places a blurred foreground light over stationary image content. Move between the images, then press an outer direction to inspect the edge response."
       >
@@ -118,7 +138,7 @@ export function ContainerPage() {
       <GuidancePanel
         summary="Container is an interactive material surface that coordinates common input behavior, visual states, and animations for its content. It is both a foundation for components such as Button, Panel, and ListItem and a standalone surface when an entire content region should act as one target."
         useWhen={<ul><li>A group of content should be presented and activated as one unit, such as a weather widget that opens a detailed forecast.</li><li>Implementing a reusable component that needs material rendering and standard toolkit interaction behavior.</li><li>A custom component needs focus, press, disabled, or partial-focus states to drive its material and content presentation.</li></ul>}
-        capabilities={<ul><li>Material hosting, input handling, focus and press states, disabled appearance, and animated state transitions.</li><li>Content scaling and alpha, semantic shapes, optional clipping, visual-state mapping, and partial-focus feedback.</li></ul>}
+        capabilities={<ul><li>Material hosting, input handling, focus and press states, disabled appearance, and animated state transitions.</li><li>Content scaling, alpha, caller-controlled translation, semantic shapes, optional clipping, visual-state mapping, and partial-focus feedback.</li></ul>}
         avoid={<ul><li>Rebuilding an existing higher-level toolkit component when it already provides the intended behavior.</li><li>Using Container only to render a non-interactive material; use StaticContainer instead.</li><li>Placing focusable or interactive children inside a Container that is itself one interaction target.</li></ul>}
       />
     </GalleryPage>

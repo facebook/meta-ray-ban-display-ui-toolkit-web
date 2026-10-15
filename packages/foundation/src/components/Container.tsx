@@ -326,6 +326,8 @@ const ContainerImpl = forwardRef<HTMLElement, ContainerImplementationProps>(
       customScaleX = 1,
       customScaleY = 1,
       customAlpha = 1,
+      customTranslationX = 0,
+      customTranslationY = 0,
       partialFocusSupportedAxis = PartialFocusSupportedAxis.XY,
       isRubberbandTranslationEnabled = true,
       shapeProvider,
@@ -973,6 +975,8 @@ const ContainerImpl = forwardRef<HTMLElement, ContainerImplementationProps>(
      */
     const combinedScaleX = interactionScale * customScaleX;
     const combinedScaleY = interactionScale * customScaleY;
+    const combinedTranslationX = customTranslationX + partialFocusTranslationX;
+    const combinedTranslationY = customTranslationY + partialFocusTranslationY;
     /**
      * Combined alpha: interactionAlpha * customAlpha.
      *
@@ -1067,10 +1071,10 @@ const ContainerImpl = forwardRef<HTMLElement, ContainerImplementationProps>(
           : shapeContext.shapeProvider.getCssBorderRadius?.() ?? '0px',
         overflow: 'visible',
         translate: material.backgroundBlendsWithBackdrop() &&
-          partialFocusTranslationX === 0 &&
-          partialFocusTranslationY === 0
+          combinedTranslationX === 0 &&
+          combinedTranslationY === 0
           ? undefined
-          : `${partialFocusTranslationX}px ${partialFocusTranslationY}px`,
+          : `${combinedTranslationX}px ${combinedTranslationY}px`,
         transform: material.backgroundBlendsWithBackdrop() &&
           combinedScaleX === 1 &&
           combinedScaleY === 1
@@ -1090,8 +1094,8 @@ const ContainerImpl = forwardRef<HTMLElement, ContainerImplementationProps>(
         effectiveUseSmoothCorners,
         height,
         material,
-        partialFocusTranslationX,
-        partialFocusTranslationY,
+        combinedTranslationX,
+        combinedTranslationY,
         style,
         width,
       ],

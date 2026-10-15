@@ -1,0 +1,17 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the Apache License, Version 2.0 found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+.gallery-custom-translation-frame {
+  box-sizing: border-box;
+  width: 100%;
+  padding: var(--uit-spacing-large);
+}
+
+.gallery-custom-translation-surface {
+  width: 100%;
+}

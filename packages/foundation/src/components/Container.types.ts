@@ -70,6 +70,10 @@ export interface ContainerOwnProps {
   customScaleX?: number;
   customScaleY?: number;
   customAlpha?: number;
+  /** Caller-owned horizontal translation added to interaction movement. */
+  customTranslationX?: number;
+  /** Caller-owned vertical translation added to interaction movement. */
+  customTranslationY?: number;
   /** Geometry used for clipping and all material fill/stroke paths. */
   shapeProvider?: ShapeProvider;
   stateChangeAnimations?: (

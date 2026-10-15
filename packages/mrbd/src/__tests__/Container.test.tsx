@@ -908,6 +908,48 @@ describe('Container scale and state', () => {
     expect(style).toContain('scale(');
   });
 
+  it('updates caller translation and resets omitted axes', () => {
+    const { container, rerender } = render(<Container>Custom translation</Container>);
+    const root = container.firstElementChild as HTMLElement;
+
+    expect(root.style.translate).toBe('0px 0px');
+
+    rerender(
+      <Container customTranslationX={120} customTranslationY={80}>
+        Custom translation
+      </Container>
+    );
+    expect(root.style.translate).toBe('120px 80px');
+
+    rerender(<Container customTranslationX={-16}>Custom translation</Container>);
+    expect(root.style.translate).toBe('-16px 0px');
+
+    rerender(<Container customTranslationY={-8}>Custom translation</Container>);
+    expect(root.style.translate).toBe('0px -8px');
+
+    rerender(<Container>Custom translation</Container>);
+    expect(root.style.translate).toBe('0px 0px');
+  });
+
+  it('preserves an explicit CSS translation when caller offsets change', () => {
+    const style = { translate: '-20px 5px' };
+    const { container, rerender } = render(
+      <Container customTranslationX={120} customTranslationY={80} style={style}>
+        Owned translation
+      </Container>
+    );
+    const root = container.firstElementChild as HTMLElement;
+
+    expect(root.style.translate).toBe('-20px 5px');
+
+    rerender(
+      <Container customTranslationX={-16} customTranslationY={-8} style={style}>
+        Owned translation
+      </Container>
+    );
+    expect(root.style.translate).toBe('-20px 5px');
+  });
+
   it('applies customAlpha as opacity', () => {
     const { container } = render(
       <Container customAlpha={0.5}>Alpha</Container>
@@ -1113,7 +1155,7 @@ describe('Container material', () => {
     expect(material.getCurrentState()).toBe(VisualState.PRESSED);
   });
 
-  it('opens backdrop-blended background layers to the parent backdrop', () => {
+  it.each([0, -16])('keeps backdrop-blending metadata with caller translation %s', (customTranslationX) => {
     const material = new ContainerMaterial({
       backgroundBlendsWithBackdrop: true,
       layers: [
@@ -1129,6 +1171,7 @@ describe('Container material', () => {
         height={48}
         material={material}
         contentScaleForStateFn={() => 1}
+        customTranslationX={customTranslationX}
       >
         Content
       </Container>,
@@ -1148,7 +1191,7 @@ describe('Container material', () => {
     expect(root.style.isolation).toBe('auto');
     expect(root.style.zIndex).toBe('');
     expect(root.style.transform).toBe('');
-    expect(root.style.translate).toBe('');
+    expect(root.style.translate).toBe(customTranslationX === 0 ? '' : '-16px 0px');
     expect(background?.style.isolation).toBe('auto');
     expect(background?.style.zIndex).toBe('auto');
     expect(content?.style.zIndex).toBe('1');
@@ -1301,7 +1344,7 @@ describe('Container material', () => {
     offsetHeightSpy.mockRestore();
   });
 
-  it('rubber-bands and offsets focus-aware material on invalid directional focus', () => {
+  it('adds rubber-band and material offsets to caller translation on invalid directional focus', () => {
     let nextFrameId = 1;
     const frames = new Map<number, FrameRequestCallback>();
     const requestFrameSpy = vi
@@ -1324,6 +1367,8 @@ describe('Container material', () => {
         width={200}
         height={88}
         material={material}
+        customTranslationX={120}
+        customTranslationY={80}
         style={{ transform: 'scale(0.75)' }}
         data-uit-capture-id="rubber-band-test"
       >
@@ -1332,6 +1377,7 @@ describe('Container material', () => {
     );
 
     const root = container.querySelector('[data-uit-capture-id="rubber-band-test"]') as HTMLElement;
+    expect(root.style.translate).toBe('120px 80px');
     // Baseline gradient origin with no partial-focus offset.
     const initialCx = focusedGradientOriginX(0);
     frames.clear();
@@ -1352,22 +1398,40 @@ describe('Container material', () => {
       firstFrame?.(performance.now() + 75);
     });
 
-    // The container rubber-bands (translate offset) while preserving the
-    // caller-owned transform, and forwards a rightward partial-focus offset to
-    // the material...
-    expect(root.style.translate).not.toBe('0px 0px');
+    // The rubber-band offset adds to the caller-owned translation while the
+    // caller-owned scale remains intact.
+    const [translatedX, translatedY] = root.style.translate
+      .split(' ')
+      .map(value => Number.parseFloat(value));
+    expect(translatedX).toBeGreaterThan(120);
+    expect(translatedY).toBe(80);
     expect(root.style.transform).toBe('scale(0.75)');
     const partialFocusX = material.getPartialFocusPosition().x;
     expect(partialFocusX).toBeGreaterThan(0);
-    // ...which shifts the focus-aware gradient origin to the right.
+    // The same partial-focus offset shifts the focus-aware gradient origin right.
     expect(focusedGradientOriginX(partialFocusX)).toBeGreaterThan(initialCx);
+
+    const completeFirstStage = Array.from(frames.values())[0];
+    expect(completeFirstStage).toBeDefined();
+    act(() => {
+      frames.clear();
+      completeFirstStage?.(performance.now() + 1_000);
+    });
+    const completeSecondStage = Array.from(frames.values())[0];
+    expect(completeSecondStage).toBeDefined();
+    act(() => {
+      frames.clear();
+      completeSecondStage?.(performance.now() + 1_000);
+    });
+
+    expect(root.style.translate).toBe('120px 80px');
 
     unmount();
     requestFrameSpy.mockRestore();
     cancelFrameSpy.mockRestore();
   });
 
-  it('can disable root translation while keeping rubber-band material offsets', () => {
+  it.each([[0, 0], [120, 80]])('can disable rubber-band translation while retaining offsets %s, %s', (customTranslationX, customTranslationY) => {
     let nextFrameId = 1;
     const frames = new Map<number, FrameRequestCallback>();
     const requestFrameSpy = vi
@@ -1391,6 +1455,8 @@ describe('Container material', () => {
         height={88}
         material={material}
         isRubberbandTranslationEnabled={false}
+        customTranslationX={customTranslationX}
+        customTranslationY={customTranslationY}
         data-uit-capture-id="rubber-band-no-translation-test"
       >
         Rubber
@@ -1419,12 +1485,9 @@ describe('Container material', () => {
       firstFrame?.(performance.now() + 75);
     });
 
-    // The root does not translate (rubber-band translation disabled), but the
-    // material still receives the rubber-band partial-focus offset...
-    expect(root.style.translate).toBe('0px 0px');
+    expect(root.style.translate).toBe(`${customTranslationX}px ${customTranslationY}px`);
     const partialFocusX = material.getPartialFocusPosition().x;
     expect(partialFocusX).toBeGreaterThan(0);
-    // ...which shifts the focus-aware gradient origin to the right.
     expect(focusedGradientOriginX(partialFocusX)).toBeGreaterThan(initialCx);
 
     unmount();

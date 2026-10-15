@@ -15,22 +15,16 @@ import type {
   Ref,
   UIEventHandler,
 } from 'react';
-import {
-  memo,
-  useCallback,
-  useMemo,
-} from 'react';
-import { useCarouselPaginationPresentation } from '../CarouselPaginationPresentation';
-import type { PaginationMode } from '../Carousel.types';
+import {memo, useCallback, useMemo} from 'react';
+import {useCarouselPaginationPresentation} from '../CarouselPaginationPresentation';
+import type {CarouselProps, PaginationMode} from '../Carousel.types';
 import {
   getCarouselItemStyle,
   getCarouselPaginationClassName,
   getCarouselPaginationStyle,
 } from './CarouselLayout';
-import {
-  CarouselIndicatorPlacement,
-} from '../Carousel.types';
-import type { FadingEdgeOverlayStyles } from './FadingEdges';
+import {CarouselIndicatorPlacement} from '../Carousel.types';
+import type {FadingEdgeOverlayStyles} from './FadingEdges';
 import styles from '../Carousel.module.css';
 
 type CarouselPaginationStyleClasses = Parameters<
@@ -63,6 +57,7 @@ interface CarouselFrameProps {
   indicatorPlacement: CarouselIndicatorPlacement;
   overlayDistance: number;
   paginationMode: PaginationMode;
+  formatPaginationText?: CarouselProps['formatPaginationText'];
   /**
    * Current dot/page fed to the pagination indicator. Distinct from
    * `currentIndex` (the centered carousel item) so a
@@ -101,12 +96,13 @@ const CarouselFrameItem = memo(function CarouselFrameItem({
   onItemFocus,
 }: CarouselFrameItemProps) {
   const itemStyle = useMemo(
-    () => getCarouselItemStyle({
-      index,
-      itemCount,
-      edgeOffsets,
-      itemGap,
-    }),
+    () =>
+      getCarouselItemStyle({
+        index,
+        itemCount,
+        edgeOffsets,
+        itemGap,
+      }),
     [index, itemCount, edgeOffsets, itemGap],
   );
   const handleFocus = useCallback(
@@ -124,8 +120,7 @@ const CarouselFrameItem = memo(function CarouselFrameItem({
       aria-label={`Item ${index + 1} of ${itemCount}`}
       data-item-index={index}
       data-centered={index === currentIndex ? 'true' : 'false'}
-      onFocus={handleFocus}
-    >
+      onFocus={handleFocus}>
       {item}
     </div>
   );
@@ -158,6 +153,7 @@ export const CarouselFrame = memo(function CarouselFrame({
   indicatorPlacement,
   overlayDistance,
   paginationMode,
+  formatPaginationText,
   indicatorCurrentIndex,
   indicatorItemCount,
 }: CarouselFrameProps) {
@@ -167,18 +163,20 @@ export const CarouselFrame = memo(function CarouselFrame({
     [alignmentClass],
   );
   const paginationClassName = useMemo(
-    () => getCarouselPaginationClassName({
-      indicatorPlacement,
-      paginationMode,
-      styles: styles as CarouselPaginationStyleClasses,
-    }),
+    () =>
+      getCarouselPaginationClassName({
+        indicatorPlacement,
+        paginationMode,
+        styles: styles as CarouselPaginationStyleClasses,
+      }),
     [indicatorPlacement, paginationMode],
   );
   const paginationStyle = useMemo(
-    () => getCarouselPaginationStyle({
-      indicatorPlacement,
-      overlayDistance,
-    }),
+    () =>
+      getCarouselPaginationStyle({
+        indicatorPlacement,
+        overlayDistance,
+      }),
     [indicatorPlacement, overlayDistance],
   );
 
@@ -191,8 +189,7 @@ export const CarouselFrame = memo(function CarouselFrame({
       aria-label={ariaLabel ?? 'Carousel'}
       aria-roledescription="carousel"
       data-item-count={itemCount}
-      data-current-item={currentIndex}
-    >
+      data-current-item={currentIndex}>
       <div
         ref={scrollAreaRef}
         className={scrollAreaClassName}
@@ -201,8 +198,7 @@ export const CarouselFrame = memo(function CarouselFrame({
         role="list"
         onKeyDown={onKeyDown}
         onFocus={onScrollAreaFocus}
-        onScroll={onScroll}
-      >
+        onScroll={onScroll}>
         <div className={styles.track}>
           {items.map((item, index) => (
             <CarouselFrameItem
@@ -239,6 +235,7 @@ export const CarouselFrame = memo(function CarouselFrame({
             mode={paginationMode}
             pageCount={indicatorItemCount}
             currentPage={indicatorCurrentIndex}
+            formatText={formatPaginationText}
           />
         </div>
       )}

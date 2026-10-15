@@ -12,30 +12,38 @@ import {
   type ComponentType,
   type ReactNode,
 } from 'react';
-import { PaginationMode } from './Carousel.types';
+import {PaginationMode, type CarouselProps} from './Carousel.types';
 
 export interface CarouselPaginationPresentationProps {
   mode: PaginationMode;
   pageCount: number;
   currentPage: number;
+  formatText?: CarouselProps['formatPaginationText'];
 }
 
-export type CarouselPaginationPresentation = ComponentType<
-  CarouselPaginationPresentationProps
->;
+export type CarouselPaginationPresentation =
+  ComponentType<CarouselPaginationPresentationProps>;
 
 function DefaultCarouselPaginationPresentation({
   mode,
   pageCount,
   currentPage,
+  formatText,
 }: CarouselPaginationPresentationProps) {
   if (mode === PaginationMode.TEXT) {
-    return <span>{`${currentPage + 1} of ${pageCount}`}</span>;
+    const displayPage = currentPage + 1;
+    return (
+      <span>
+        {formatText != null
+          ? formatText(displayPage, pageCount)
+          : `${displayPage} of ${pageCount}`}
+      </span>
+    );
   }
 
   return (
     <span aria-hidden="true">
-      {Array.from({ length: pageCount }, (_, index) => (
+      {Array.from({length: pageCount}, (_, index) => (
         <span key={index} data-active={index === currentPage} />
       ))}
     </span>
@@ -63,7 +71,6 @@ export function CarouselPaginationPresentationProvider({
   );
 }
 
-export function useCarouselPaginationPresentation():
-  CarouselPaginationPresentation {
+export function useCarouselPaginationPresentation(): CarouselPaginationPresentation {
   return useContext(CarouselPaginationPresentationContext);
 }

@@ -6,8 +6,8 @@
  *
  */
 
-import type { CSSProperties } from 'react';
-import { PaginationMode } from '../Carousel.types';
+import type {CSSProperties} from 'react';
+import {PaginationMode} from '../Carousel.types';
 import {
   getFadingEdgeOverlayStyles,
   type FadingEdgeOverlayStyles,
@@ -59,10 +59,12 @@ const FOCUSABLE_DESCENDANT_SELECTOR = [
 export function getFirstCarouselFocusableDescendant(
   element: HTMLElement,
 ): HTMLElement | null {
-  return Array.from(element.querySelectorAll(FOCUSABLE_DESCENDANT_SELECTOR)).find(
-    (candidate): candidate is HTMLElement =>
-      candidate instanceof HTMLElement && candidate !== element,
-  ) ?? null;
+  return (
+    Array.from(element.querySelectorAll(FOCUSABLE_DESCENDANT_SELECTOR)).find(
+      (candidate): candidate is HTMLElement =>
+        candidate instanceof HTMLElement && candidate !== element,
+    ) ?? null
+  );
 }
 
 export function getCarouselEdgeOffsets(
@@ -71,14 +73,18 @@ export function getCarouselEdgeOffsets(
   itemCount: number,
 ): CarouselEdgeOffsets {
   if (scrollArea == null || itemCount === 0) {
-    return { start: 0, end: 0 };
+    return {start: 0, end: 0};
   }
 
   const firstItem = itemRefs[0];
   const lastItem = itemRefs[itemCount - 1];
   return {
-    start: firstItem ? Math.max(0, (scrollArea.clientWidth - firstItem.offsetWidth) / 2) : 0,
-    end: lastItem ? Math.max(0, (scrollArea.clientWidth - lastItem.offsetWidth) / 2) : 0,
+    start: firstItem
+      ? Math.max(0, (scrollArea.clientWidth - firstItem.offsetWidth) / 2)
+      : 0,
+    end: lastItem
+      ? Math.max(0, (scrollArea.clientWidth - lastItem.offsetWidth) / 2)
+      : 0,
   };
 }
 
@@ -95,10 +101,41 @@ export function getCarouselScrollTarget(
 ): number {
   const scrollAreaCenter = scrollArea.clientWidth / 2;
   const itemCenter = itemElement.offsetLeft + itemElement.clientWidth / 2;
-  return Math.max(0, itemCenter - scrollAreaCenter);
+  const maxScrollLeft = Math.max(
+    0,
+    scrollArea.scrollWidth - scrollArea.clientWidth,
+  );
+  return Math.min(maxScrollLeft, Math.max(0, itemCenter - scrollAreaCenter));
 }
 
-export function isCarouselIndexInRange(index: number, itemCount: number): boolean {
+export function getNearestCenteredCarouselIndex(
+  scrollArea: HTMLElement,
+  itemRefs: Array<HTMLElement | null>,
+  itemCount: number,
+): number | null {
+  const viewport = scrollArea.getBoundingClientRect();
+  if (viewport.width <= 0) return null;
+  const center = viewport.left + viewport.width / 2;
+  let nearestIndex: number | null = null;
+  let nearestDistance = Infinity;
+  for (let index = 0; index < itemCount; index += 1) {
+    const item = itemRefs[index];
+    if (item == null) continue;
+    const bounds = item.getBoundingClientRect();
+    if (bounds.width <= 0) continue;
+    const distance = Math.abs(bounds.left + bounds.width / 2 - center);
+    if (distance < nearestDistance) {
+      nearestDistance = distance;
+      nearestIndex = index;
+    }
+  }
+  return nearestIndex;
+}
+
+export function isCarouselIndexInRange(
+  index: number,
+  itemCount: number,
+): boolean {
   return index >= 0 && index < itemCount;
 }
 
@@ -134,7 +171,7 @@ export function shouldShowCarouselPagination(
 
 export function getCarouselAlignmentClass(
   verticalAlignment: CarouselVerticalAlignment,
-  styles: { alignBottom: string; alignCenter: string },
+  styles: {alignBottom: string; alignCenter: string},
 ): string {
   return verticalAlignment === CarouselVerticalAlignment.BOTTOM
     ? styles.alignBottom
@@ -222,11 +259,11 @@ export function getCarouselPaginationStyle({
     return {};
   }
 
-  return { paddingBottom: overlayDistance };
+  return {paddingBottom: overlayDistance};
 }
 
 export function getCarouselClassName(
-  styles: { carousel: string },
+  styles: {carousel: string},
   className: string,
 ): string {
   return [styles.carousel, className].filter(Boolean).join(' ');

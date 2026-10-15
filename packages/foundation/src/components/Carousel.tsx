@@ -9,8 +9,8 @@
 /**
  * Carousel component
  *
- * Horizontal scrolling container for traversable content (e.g., Gallery,
- * Notifications, Music). Items center-snap on focus and keyboard navigation.
+ * Horizontal scrolling container for photos, saved items, and other collections.
+ * Items center-snap on focus and keyboard navigation.
  *
  * Features:
  * - Horizontal scrolling with center-snapping
@@ -50,7 +50,7 @@ import {
   type FocusEvent,
   Children,
 } from 'react';
-import { PaginationMode } from './Carousel.types';
+import {PaginationMode} from './Carousel.types';
 import styles from './Carousel.module.css';
 import {
   DEFAULT_CAROUSEL_FADING_EDGE_LENGTH,
@@ -60,7 +60,6 @@ import {
   getCarouselClassName,
   getCarouselFadingEdgeOverlayStyles,
   getCarouselIndexForKey,
-  getCarouselScrollTarget,
   getFirstCarouselFocusableDescendant,
   isCarouselIndexInRange,
   shouldShowCarouselPagination,
@@ -69,16 +68,21 @@ import {
   CarouselIndicatorPlacement,
   CarouselVerticalAlignment,
 } from './Carousel.types';
-import type { CarouselHandle, CarouselProps } from './Carousel.types';
-import { useCarouselLayoutState } from './private/useCarouselLayoutState';
-import { CarouselFrame } from './private/CarouselFrame';
+import type {CarouselHandle, CarouselProps} from './Carousel.types';
+import {useCarouselLayoutState} from './private/useCarouselLayoutState';
+import {useCarouselScrollPosition} from './private/useCarouselScrollPosition';
+import {CarouselFrame} from './private/CarouselFrame';
 
 export {
   CarouselIndicatorPlacement,
   CarouselVerticalAlignment,
   PaginationMode,
 } from './Carousel.types';
-export type { CarouselHandle, CarouselProps, ProgressIndicatorCustomization } from './Carousel.types';
+export type {
+  CarouselHandle,
+  CarouselProps,
+  ProgressIndicatorCustomization,
+} from './Carousel.types';
 
 const DEFAULT_STYLE: CSSProperties = {};
 type CarouselAlignmentStyleClasses = {
@@ -105,14 +109,15 @@ type CarouselRootStyleClasses = {
  * The carousel manages focus and scroll position internally. Each item
  * is individually focusable for d-pad/keyboard navigation.
  */
-export const Carousel = memo(forwardRef<CarouselHandle, CarouselProps>(
-  function Carousel(
+export const Carousel = memo(
+  forwardRef<CarouselHandle, CarouselProps>(function Carousel(
     {
       children,
       itemGap = DEFAULT_CAROUSEL_ITEM_GAP,
       onItemCentered,
       showPagination = true,
       paginationMode = PaginationMode.TEXT,
+      formatPaginationText,
       verticalAlignment = CarouselVerticalAlignment.CENTER,
       indicatorPlacement = CarouselIndicatorPlacement.UNDER,
       overlayDistance = DEFAULT_CAROUSEL_OVERLAY_DISTANCE,
@@ -124,43 +129,41 @@ export const Carousel = memo(forwardRef<CarouselHandle, CarouselProps>(
       tabIndex = 0,
       progressIndicatorCustomizationOverride,
     },
-    ref
+    ref,
   ) {
     const rootRef = useRef<HTMLDivElement>(null);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
     const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
     const [currentIndex, setCurrentIndex] = useState(initialIndex);
+    const currentIndexRef = useRef(initialIndex);
 
     // Resolve children into an array of items
     const items = useMemo(() => Children.toArray(children), [children]);
     const itemCount = items.length;
-    const {
-      edgeOffsets,
-      scrollMetrics,
-      updateScrollMetrics,
-    } = useCarouselLayoutState({
-      scrollAreaRef,
-      itemRefs,
-      items,
-      itemCount,
-    });
-
-    /**
-     * Scroll to center an item at the given index.
-     */
-    const scrollToItem = useCallback(
-      (index: number, smooth: boolean = true) => {
-        const scrollArea = scrollAreaRef.current;
-        const itemEl = itemRefs.current[index];
-        if (!scrollArea || !itemEl) return;
-
-        scrollArea.scrollTo({
-          left: getCarouselScrollTarget(scrollArea, itemEl),
-          behavior: smooth ? 'smooth' : 'auto',
-        });
+    const {edgeOffsets, scrollMetrics, updateScrollMetrics} =
+      useCarouselLayoutState({
+        scrollAreaRef,
+        itemRefs,
+        items,
+        itemCount,
+      });
+    const setCenteredIndex = useCallback(
+      (index: number) => {
+        currentIndexRef.current = index;
+        setCurrentIndex(index);
+        onItemCentered?.(index);
       },
-      []
+      [onItemCentered],
     );
+    const {handleScroll, isSynchronizingScroll, scrollToItem} =
+      useCarouselScrollPosition({
+        scrollAreaRef,
+        itemRefs,
+        currentIndexRef,
+        itemCount,
+        onCenteredItemChange: setCenteredIndex,
+        updateScrollMetrics,
+      });
 
     /**
      * Focus and center an item.
@@ -169,16 +172,14 @@ export const Carousel = memo(forwardRef<CarouselHandle, CarouselProps>(
       (index: number, smooth: boolean = true) => {
         if (!isCarouselIndexInRange(index, itemCount)) return;
 
-        setCurrentIndex(index);
-        onItemCentered?.(index);
-
+        setCenteredIndex(index);
         const itemEl = itemRefs.current[index];
         if (itemEl) {
-          itemEl.focus({ preventScroll: true });
+          itemEl.focus({preventScroll: true});
           scrollToItem(index, smooth);
         }
       },
-      [itemCount, onItemCentered, scrollToItem]
+      [itemCount, setCenteredIndex, scrollToItem],
     );
 
     /**
@@ -201,10 +202,10 @@ export const Carousel = memo(forwardRef<CarouselHandle, CarouselProps>(
     useEffect(() => {
       if (itemCount === 0) return;
       if (currentIndex >= itemCount) {
-        setCurrentIndex(itemCount - 1);
+        setCenteredIndex(itemCount - 1);
         requestAnimationFrame(() => scrollToItem(itemCount - 1, false));
       }
-    }, [currentIndex, itemCount, scrollToItem]);
+    }, [currentIndex, itemCount, setCenteredIndex, scrollToItem]);
 
     /**
      * Handle keyboard navigation.
@@ -215,7 +216,7 @@ export const Carousel = memo(forwardRef<CarouselHandle, CarouselProps>(
       (event: KeyboardEvent<HTMLDivElement>) => {
         const nextIndex = getCarouselIndexForKey(
           event.key,
-          currentIndex,
+          currentIndexRef.current,
           itemCount,
         );
 
@@ -225,7 +226,7 @@ export const Carousel = memo(forwardRef<CarouselHandle, CarouselProps>(
           focusItem(nextIndex);
         }
       },
-      [currentIndex, itemCount, focusItem]
+      [itemCount, focusItem],
     );
 
     /**
@@ -236,20 +237,23 @@ export const Carousel = memo(forwardRef<CarouselHandle, CarouselProps>(
     const handleItemFocus = useCallback(
       (index: number, event?: FocusEvent<HTMLDivElement>) => {
         if (event != null && event.target === event.currentTarget) {
-          const focusableChild = getFirstCarouselFocusableDescendant(event.currentTarget);
+          const focusableChild = getFirstCarouselFocusableDescendant(
+            event.currentTarget,
+          );
           if (focusableChild != null) {
-            focusableChild.focus({ preventScroll: true });
+            focusableChild.focus({preventScroll: true});
             return;
           }
         }
 
-        if (index !== currentIndex) {
-          setCurrentIndex(index);
-          onItemCentered?.(index);
+        if (index !== currentIndexRef.current) {
+          setCenteredIndex(index);
         }
-        scrollToItem(index);
+        if (!isSynchronizingScroll.current) {
+          scrollToItem(index);
+        }
       },
-      [currentIndex, onItemCentered, scrollToItem]
+      [isSynchronizingScroll, setCenteredIndex, scrollToItem],
     );
 
     /**
@@ -263,9 +267,9 @@ export const Carousel = memo(forwardRef<CarouselHandle, CarouselProps>(
           return;
         }
 
-        focusItem(currentIndex, false);
+        focusItem(currentIndexRef.current, false);
       },
-      [currentIndex, focusItem],
+      [focusItem],
     );
 
     /**
@@ -275,7 +279,7 @@ export const Carousel = memo(forwardRef<CarouselHandle, CarouselProps>(
       (index: number) => (el: HTMLDivElement | null) => {
         itemRefs.current[index] = el;
       },
-      []
+      [],
     );
 
     // Resolve the optional progress-indicator customization for the active
@@ -289,38 +293,39 @@ export const Carousel = memo(forwardRef<CarouselHandle, CarouselProps>(
     // The dot/page values fed to the indicator. Defaults to the carousel's
     // active index + item count; overridden by the customization's
     // `currentIndex` / `totalItems` when present.
-    const indicatorCurrentIndex = progressCustomization?.currentIndex ?? currentIndex;
+    const indicatorCurrentIndex =
+      progressCustomization?.currentIndex ?? currentIndex;
     const indicatorItemCount = progressCustomization?.totalItems ?? itemCount;
 
     // Pagination visibility logic for the progress indicator.
-    const shouldShowPagination = useMemo(
-      () => {
-        // When a customization is provided, its `isVisible` gates the indicator.
-        if (progressCustomization != null && !progressCustomization.isVisible) {
-          return false;
-        }
-        return shouldShowCarouselPagination(
-          showPagination,
-          indicatorItemCount,
-          paginationMode,
-        );
-      },
-      [progressCustomization, indicatorItemCount, paginationMode, showPagination],
-    );
+    const shouldShowPagination = useMemo(() => {
+      // When a customization is provided, its `isVisible` gates the indicator.
+      if (progressCustomization != null && !progressCustomization.isVisible) {
+        return false;
+      }
+      return shouldShowCarouselPagination(
+        showPagination,
+        indicatorItemCount,
+        paginationMode,
+      );
+    }, [
+      progressCustomization,
+      indicatorItemCount,
+      paginationMode,
+      showPagination,
+    ]);
 
     // Track alignment class
     const alignmentClass = useMemo(
-      () => getCarouselAlignmentClass(
-        verticalAlignment,
-        styles as CarouselAlignmentStyleClasses,
-      ),
+      () =>
+        getCarouselAlignmentClass(
+          verticalAlignment,
+          styles as CarouselAlignmentStyleClasses,
+        ),
       [verticalAlignment],
     );
     const fadingEdgeOverlayStyles = useMemo(
-      () => getCarouselFadingEdgeOverlayStyles(
-        scrollMetrics,
-        fadingEdgeLength,
-      ),
+      () => getCarouselFadingEdgeOverlayStyles(scrollMetrics, fadingEdgeLength),
       [fadingEdgeLength, scrollMetrics],
     );
 
@@ -362,16 +367,17 @@ export const Carousel = memo(forwardRef<CarouselHandle, CarouselProps>(
         tabIndex={tabIndex}
         onKeyDown={handleKeyDown}
         onScrollAreaFocus={handleScrollAreaFocus}
-        onScroll={updateScrollMetrics}
+        onScroll={handleScroll}
         setItemRef={setItemRef}
         onItemFocus={handleItemFocus}
         shouldShowPagination={shouldShowPagination}
         indicatorPlacement={indicatorPlacement}
         overlayDistance={overlayDistance}
         paginationMode={paginationMode}
+        formatPaginationText={formatPaginationText}
         indicatorCurrentIndex={indicatorCurrentIndex}
         indicatorItemCount={indicatorItemCount}
       />
     );
-  }
-));
+  }),
+);

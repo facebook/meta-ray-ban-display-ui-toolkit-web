@@ -10,7 +10,7 @@
  * Carousel public API.
  */
 
-import type { CSSProperties, ReactNode } from 'react';
+import type {CSSProperties, ReactNode} from 'react';
 /** Pagination display mode requested from the active device presentation. */
 export const PaginationMode = {
   TEXT: 'text',
@@ -114,6 +114,13 @@ export interface CarouselProps {
    * @default PaginationMode.TEXT
    */
   paginationMode?: PaginationMode;
+
+  /**
+   * Formats text-mode pagination with a one-based display page and page count.
+   * Receives the indicator values after progress customization.
+   * @default "displayPage of pageCount"
+   */
+  formatPaginationText?: (displayPage: number, pageCount: number) => string;
 
   /**
    * Vertical alignment of items within the carousel.

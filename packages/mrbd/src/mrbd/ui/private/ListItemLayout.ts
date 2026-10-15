@@ -143,6 +143,7 @@ export function getListItemLayoutState({
     !effectiveHasStatus;
   const effectiveHasTag =
     hasVisibleListItemText(trailingTagLabel) &&
+    !effectiveShowSlider &&
     !effectiveShowSwitch &&
     !effectiveShowRadio &&
     !effectiveHasTimestamp &&

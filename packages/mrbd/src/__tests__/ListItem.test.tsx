@@ -57,6 +57,8 @@ import {
 } from '../mrbd/ui/private/ListItemMaterials';
 import { SliderBarState } from '../mrbd/ui/SliderBar';
 import { TEST_ICON } from './helpers/testIcon';
+import { getTrailingTagLabel } from '../mrbd/ui/TrailingTag';
+import type { ListItemVisibilityInput } from '../mrbd/ui/private/ListItemLayout.types';
 
 describe('ListItem initialization', () => {
   it('renders without crashing', () => {
@@ -82,6 +84,7 @@ describe('ListItem initialization', () => {
       <MemoryRouter initialEntries={['/']}>
         <ListItem as={Link} to="/settings" title="Settings" />
         <Routes>
+          <Route path="/" element={null} />
           <Route path="/settings" element={<div>Settings page</div>} />
         </Routes>
       </MemoryRouter>,
@@ -106,6 +109,7 @@ describe('ListItem initialization', () => {
           onClick={onClick}
         />
         <Routes>
+          <Route path="/" element={null} />
           <Route path="/settings" element={<div>Settings page</div>} />
         </Routes>
       </MemoryRouter>,
@@ -265,7 +269,9 @@ describe('ListItem trailing switch', () => {
       <ListItem title="Toggle" showSwitch checked={false} onCheckedChange={handleChange} />
     );
     // Click the outer ListItem container (first switch role)
-    screen.getAllByRole('switch')[0].click();
+    act(() => {
+      screen.getAllByRole('switch')[0].click();
+    });
     expect(handleChange).toHaveBeenCalledWith(true);
   });
 });
@@ -650,7 +656,9 @@ describe('ListItem click', () => {
   it('calls onClick', () => {
     const handleClick = vi.fn();
     render(<ListItem title="Test" onClick={handleClick} />);
-    screen.getByRole('button').click();
+    act(() => {
+      screen.getByRole('button').click();
+    });
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 });
@@ -836,5 +844,81 @@ describe('ListItem trailing-slot rendering', () => {
       'aria-label',
       'Network setting, Wi-Fi, Connected'
     );
+  });
+});
+
+function createSliderTagVisibility(overrides: Partial<ListItemVisibilityInput>): ListItemVisibilityInput {
+  return {
+    title: 'Feature', subtitleMaxLines: 1,
+    timestampPosition: TimestampPosition.ACCESSORY,
+    showSlider: false, showSwitch: false, showRadioButton: false,
+    hasAccessoryIcon: false, accessoryIconAlwaysVisible: true,
+    hasAvatar: false, hasIcon: false, currentState: State.DEFAULT,
+    ...overrides,
+  };
+}
+const SLIDER_TAG_RESOLVED_CASES = [
+  { tag: TrailingTag.BETA, labels: undefined, expected: 'Beta' },
+  { tag: TrailingTag.BETA, labels: { beta: 'Bêta' }, expected: 'Bêta' },
+  { tag: TrailingTag.NONE, labels: { beta: 'Bêta' }, expected: undefined },
+] as const;
+
+describe('ListItem slider tag visibility', () => {
+  it.each(SLIDER_TAG_RESOLVED_CASES)('omits the resolved tag from slider layout/name %j', ({ tag, labels, expected }) => {
+    const label = getTrailingTagLabel(tag, labels) ?? undefined;
+    expect(label).toBe(expected);
+    const layout = getListItemLayoutState(createSliderTagVisibility({ showSlider: true, trailingTagLabel: label }));
+    expect(layout.effectiveShowSlider).toBe(true);
+    expect(layout.effectiveHasTag).toBe(false);
+    expect(layout.hasTrailingContent).toBe(false);
+    expect(layout.ariaRole).toBe('slider');
+    expect(getListItemContentDescription({ layout, trailingTagLabel: label, containerContentDescription: 'Volume' })).toBe('Volume');
+  });
+
+  it.each(SLIDER_TAG_RESOLVED_CASES)('preserves ordinary resolved tag layout/name %j', ({ tag, labels, expected }) => {
+    const label = getTrailingTagLabel(tag, labels) ?? undefined;
+    const layout = getListItemLayoutState(createSliderTagVisibility({ trailingTagLabel: label }));
+    expect(layout.effectiveShowSlider).toBe(false);
+    expect(layout.effectiveHasTag).toBe(expected !== undefined);
+    expect(layout.ariaRole).toBe('button');
+    expect(getListItemContentDescription({ layout, trailingTagLabel: label })).toBe(expected ? `Feature, ${expected}` : 'Feature');
+  });
+
+  it.each([
+    { input: { showSwitch: true }, role: 'switch', name: 'Feature' },
+    { input: { showRadioButton: true }, role: 'radio', name: 'Feature' },
+    { input: { timestamp: 'Now' }, role: 'button', name: 'Feature, Now' },
+    { input: { statusIndicator: { type: StatusIndicatorType.ACTIVE, contentDescription: 'Active' } }, role: 'button', name: 'Feature, Active' },
+    { input: { statusIndicatorIcons: [{ icon: TEST_ICON, accessibilityContentDescription: 'Status' }] }, role: 'button', name: 'Feature, Status' },
+    { input: { hasAccessoryIcon: true }, role: 'button', name: 'Feature' },
+  ])('preserves ordinary trailing-slot priority %j', ({ input: overrides, role, name }) => {
+    const input = createSliderTagVisibility({ trailingTagLabel: 'Bêta', ...overrides });
+    const layout = getListItemLayoutState(input);
+    expect(layout.effectiveShowSlider).toBe(false);
+    expect(layout.effectiveHasTag).toBe(false);
+    expect(layout.ariaRole).toBe(role);
+    expect(getListItemContentDescription({
+      layout, trailingTagLabel: 'Bêta', timestamp: input.timestamp,
+      statusIndicator: input.statusIndicator, statusIndicatorIcons: input.statusIndicatorIcons,
+    })).toBe(name);
+  });
+
+  it.each([TrailingTag.BETA, TrailingTag.NONE])('keeps the real public slider free of an invisible tag %s', tag => {
+    render(<ListItem showSlider title="Feature" subtitle="Hidden text" ariaLabel="Volume" trailingTag={tag} />);
+    expect(screen.getByRole('slider', { name: 'Volume' })).toHaveAttribute('aria-label', 'Volume');
+    expect(screen.queryByText('Beta')).toBeNull();
+    expect(screen.queryByText('Feature')).toBeNull();
+    expect(screen.queryByText('Hidden text')).toBeNull();
+  });
+
+  it('restores ordinary tag naming when leaving slider mode', () => {
+    const { rerender } = render(<ListItem showSlider title="Feature" ariaLabel="Volume" trailingTag={TrailingTag.BETA} />);
+    expect(screen.getByRole('slider', { name: 'Volume' })).toBeInTheDocument();
+    rerender(<ListItem title="Feature" ariaLabel="Volume" trailingTag={TrailingTag.BETA} />);
+    expect(screen.getByText('Beta')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Volume, Feature, Beta' })).toBeInTheDocument();
+    rerender(<ListItem showSlider title="Feature" ariaLabel="Volume" trailingTag={TrailingTag.BETA} />);
+    expect(screen.getByRole('slider', { name: 'Volume' })).toBeInTheDocument();
+    expect(screen.queryByText('Beta')).toBeNull();
   });
 });

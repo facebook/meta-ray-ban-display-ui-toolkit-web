@@ -85,6 +85,19 @@ export const publicApiSections = [
     ],
   },
   {
+    title: 'Foundation - Color Scales',
+    exports: [
+      {
+        source: '@wearables-ui-toolkit/foundation',
+        values: [
+          'createHexColorTokenScale',
+          'isHexColor',
+        ],
+        types: ['HexColorToken'],
+      },
+    ],
+  },
+  {
     title: 'Foundation - Navigation',
     exports: [
       {

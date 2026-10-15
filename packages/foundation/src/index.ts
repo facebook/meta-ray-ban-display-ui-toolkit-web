@@ -63,6 +63,13 @@ export type {
   UseSpringAnimationOptions,
 } from './motion/useSpringAnimation';
 
+// Foundation - Color Scales
+export {
+  createHexColorTokenScale,
+  isHexColor,
+} from './colors/HexColorTokenScale';
+export type { HexColorToken } from './colors/HexColorTokenScale';
+
 // Foundation - Navigation
 export { useBackNavigation } from './navigation/BackNavigation';
 export type { BackNavigationHandler } from './navigation/BackNavigation';

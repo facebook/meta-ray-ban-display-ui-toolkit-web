@@ -56,6 +56,13 @@ export type {
   UseSpringAnimationOptions,
 } from '@wearables-ui-toolkit/foundation';
 
+// Foundation - Color Scales
+export {
+  createHexColorTokenScale,
+  isHexColor,
+} from '@wearables-ui-toolkit/foundation';
+export type { HexColorToken } from '@wearables-ui-toolkit/foundation';
+
 // Foundation - Navigation
 export { useBackNavigation } from '@wearables-ui-toolkit/foundation';
 export type { BackNavigationHandler } from '@wearables-ui-toolkit/foundation';

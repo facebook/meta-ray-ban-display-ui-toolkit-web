@@ -50,6 +50,9 @@ export interface ChipProps extends Omit<StaticContainerProps, 'children'> {
   /** Maximum number of text lines. */
   maxLines?: number;
 
+  /** Whether numeric glyphs use equal-width tabular figures. */
+  useTabularNumbers?: boolean;
+
   /** The metadata text to display in the chip. */
   metadata?: string;
 

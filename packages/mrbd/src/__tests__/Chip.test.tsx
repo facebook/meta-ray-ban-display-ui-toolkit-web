@@ -190,6 +190,28 @@ describe('Chip metadata', () => {
   });
 });
 
+describe('Chip tabular numbers', () => {
+  it('applies equal-width numeric figures to text and metadata when enabled', () => {
+    render(
+      <Chip text="11:59" metadata="42" useTabularNumbers />,
+    );
+
+    expect(screen.getByText('11:59')).toHaveStyle({
+      fontVariantNumeric: 'tabular-nums',
+    });
+    expect(screen.getByText('42')).toHaveStyle({
+      fontVariantNumeric: 'tabular-nums',
+    });
+  });
+
+  it('leaves numeric font features unchanged by default', () => {
+    render(<Chip text="11:59" metadata="42" />);
+
+    expect((screen.getByText('11:59') as HTMLElement).style.fontVariantNumeric).toBe('');
+    expect((screen.getByText('42') as HTMLElement).style.fontVariantNumeric).toBe('');
+  });
+});
+
 // ============================================================================
 // ChipStyle values
 // ============================================================================

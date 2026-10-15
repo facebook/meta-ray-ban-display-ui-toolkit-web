@@ -107,6 +107,7 @@ export const Chip = memo(forwardRef<HTMLDivElement, ChipProps>(
     {
       text,
       maxLines = 2,
+      useTabularNumbers = false,
       metadata,
       icon,
       isLoading = false,
@@ -262,8 +263,13 @@ export const Chip = memo(forwardRef<HTMLDivElement, ChipProps>(
     // width so container material animations never make it wrap for a frame.
     const textStyle = useMemo<CSSProperties>(
       () => {
+        const numericStyle: CSSProperties = useTabularNumbers
+          ? { fontVariantNumeric: 'tabular-nums' }
+          : {};
+
         if (isLayoutTransition || maxLines === 1) {
           return {
+            ...numericStyle,
             overflow: 'visible',
             textOverflow: 'clip',
             whiteSpace: 'nowrap',
@@ -272,6 +278,7 @@ export const Chip = memo(forwardRef<HTMLDivElement, ChipProps>(
         }
 
         return {
+          ...numericStyle,
           ...(maxLines > 0 ? {
             display: '-webkit-box',
             WebkitLineClamp: maxLines,
@@ -284,7 +291,13 @@ export const Chip = memo(forwardRef<HTMLDivElement, ChipProps>(
           } : {}),
         };
       },
-      [isLayoutTransition, maxLines],
+      [isLayoutTransition, maxLines, useTabularNumbers],
+    );
+    const metadataStyle = useMemo<CSSProperties | undefined>(
+      () => useTabularNumbers
+        ? { fontVariantNumeric: 'tabular-nums' }
+        : undefined,
+      [useTabularNumbers],
     );
 
     // Accessibility
@@ -381,6 +394,7 @@ export const Chip = memo(forwardRef<HTMLDivElement, ChipProps>(
         text ?? '',
         metadata ?? '',
         maxLines,
+        useTabularNumbers,
         chipStyle,
       ],
       [
@@ -388,6 +402,7 @@ export const Chip = memo(forwardRef<HTMLDivElement, ChipProps>(
         maxLines,
         metadata,
         text,
+        useTabularNumbers,
       ],
     );
 
@@ -474,6 +489,7 @@ export const Chip = memo(forwardRef<HTMLDivElement, ChipProps>(
           {hasMetadata && (
             <span
               className={metadataClassName}
+              style={metadataStyle}
               data-uit-layout-transition-part="chip-metadata"
             >
               {metadata}

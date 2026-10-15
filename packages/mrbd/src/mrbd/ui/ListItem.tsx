@@ -171,6 +171,7 @@ const ListItemImpl = forwardRef<HTMLElement, ListItemImplementationProps>(
       accessoryIconAlwaysVisible = true,
       accessoryIconTintColor,
       trailingTag = TrailingTag.NONE,
+      trailingTagLabels,
 
       // Interaction
       onClick,
@@ -197,11 +198,9 @@ const ListItemImpl = forwardRef<HTMLElement, ListItemImplementationProps>(
       [materialProp],
     );
 
-    // The design system owns the tag label; callers pass a closed TrailingTag
-    // case, never free-form text.
     const trailingTagLabel = useMemo(
-      () => getTrailingTagLabel(trailingTag) ?? undefined,
-      [trailingTag],
+      () => getTrailingTagLabel(trailingTag, trailingTagLabels) ?? undefined,
+      [trailingTag, trailingTagLabels],
     );
 
     // Track Container state for slider visual state + accessory icon visibility

@@ -22,7 +22,7 @@ import type {
 } from './Avatar.types';
 import type { IconTintColor } from './IconTintColor';
 import type { TimestampTextColor } from './TimestampTextColor';
-import type { TrailingTag } from './TrailingTag';
+import type { TrailingTag, TrailingTagLabels } from './TrailingTag';
 
 export const SubtitleTextColor = {
   PRIMARY: 'primary',
@@ -112,6 +112,8 @@ export interface ListItemOwnProps {
   accessoryIcon?: IconSource;
   accessoryIconAlwaysVisible?: boolean;
   trailingTag?: TrailingTag;
+  /** Localized labels by semantic tag. Missing or blank values use the fallback. */
+  trailingTagLabels?: TrailingTagLabels;
 }
 
 export type ListItemProps<T extends ElementType = 'div'> =

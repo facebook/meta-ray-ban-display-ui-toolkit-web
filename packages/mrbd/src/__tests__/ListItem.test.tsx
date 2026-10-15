@@ -27,6 +27,7 @@ import {
   TimestampTextColor,
   TrailingTag,
 } from '../mrbd/ui/ListItem';
+import type { ListItemProps } from '../mrbd/ui/ListItem';
 import { StatusIndicatorType } from '../mrbd/ui/Avatar';
 import {
   clampListItemSliderValue,
@@ -437,6 +438,132 @@ describe('ListItem trailing tag', () => {
       <ListItem title="Feature" trailingTag={TrailingTag.NONE} />
     );
     expect(container.textContent).not.toContain('Beta');
+  });
+
+  it('uses the localized tag in both visible text and the accessible row name', () => {
+    render(
+      <ListItem
+        title="Feature"
+        trailingTag={TrailingTag.BETA}
+        trailingTagLabels={{ [TrailingTag.BETA]: 'Bêta' }}
+      />,
+    );
+
+    expect(screen.getByText('Bêta')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Feature, Bêta' })).toBeInTheDocument();
+    expect(screen.getByRole('button')).not.toHaveAttribute('trailingTagLabels');
+  });
+
+  it('updates localization independently of the semantic tag', () => {
+    const { rerender } = render(
+      <ListItem
+        title="Feature"
+        trailingTag={TrailingTag.BETA}
+        trailingTagLabels={{ [TrailingTag.BETA]: 'Bêta' }}
+      />,
+    );
+    expect(screen.getByRole('button', { name: 'Feature, Bêta' })).toBeInTheDocument();
+
+    rerender(
+      <ListItem
+        title="Feature"
+        trailingTag={TrailingTag.BETA}
+        trailingTagLabels={{ [TrailingTag.BETA]: 'Beta-Version' }}
+      />,
+    );
+    expect(screen.queryByText('Bêta')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Feature, Beta-Version' })).toBeInTheDocument();
+
+    rerender(<ListItem title="Feature" trailingTag={TrailingTag.BETA} />);
+    expect(screen.getByRole('button', { name: 'Feature, Beta' })).toBeInTheDocument();
+  });
+
+  it.each([undefined, {}, { beta: '' }, { beta: '   ' }, { beta: '\n\t' }, { beta: '\u2000' }])(
+    'uses the fallback for omitted or blank tag labels %j',
+    trailingTagLabels => {
+      render(<ListItem title="Feature" trailingTag={TrailingTag.BETA} trailingTagLabels={trailingTagLabels} />);
+      expect(screen.getByText('Beta')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Feature, Beta' })).toBeInTheDocument();
+    },
+  );
+
+  it('does not add a tag for NONE when localization is supplied', () => {
+    render(
+      <ListItem
+        title="Feature"
+        trailingTag={TrailingTag.NONE}
+        trailingTagLabels={{ [TrailingTag.BETA]: 'Bêta' }}
+      />,
+    );
+    expect(screen.queryByText('Bêta')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Feature' })).toBeInTheDocument();
+  });
+
+  it.each<{
+    treatment: string;
+    props: ListItemProps;
+    role: 'button' | 'switch' | 'radio';
+    name: string;
+  }>([
+    { treatment: 'a switch', props: { showSwitch: true }, role: 'switch', name: 'Feature' },
+    { treatment: 'a radio', props: { showRadioButton: true }, role: 'radio', name: 'Feature' },
+    { treatment: 'a timestamp', props: { timestamp: 'Now' }, role: 'button', name: 'Feature, Now' },
+    { treatment: 'a status dot', props: { statusIndicator: { type: StatusIndicatorType.ACTIVE, contentDescription: 'Active' } }, role: 'button', name: 'Feature, Active' },
+    { treatment: 'status icons', props: { statusIndicatorIcons: [{ icon: TEST_ICON, accessibilityContentDescription: 'Status' }] }, role: 'button', name: 'Feature, Status' },
+    { treatment: 'an accessory icon', props: { accessoryIcon: TEST_ICON }, role: 'button', name: 'Feature' },
+  ])('keeps localized tags suppressed by $treatment', ({ props, role, name }) => {
+    render(
+      <ListItem title="Feature" trailingTag={TrailingTag.BETA} trailingTagLabels={{ [TrailingTag.BETA]: 'Bêta' }} {...props} />,
+    );
+    expect(screen.queryByText('Bêta')).toBeNull();
+    expect(screen.getByRole(role, { name })).toHaveAttribute('aria-label', name);
+  });
+
+  it.each([TrailingTag.BETA, TrailingTag.NONE])(
+    'does not announce a localized tag in slider mode with tag %s',
+    trailingTag => {
+      render(
+        <ListItem
+          showSlider
+          ariaLabel="Volume"
+          title="Feature"
+          subtitle="Details"
+          trailingTag={trailingTag}
+          trailingTagLabels={{ [TrailingTag.BETA]: 'Bêta' }}
+        />,
+      );
+
+      expect(screen.getByRole('slider', { name: 'Volume' })).toHaveAttribute('aria-label', 'Volume');
+      expect(screen.queryByText('Bêta')).toBeNull();
+      expect(screen.queryByText('Feature')).toBeNull();
+      expect(screen.queryByText('Details')).toBeNull();
+    },
+  );
+
+  it('resolves the current language after a slider row returns to ordinary mode', () => {
+    const props: ListItemProps = {
+      title: 'Feature',
+      subtitle: 'Details',
+      ariaLabel: 'Volume',
+      trailingTag: TrailingTag.BETA,
+    };
+    const { rerender } = render(
+      <ListItem {...props} trailingTagLabels={{ [TrailingTag.BETA]: 'Bêta' }} />,
+    );
+    expect(screen.getByRole('button', { name: 'Volume, Feature, Details, Bêta' })).toBeInTheDocument();
+
+    rerender(
+      <ListItem {...props} showSlider trailingTagLabels={{ [TrailingTag.BETA]: 'Beta-Version' }} />,
+    );
+    expect(screen.getByRole('slider', { name: 'Volume' })).toBeInTheDocument();
+    expect(screen.queryByText('Bêta')).toBeNull();
+    expect(screen.queryByText('Beta-Version')).toBeNull();
+
+    rerender(
+      <ListItem {...props} trailingTagLabels={{ [TrailingTag.BETA]: 'Beta-Version' }} />,
+    );
+    expect(screen.getByText('Beta-Version')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Volume, Feature, Details, Beta-Version' })).toBeInTheDocument();
   });
 });
 

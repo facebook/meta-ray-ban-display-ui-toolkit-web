@@ -89,6 +89,7 @@ export const AppControlTile = memo(forwardRef<HTMLDivElement, AppControlTileProp
       avatarPrimaryImageShape,
       avatarPlaceholderStyle,
       iconSrc,
+      iconScale,
       iconContent,
       iconContainerMaterial,
       iconContainerShapeProvider,
@@ -197,6 +198,7 @@ export const AppControlTile = memo(forwardRef<HTMLDivElement, AppControlTileProp
             avatarPrimaryImageShape={avatarPrimaryImageShape}
             avatarPlaceholderStyle={avatarPlaceholderStyle}
             iconSrc={iconSrc}
+            iconScale={iconScale}
             iconContent={iconContent}
             iconContainerMaterial={iconContainerMaterial}
             iconContainerShapeProvider={iconContainerShapeProvider}

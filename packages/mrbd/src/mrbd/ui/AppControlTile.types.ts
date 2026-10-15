@@ -22,15 +22,8 @@ import type {
 } from './Avatar';
 
 /**
- * Single-seed-color theming (deriving the whole secondary material — idle fill,
- * radial gradient stops, inner-glow tint — from one color) is not yet available:
- * it requires an OKLCH WCAG-contrast color-ramp pipeline that does not exist here
- * yet, and is deferred rather than approximated (an approximate tint would drift
- * from the contrast-targeted shades).
- *
- * For now, callers tint the tile by passing a full `material` override (from
- * `ContainerProps`), which already covers the themed-secondary case via
- * `MaterialLibrary.themedSecondary()`.
+ * Customize tile appearance through the full `material` override inherited
+ * from `ContainerProps`.
  */
 export interface AppControlTileProps extends Omit<ContainerProps, 'children'> {
   /**
@@ -99,6 +92,13 @@ export interface AppControlTileProps extends Omit<ContainerProps, 'children'> {
    * Hidden when avatar or custom icon content is set.
    */
   iconSrc?: string;
+
+  /**
+   * Positive finite scale applied to the built-in app icon relative to its
+   * standard bounds. Invalid or non-finite values fall back to 1. Ignored when
+   * `iconContent` or avatar content is provided. Default: 1.
+   */
+  iconScale?: number;
 
   /**
    * Custom content for the app-icon slot. The tile owns the slot size and

@@ -48,6 +48,7 @@ export interface AppControlTileMediaProps {
   /** Placeholder style for the avatar. */
   avatarPlaceholderStyle?: PlaceholderStyle;
   iconSrc?: string;
+  iconScale?: number;
   iconContent?: ReactNode;
   iconContainerMaterial?: ContainerMaterial;
   iconContainerShapeProvider?: ShapeProvider;
@@ -67,6 +68,20 @@ const APP_ICON_CONTAINER_STYLE: CSSProperties = {
 const DEFAULT_APP_ICON_SHAPE_PROVIDER =
   new RoundedRectangleShapeProvider(CornerRadius.FULL);
 
+export function getAppControlTileIconStyle(
+  iconScale: number,
+): CSSProperties {
+  if (!Number.isFinite(iconScale) || iconScale <= 0) {
+    return APP_ICON_CONTAINER_STYLE;
+  }
+  return iconScale === 1
+    ? APP_ICON_CONTAINER_STYLE
+    : {
+        ...APP_ICON_CONTAINER_STYLE,
+        transform: `scale(${iconScale})`,
+      };
+}
+
 export const AppControlTileMedia = memo(function AppControlTileMedia({
   avatarSrc,
   avatarPrimaryContent,
@@ -78,6 +93,7 @@ export const AppControlTileMedia = memo(function AppControlTileMedia({
   avatarPrimaryImageShape,
   avatarPlaceholderStyle,
   iconSrc,
+  iconScale = 1,
   iconContent,
   iconContainerMaterial,
   iconContainerShapeProvider = DEFAULT_APP_ICON_SHAPE_PROVIDER,
@@ -85,6 +101,13 @@ export const AppControlTileMedia = memo(function AppControlTileMedia({
   const hasAvatar = avatarSrc != null || avatarPrimaryContent != null;
   const resolvedIconContent = iconContent ?? (
     iconSrc == null ? null : <IconImage source={{ uri: iconSrc, tinted: false }} />
+  );
+  const appIconStyle = useMemo(
+    () =>
+      !hasAvatar && iconContent == null && iconSrc != null
+        ? getAppControlTileIconStyle(iconScale)
+        : APP_ICON_CONTAINER_STYLE,
+    [hasAvatar, iconContent, iconScale, iconSrc],
   );
 
   // The inner-shadow effect is disabled on the icon-container material so the
@@ -130,7 +153,7 @@ export const AppControlTileMedia = memo(function AppControlTileMedia({
           <div className={styles.appIconMaterialContent}>
             <div
               className={styles.appIconContainer}
-              style={APP_ICON_CONTAINER_STYLE}
+              style={appIconStyle}
             >
               {resolvedIconContent}
             </div>
@@ -139,7 +162,7 @@ export const AppControlTileMedia = memo(function AppControlTileMedia({
       ) : resolvedIconContent != null ? (
         <div
           className={styles.appIconContainer}
-          style={APP_ICON_CONTAINER_STYLE}
+          style={appIconStyle}
         >
           {resolvedIconContent}
         </div>

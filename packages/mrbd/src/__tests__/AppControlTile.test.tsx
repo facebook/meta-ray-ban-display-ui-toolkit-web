@@ -19,7 +19,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { AppControlTile } from '../mrbd/ui/AppControlTile';
 import {
   APP_CONTROL_TILE_IMAGE_CONTAINER_SIZE,
@@ -32,6 +32,7 @@ import {
   getAppControlTileRootStyle,
   hasAppControlTileTitle,
 } from '../mrbd/ui/private/AppControlTileLayout';
+import { getAppControlTileIconStyle } from '../mrbd/ui/private/AppControlTileMedia';
 import { createDefaultContainerMaterial } from '@wearables-ui-toolkit/foundation/material/DefaultContainerMaterial';
 import {
   CornerRadius,
@@ -92,12 +93,18 @@ describe('AppControlTile app image vs avatar (mutual exclusivity)', () => {
     const { container } = render(
       <AppControlTile
         iconSrc={APP_ICON_SRC}
+        iconScale={2}
         iconContent={<span data-testid="custom-icon">Custom</span>}
       />,
     );
 
     expect(screen.getByTestId('custom-icon')).toBeInTheDocument();
     expect(container.querySelector(`img[src="${APP_ICON_SRC}"]`)).toBeNull();
+    expect(
+      container
+        .querySelector('[class*="appIconContainer"]')
+        ?.getAttribute('style') ?? '',
+    ).not.toContain('transform');
   });
 
   it('renders avatar when avatarSrc provided', () => {
@@ -259,6 +266,165 @@ describe('AppControlTile image container dimensions', () => {
     expect(style).toContain(`width: ${APP_CONTROL_TILE_IMAGE_SIZE}`);
     expect(style).toContain(`height: ${APP_CONTROL_TILE_IMAGE_SIZE}`);
   });
+
+  it.each([false, true])(
+    'scales source artwork and resets without resizing its slots (material: %s)',
+    withMaterial => {
+      const iconContainerMaterial = withMaterial
+        ? createDefaultContainerMaterial()
+        : undefined;
+      const { container, rerender } = render(
+        <AppControlTile
+          iconSrc={APP_ICON_SRC}
+          iconScale={1.25}
+          iconContainerMaterial={iconContainerMaterial}
+        />,
+      );
+      const iconContainer = container.querySelector<HTMLDivElement>(
+        '[class*="appIconContainer"]',
+      );
+      const imageContainer = container.querySelector('[class*="appImageContainer"]');
+      const tile = screen.getByRole('button');
+      act(() => tile.focus());
+
+      expect(iconContainer).not.toBeNull();
+      expect(iconContainer).toHaveStyle({
+        width: '40px',
+        height: '40px',
+        transform: 'scale(1.25)',
+      });
+      expect(imageContainer).toHaveStyle({ width: '72px', height: '72px' });
+      expect(tile).not.toHaveAttribute('iconscale');
+      if (withMaterial) {
+        expect(container.querySelector('[class*="appIconMaterial"]')).toHaveStyle({
+          width: '72px',
+          height: '72px',
+        });
+      }
+
+      rerender(
+        <AppControlTile
+          iconSrc={APP_ICON_SRC}
+          iconScale={0.75}
+          iconContainerMaterial={iconContainerMaterial}
+        />,
+      );
+      expect(iconContainer).toHaveStyle({ transform: 'scale(0.75)' });
+      expect(screen.getByRole('button')).toBe(tile);
+      expect(tile).toHaveFocus();
+
+      rerender(
+        <AppControlTile
+          iconSrc={APP_ICON_SRC}
+          iconScale={1}
+          iconContainerMaterial={iconContainerMaterial}
+        />,
+      );
+      expect(iconContainer!.style.transform).toBe('');
+
+      rerender(
+        <AppControlTile
+          iconSrc="/icons/replacement.svg"
+          iconContainerMaterial={iconContainerMaterial}
+        />,
+      );
+      expect(iconContainer!.style.transform).toBe('');
+      expect(iconContainer).toHaveStyle({ width: '40px', height: '40px' });
+      expect(imageContainer).toHaveStyle({ width: '72px', height: '72px' });
+      expect(tile).toHaveFocus();
+    },
+  );
+
+  it('ignores iconScale for avatar and caller-owned icon content', () => {
+    const { container, rerender } = render(
+      <AppControlTile
+        iconSrc={APP_ICON_SRC}
+        iconScale={0}
+        avatarPrimaryContent={<span data-testid="scaled-avatar">A</span>}
+      />,
+    );
+    expect(screen.getByTestId('scaled-avatar')).toBeInTheDocument();
+    expect(container.querySelector('[class*="appIconContainer"]')).toBeNull();
+    expect(container.querySelector(`img[src="${APP_ICON_SRC}"]`)).toBeNull();
+
+    rerender(
+      <AppControlTile
+        iconSrc={APP_ICON_SRC}
+        iconScale={0}
+        iconContent={<span data-testid="unscaled-content">Custom</span>}
+      />,
+    );
+    expect(screen.getByTestId('unscaled-content')).toBeInTheDocument();
+    expect(container.querySelector(`img[src="${APP_ICON_SRC}"]`)).toBeNull();
+    expect(container.querySelector('[class*="appIconContainer"]')).toHaveStyle({
+      width: '40px',
+      height: '40px',
+    });
+    expect(
+      container.querySelector<HTMLDivElement>('[class*="appIconContainer"]')!
+        .style.transform,
+    ).toBe('');
+  });
+
+  it.each([0, -1, Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY])(
+    'uses unscaled fallback for invalid iconScale %s',
+    invalidScale => {
+      expect(() => getAppControlTileIconStyle(invalidScale)).not.toThrow();
+      expect(getAppControlTileIconStyle(invalidScale)).toEqual({
+        width: APP_CONTROL_TILE_IMAGE_SIZE,
+        height: APP_CONTROL_TILE_IMAGE_SIZE,
+      });
+    },
+  );
+
+  it.each([false, true])(
+    'retains rendering and focus across invalid scales (material: %s)',
+    withMaterial => {
+      const iconContainerMaterial = withMaterial
+        ? createDefaultContainerMaterial()
+        : undefined;
+      const { container, rerender } = render(
+        <AppControlTile
+          iconSrc={APP_ICON_SRC}
+          iconScale={1.25}
+          iconContainerMaterial={iconContainerMaterial}
+        />,
+      );
+      const tile = screen.getByRole('button');
+      act(() => tile.focus());
+
+      for (const invalidScale of [0, -1, Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]) {
+        expect(() => rerender(
+          <AppControlTile
+            iconSrc={APP_ICON_SRC}
+            iconScale={invalidScale}
+            iconContainerMaterial={iconContainerMaterial}
+          />,
+        )).not.toThrow();
+        const iconContainer = container.querySelector<HTMLDivElement>(
+          '[class*="appIconContainer"]',
+        );
+        expect(iconContainer).toHaveStyle({ width: '40px', height: '40px' });
+        expect(iconContainer!.style.transform).toBe('');
+        expect(container.querySelector('[class*="appImageContainer"]')).toHaveStyle({
+          width: '72px',
+          height: '72px',
+        });
+        expect(screen.getByRole('button')).toBe(tile);
+        expect(tile).toHaveFocus();
+
+        rerender(
+          <AppControlTile
+            iconSrc={APP_ICON_SRC}
+            iconScale={1.25}
+            iconContainerMaterial={iconContainerMaterial}
+          />,
+        );
+        expect(iconContainer).toHaveStyle({ transform: 'scale(1.25)' });
+        expect(tile).toHaveFocus();
+      }
+    },
+  );
 
   it('renders provided iconContainerMaterial in the 72px icon container', () => {
     const { container } = render(

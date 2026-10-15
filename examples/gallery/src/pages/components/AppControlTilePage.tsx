@@ -76,6 +76,7 @@ export function AppControlTilePage() {
               className="gallery-app-shortcut-tile"
               aria-label="Open captions"
               iconSrc={closedCaptioningFilled}
+              iconScale={1.2}
               iconContainerMaterial={captionsIconMaterial}
               iconContainerShapeProvider={ICON_CONTAINER_SHAPE_PROVIDER}
               onClick={() => {}}
@@ -122,7 +123,7 @@ export function AppControlTilePage() {
       <GuidancePanel
         summary="AppControlTile is a prominent shortcut to an app, destination, or person. Its app icon or avatar provides the primary identity, while optional text and status provide supporting context."
         useWhen={<ul><li>A small set of recognizable, high-value destinations benefits from visual scanning.</li><li>An app or person is the primary identity of the destination.</li></ul>}
-        capabilities={<ul><li>An app icon or avatar. These treatments are mutually exclusive, and icon-only or avatar-only tiles center the media.</li><li>An optional title with multiline overflow treatment or an opt-in marquee for long names.</li><li>A static status icon or custom status media below the title. Adding status media limits the title to one line.</li><li>Avatar badges, shapes, placeholders, and semantic status indicators with optional glyphs.</li><li>Responsive width, disabled state, a custom tile material, and an optional material behind the app icon.</li></ul>}
+        capabilities={<ul><li>An app icon or avatar. These treatments are mutually exclusive, icon-only or avatar-only tiles center the media, and built-in app icons can scale within their standard bounds.</li><li>An optional title with multiline overflow treatment or an opt-in marquee for long names.</li><li>A static status icon or custom status media below the title. Adding status media limits the title to one line.</li><li>Avatar badges, shapes, placeholders, and semantic status indicators with optional glyphs.</li><li>Responsive width, disabled state, a custom tile material, and an optional material behind the app icon.</li></ul>}
         avoid={<ul><li>Omitting the title unless the image is unmistakable; icon-only tiles still need a descriptive accessible label.</li><li>Using generic imagery when recognizable app or person identity is required.</li><li>Presenting dense collections better suited to a list.</li><li>Wrapping the tile in another material surface.</li></ul>}
       />
     </GalleryPage>

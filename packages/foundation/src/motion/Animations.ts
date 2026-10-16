@@ -15,6 +15,7 @@ import type { StateTransition } from '../base/Interactions';
 import { EquilibriumMode } from './Animations.types';
 import type {
   AnimationState,
+  SecondOrderConfig,
   SpringConfig,
   StateChangeAnimationConfig,
   TransitionDescriptor,
@@ -23,6 +24,7 @@ import type {
 export { EquilibriumMode } from './Animations.types';
 export type {
   AnimationState,
+  SecondOrderConfig,
   SpringConfig,
   StateChangeAnimationConfig,
   TransitionDescriptor,
@@ -281,6 +283,51 @@ export const SpringConfigs = {
     mass: 1,
     equilibriumMode: EquilibriumMode.FASTER,
   } as SpringConfig,
+} as const;
+
+export const SecondOrderConfigs = {
+  /** Balanced general-purpose motion. */
+  DEFAULT: {
+    frequency: 1,
+    damping: 0.5,
+    response: 1,
+    equilibriumMode: EquilibriumMode.DEFAULT,
+  } as SecondOrderConfig,
+  /** Relaxed motion with a slower response and critical damping. */
+  SOFT: {
+    frequency: 0.5,
+    damping: 1,
+    response: 1,
+    equilibriumMode: EquilibriumMode.FASTER,
+  } as SecondOrderConfig,
+  /** Fast, critically damped UI feedback. */
+  SNAPPY: {
+    frequency: 2,
+    damping: 1,
+    response: 1,
+    equilibriumMode: EquilibriumMode.FASTER,
+  } as SecondOrderConfig,
+  /** Fast motion with visible oscillation. */
+  BOUNCY: {
+    frequency: 1.5,
+    damping: 0.3,
+    response: 1,
+    equilibriumMode: EquilibriumMode.FASTER,
+  } as SecondOrderConfig,
+  /** Motion that initially resists a moving target. */
+  ANTICIPATION: {
+    frequency: 1,
+    damping: 0.5,
+    response: -0.5,
+    equilibriumMode: EquilibriumMode.DEFAULT,
+  } as SecondOrderConfig,
+  /** Motion with an amplified response to target velocity. */
+  EXAGGERATED: {
+    frequency: 1,
+    damping: 0.5,
+    response: 1.5,
+    equilibriumMode: EquilibriumMode.DEFAULT,
+  } as SecondOrderConfig,
 } as const;
 
 export function createLinearTimingFunction(

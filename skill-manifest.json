@@ -6,7 +6,7 @@
       "name": "building-uit-interfaces-web",
       "description": "Build, revise, or review polished production Meta Ray-Ban Display React interfaces with the public `@wearables-ui-toolkit/mrbd` library. Use for UI Toolkit for Meta Ray-Ban Display applications, routes, layouts, focus/D-pad navigation, materials, responsive sizing, overlays, accessibility, performance, or visual validation. Covers component selection, compliant composition, semantic tokens, filled icons, additive-display legibility, incorrect patterns, and device-ready testing. Assume no prior toolkit knowledge.",
       "file_count": 11,
-      "sha256": "sha256:c635d89df7f3d19ae9ed8ca71f9e9ae68bc494ec14a3a89045a7a3b6164db393"
+      "sha256": "sha256:7b6a24fd10f02b17c1bfed2bc9e7b8c392c77bd64d2421a2fd64219a01a11fe2"
     },
     {
       "name": "uit-accessibility-testing-web",

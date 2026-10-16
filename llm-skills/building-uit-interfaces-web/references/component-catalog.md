@@ -127,7 +127,7 @@ Check `packages/mrbd/package.json` for the current public subpath export list an
 
 - `InteractableBase`: low-level polymorphic focus/press/activation/tooltip/partial-focus host. Prefer `Container` or a semantic component.
 - Materials: `MaterialLibrary`, `ContainerMaterial`, layer factories, canvas helpers, `RoundedRectangleShapeProvider`, `CornerRadius`. Use supported factories first.
-- Motion: durations, interpolators, springs, reduced-motion helpers, `useSpringAnimation`. Keep animation hot paths out of React state.
+- Motion: durations, interpolators, springs, second-order dynamics, reduced-motion helpers, `useSpringAnimation`, and `useSecondOrderAnimation`. Keep animation hot paths out of React state. Prefer named second-order configurations at the default frame rate; custom values must remain finite with a stable timestep, and completion callbacks apply to the target actually reached.
 - Navigation: focus provider, back handler, route preload APIs, focus retention, transitions, React Router adapter.
 - Portals: `FloatingPortalRootProvider` is already supplied by `App`; ordinary apps should not replace it.
 - Smooth-corner helpers: use only for advanced component/shape implementation, not to repaint semantic components.

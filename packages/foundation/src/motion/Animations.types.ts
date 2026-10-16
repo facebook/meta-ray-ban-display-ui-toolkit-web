@@ -33,6 +33,20 @@ export interface SpringConfig {
   equilibriumMode?: EquilibriumMode;
 }
 
+/**
+ * Second-order dynamics parameters.
+ */
+export interface SecondOrderConfig {
+  /** Finite response speed in hertz. Must be positive and stable at the frame rate. */
+  frequency: number;
+  /** Finite nonnegative damping ratio; 1 is critically damped, 0 permits oscillation. */
+  damping: number;
+  /** Finite target-velocity response. Defaults to 1. */
+  response?: number;
+  /** Equilibrium detection mode (defaults to {@link EquilibriumMode.DEFAULT}). */
+  equilibriumMode?: EquilibriumMode;
+}
+
 export interface TransitionDescriptor {
   property: string;
   duration: number;

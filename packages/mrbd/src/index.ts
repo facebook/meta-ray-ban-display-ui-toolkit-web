@@ -43,13 +43,23 @@ export type { AppProps } from './mrbd/app/App';
 // Foundation - Motion
 export {
   AnimationDurations,
+  EquilibriumMode,
   Interpolators,
+  SecondOrderConfigs,
   SpringConfigs,
   createTransition,
   reducedMotionDuration,
 } from '@wearables-ui-toolkit/foundation';
-export type { SpringConfig } from '@wearables-ui-toolkit/foundation';
+export type {
+  SecondOrderConfig,
+  SpringConfig,
+} from '@wearables-ui-toolkit/foundation';
 export { usePrefersReducedMotion } from '@wearables-ui-toolkit/foundation';
+export { useSecondOrderAnimation } from '@wearables-ui-toolkit/foundation';
+export type {
+  SecondOrderAnimationController,
+  UseSecondOrderAnimationOptions,
+} from '@wearables-ui-toolkit/foundation';
 export { useSpringAnimation } from '@wearables-ui-toolkit/foundation';
 export type {
   SpringAnimationController,

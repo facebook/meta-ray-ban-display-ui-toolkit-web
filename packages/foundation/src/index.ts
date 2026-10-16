@@ -50,13 +50,23 @@ export type { AppProps } from './app/App';
 // Foundation - Motion
 export {
   AnimationDurations,
+  EquilibriumMode,
   Interpolators,
+  SecondOrderConfigs,
   SpringConfigs,
   createTransition,
   reducedMotionDuration,
 } from './motion/Animations';
-export type { SpringConfig } from './motion/Animations';
+export type {
+  SecondOrderConfig,
+  SpringConfig,
+} from './motion/Animations';
 export { usePrefersReducedMotion } from './motion/usePrefersReducedMotion';
+export { useSecondOrderAnimation } from './motion/useSecondOrderAnimation';
+export type {
+  SecondOrderAnimationController,
+  UseSecondOrderAnimationOptions,
+} from './motion/useSecondOrderAnimation';
 export { useSpringAnimation } from './motion/useSpringAnimation';
 export type {
   SpringAnimationController,

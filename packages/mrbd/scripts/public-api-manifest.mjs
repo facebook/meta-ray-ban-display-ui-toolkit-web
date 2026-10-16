@@ -63,16 +63,29 @@ export const publicApiSections = [
         source: '@wearables-ui-toolkit/foundation',
         values: [
           'AnimationDurations',
+          'EquilibriumMode',
           'Interpolators',
+          'SecondOrderConfigs',
           'SpringConfigs',
           'createTransition',
           'reducedMotionDuration',
         ],
-        types: ['SpringConfig'],
+        types: [
+          'SecondOrderConfig',
+          'SpringConfig',
+        ],
       },
       {
         source: '@wearables-ui-toolkit/foundation',
         values: ['usePrefersReducedMotion'],
+      },
+      {
+        source: '@wearables-ui-toolkit/foundation',
+        values: ['useSecondOrderAnimation'],
+        types: [
+          'SecondOrderAnimationController',
+          'UseSecondOrderAnimationOptions',
+        ],
       },
       {
         source: '@wearables-ui-toolkit/foundation',

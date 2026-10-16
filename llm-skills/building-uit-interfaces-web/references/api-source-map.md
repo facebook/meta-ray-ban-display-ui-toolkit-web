@@ -139,7 +139,7 @@ All paths are relative to `packages/mrbd/src/`.
 - Materials/layers: `foundation/material/ContainerMaterial.types.ts`, `foundation/material/layers/`.
 - Material factories: `foundation/material/MaterialLibrary.ts`.
 - Shape providers: `foundation/material/ShapeProvider.ts`.
-- Motion: `foundation/motion/Animations.types.ts`, `foundation/motion/useSpringAnimation.ts`.
+- Motion: `foundation/motion/Animations.types.ts`, `foundation/motion/useSpringAnimation.ts`, `foundation/motion/useSecondOrderAnimation.ts`. Second-order values use the application's numeric domain; custom dynamics require finite, representable coefficients and a stable frame-rate timestep. `onRest` reports only the target actually reached, and retained controllers ignore calls after unmount.
 - Page transitions/back/focus retention/preloading: `foundation/navigation/`.
 - React Router adapter: `packages/mrbd/src/react-router/`.
 - Theme tokens/appearances: `foundation/theme/` and exported `styles.css`.

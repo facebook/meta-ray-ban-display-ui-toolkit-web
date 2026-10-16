@@ -15,8 +15,6 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 56px;
-  min-height: 56px;
   box-sizing: border-box;
   flex-shrink: 0;
 }
@@ -30,7 +28,8 @@
   gap: var(--uit-spacing-small);
   padding: 0 var(--uit-spacing-medium);
   width: 100%;
-  height: 100%;
+  height: auto;
+  min-height: var(--uit-context-menu-item-min-height);
 }
 
 /* Icon container */
@@ -70,7 +69,12 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 100%;
+  height: auto;
+  min-height: var(--uit-context-menu-item-min-height);
+  padding: 0;
+}
+
+.buttonItemContentWithTitle {
   padding: 0 var(--uit-spacing-medium);
 }
 
@@ -118,7 +122,8 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 100%;
+  height: auto;
+  min-height: var(--uit-context-menu-item-min-height);
 }
 
 .emojiText {

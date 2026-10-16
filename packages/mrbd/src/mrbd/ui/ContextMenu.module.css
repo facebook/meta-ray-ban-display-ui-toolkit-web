@@ -11,12 +11,6 @@
  * Horizontal scrolling menu with drop shadow material and optional tail
  */
 
-/**
- * ContextMenu uses a custom material with:
- *   a solid-color container material layer using elevation 3 background
- *   cornerRadius = FULL
- * Override the default material background to match.
- */
 .contextMenu {
   display: inline-flex;
   position: relative;
@@ -39,7 +33,7 @@
   position: relative;
   z-index: 1;
   width: 100%;
-  height: 72px;
+  height: var(--uit-context-menu-height);
   overflow: hidden;
   border-radius: var(--uit-corner-radius-full);
   isolation: isolate;
@@ -57,7 +51,7 @@
   display: flex;
   position: relative;
   width: 100%;
-  height: 72px;
+  height: var(--uit-context-menu-height);
   overflow-x: auto;
   overflow-y: hidden;
 }
@@ -70,7 +64,7 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  width: var(--uit-context-menu-fading-edge-length, 64px);
+  width: var(--uit-context-menu-fading-edge-length);
   z-index: 2;
   pointer-events: none;
 }
@@ -79,8 +73,8 @@
   left: 0;
   background: linear-gradient(
     to right,
-    var(--uit-color-background-elevation3, #646A76) 0%,
-    rgba(100, 106, 118, 0) 100%
+    var(--uit-context-menu-surface-color) 0%,
+    transparent 100%
   );
 }
 
@@ -88,8 +82,8 @@
   right: 0;
   background: linear-gradient(
     to left,
-    var(--uit-color-background-elevation3, #646A76) 0%,
-    rgba(100, 106, 118, 0) 100%
+    var(--uit-context-menu-surface-color) 0%,
+    transparent 100%
   );
 }
 
@@ -99,7 +93,8 @@
   flex-direction: row;
   align-items: center;
   flex: 0 0 max-content;
-  gap: 8px;
-  padding: 0 8px;
-  height: 100%;
+  gap: var(--uit-spacing-xsmall);
+  padding: 0 var(--uit-spacing-xsmall);
+  align-self: center;
+  height: auto;
 }

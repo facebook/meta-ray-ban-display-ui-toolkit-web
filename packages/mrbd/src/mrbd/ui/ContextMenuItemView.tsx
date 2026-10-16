@@ -11,7 +11,7 @@
  * Extends Container — individual interactive item within ContextMenu
  *
  * Features:
- * - 56px minimum size
+ * - 56px default or 48px small minimum size
  * - Pill-shaped corners (FULL radius)
  * - Focus/press material state transitions
  * - Enter/Space to activate (no touch on Meta Ray-Ban Display)
@@ -59,7 +59,7 @@ const DEFAULT_CONTEXT_MENU_ITEM_SHAPE_PROVIDER =
 /**
  * ContextMenuItemView component
  * An interactive item for use in ContextMenu.
- * Minimum 56x56px, pill-shaped corners (FULL radius).
+ * Minimum 56x56px by default or 48x48px when small, with fully rounded corners.
  *
  * Uses the default container material with the glow hidden in the DEFAULT
  * state — idle items draw directly on the menu surface and glow/focus material
@@ -69,6 +69,7 @@ export const ContextMenuItemView = memo(forwardRef<HTMLDivElement, ContextMenuIt
   function ContextMenuItemView(
     {
       children,
+      size = 'default',
       icon,
       label,
       onClick,
@@ -84,13 +85,20 @@ export const ContextMenuItemView = memo(forwardRef<HTMLDivElement, ContextMenuIt
       () => materialProp ?? MaterialLibrary.contextMenuItem(),
       [materialProp],
     );
-    const containerStyle: CSSProperties = useMemo(
-      () => ({
-        minWidth: CONTEXT_MENU_ITEM_SIZE,
-        minHeight: CONTEXT_MENU_ITEM_SIZE,
-        ...style,
-      }),
-      [style],
+    const itemSize = CONTEXT_MENU_ITEM_SIZE[size];
+    const containerStyle: CSSProperties & Record<'--uit-context-menu-item-min-height', string> = useMemo(
+      () => {
+        const minimumHeight = style.minHeight ?? itemSize;
+        return {
+          minWidth: itemSize,
+          minHeight: itemSize,
+          '--uit-context-menu-item-min-height': typeof minimumHeight === 'number'
+            ? `${minimumHeight}px`
+            : minimumHeight,
+          ...style,
+        };
+      },
+      [itemSize, style],
     );
 
     // If children are provided, render them directly. Otherwise use the
@@ -156,9 +164,11 @@ export const ButtonContextMenuItemView = memo(forwardRef<HTMLDivElement, ButtonC
       () => `${styles.buttonItemContent} ${
         hasIcon && hasTitle ? styles.buttonItemContentWithGap : ''
       } ${
-        // The large icon tightens the container horizontal padding from 16px
-        // to 12px.
-        isLargeIcon ? styles.buttonItemContentLarge : ''
+        hasTitle
+          ? isLargeIcon
+            ? styles.buttonItemContentLarge
+            : styles.buttonItemContentWithTitle
+          : ''
       }`,
       [hasIcon, hasTitle, isLargeIcon],
     );

@@ -6,8 +6,16 @@
  *
  */
 
-/** 8px (--uit-spacing-small). */
-export const CONTEXT_MENU_ITEM_SPACING = 8;
+import type { ContextMenuSize } from '../ContextMenu.types';
+
+/** Minimum body height for each ContextMenu size variant. */
+export const CONTEXT_MENU_HEIGHT: Record<ContextMenuSize, number> = {
+  default: 64,
+  small: 56,
+};
+
+/** 4px (--uit-spacing-xsmall). */
+export const CONTEXT_MENU_ITEM_SPACING = 4;
 
 export const CONTEXT_MENU_FOCUS_SEARCH_FROM_ORIGIN_EVENT =
   'uit-focus-search-from-origin';

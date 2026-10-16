@@ -23,6 +23,12 @@ export const DismissReason = {
 export type DismissReason =
   (typeof DismissReason)[keyof typeof DismissReason];
 
+/** Fixed-height variants for the menu and its items. */
+export type ContextMenuSize = 'default' | 'small';
+
+/** Semantic surface color variants for the menu background. */
+export type ContextMenuSurfaceStyle = 'primary' | 'secondary';
+
 export interface ContextMenuProps
   extends Omit<StaticContainerProps, 'children' | 'height'> {
   /** Menu item elements (ContextMenuItemView instances) */
@@ -30,6 +36,21 @@ export interface ContextMenuProps
 
   /** Callback when the user attempts to dismiss the menu */
   onDismiss?: (reason: DismissReason) => void;
+
+  /**
+   * Fixed-height menu variant. Use the same value on each direct menu item.
+   *
+   * @default 'default'
+   */
+  size?: ContextMenuSize;
+
+  /**
+   * Semantic background surface. `primary` uses the brighter elevated surface;
+   * `secondary` uses the darker elevated surface.
+   *
+   * @default 'primary'
+   */
+  surfaceStyle?: ContextMenuSurfaceStyle;
 
   /**
    * Whether to show the tail (arrow pointer) when anchored.

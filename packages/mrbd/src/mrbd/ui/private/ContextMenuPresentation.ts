@@ -7,6 +7,7 @@
  */
 
 import type { CSSProperties } from 'react';
+import type { ContextMenuSurfaceStyle } from '../ContextMenu.types';
 import { contextMenuPath } from './ContextMenuPath';
 import {
   getContextMenuEffectiveSize,
@@ -17,8 +18,15 @@ import type {
   ContextMenuTailDirection,
 } from './ContextMenuLayout.types';
 
+const CONTEXT_MENU_SURFACE_COLOR: Record<ContextMenuSurfaceStyle, string> = {
+  primary: 'var(--uit-color-background-elevation3)',
+  secondary: 'var(--uit-color-background-elevation1)',
+};
+
 export interface ContextMenuContainerStyleOptions {
   totalHeight: number;
+  menuHeight: number;
+  surfaceStyle: ContextMenuSurfaceStyle;
   paddingTop: number;
   paddingBottom: number;
   dropShadowPadding: number;
@@ -28,20 +36,28 @@ export interface ContextMenuContainerStyleOptions {
 
 export function getContextMenuContainerStyle({
   totalHeight,
+  menuHeight,
+  surfaceStyle,
   paddingTop,
   paddingBottom,
   dropShadowPadding,
   maxWidth,
   style = {},
 }: ContextMenuContainerStyleOptions): CSSProperties {
-  return {
+  const containerStyle: CSSProperties & Record<
+    '--uit-context-menu-height' | '--uit-context-menu-surface-color',
+    string
+  > = {
     height: totalHeight,
     padding: `${paddingTop}px ${dropShadowPadding}px ${paddingBottom}px ${dropShadowPadding}px`,
     width: 'max-content',
     maxWidth,
     boxSizing: 'border-box',
+    '--uit-context-menu-height': `${menuHeight}px`,
+    '--uit-context-menu-surface-color': CONTEXT_MENU_SURFACE_COLOR[surfaceStyle],
     ...style,
   };
+  return containerStyle;
 }
 
 export interface ContextMenuMaterialShapeOptions {

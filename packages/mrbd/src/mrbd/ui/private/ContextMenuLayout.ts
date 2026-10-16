@@ -11,7 +11,7 @@ import {
   type ScrollMetrics,
 } from '@wearables-ui-toolkit/foundation/internal';
 import { CONTEXT_MENU_ITEM_SPACING } from './ContextMenuMetrics';
-import { CONTEXT_MENU_HEIGHT, TAIL_HEIGHT } from './ContextMenuPath';
+import { TAIL_HEIGHT } from './ContextMenuPath';
 import type {
   ContextMenuEffectiveSize,
   ContextMenuFadingEdgeStrengths,
@@ -38,6 +38,7 @@ export function shouldShowContextMenuTail(
 export function getContextMenuPadding(
   showTailPointer: boolean,
   tailDirection: ContextMenuTailDirection | undefined,
+  menuHeight: number,
   dropShadowPadding: number,
 ): ContextMenuPadding {
   const tailPadding = showTailPointer ? TAIL_HEIGHT : 0;
@@ -53,7 +54,7 @@ export function getContextMenuPadding(
   return {
     paddingTop,
     paddingBottom,
-    totalHeight: CONTEXT_MENU_HEIGHT + paddingTop + paddingBottom,
+    totalHeight: menuHeight + paddingTop + paddingBottom,
   };
 }
 

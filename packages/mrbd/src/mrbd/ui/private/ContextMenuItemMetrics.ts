@@ -6,5 +6,10 @@
  *
  */
 
-/** ContextMenuItemView minimum size. */
-export const CONTEXT_MENU_ITEM_SIZE = 56;
+import type { ContextMenuSize } from '../ContextMenu.types';
+
+/** Minimum item size for each ContextMenu size variant. */
+export const CONTEXT_MENU_ITEM_SIZE: Record<ContextMenuSize, number> = {
+  default: 56,
+  small: 48,
+};

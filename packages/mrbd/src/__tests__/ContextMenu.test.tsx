@@ -10,16 +10,16 @@
  * ContextMenu tests
  *
  * Constants:
- * - Height: 72px (CONTEXT_MENU_HEIGHT)
+ * - Default height: 64px; small height: 56px
  * - Shadow blur: 6px
- * - Item spacing: 8px
+ * - Item spacing: 4px
  * - Fading edge: 64px
  * - Tail: 17px height, 25.5px width
  * - Dismiss on Escape, Up/Down arrows
  */
 
 import { createRef, useState } from 'react';
-import { describe, it, expect, vi } from 'vitest';
+import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { ContextMenu, DismissReason } from '../mrbd/ui/ContextMenu';
 import type { ContextMenuHandle } from '../mrbd/ui/ContextMenu';
@@ -122,6 +122,469 @@ describe('ContextMenu initialization', () => {
       </ContextMenu>
     );
     expect(screen.getByRole('menu')).toBeInTheDocument();
+  });
+
+  it('uses the default 64px body and primary surface', () => {
+    const { container } = render(<ContextMenu />);
+    const menu = container.firstElementChild as HTMLElement;
+
+    expect(menu.style.height).toBe('88px');
+    expect(menu.style.getPropertyValue('--uit-context-menu-height')).toBe('64px');
+    expect(menu.style.getPropertyValue('--uit-context-menu-surface-color')).toBe(
+      'var(--uit-color-background-elevation3)',
+    );
+  });
+
+  it('supports a 56px small body with the secondary surface', () => {
+    const { container } = render(
+      <ContextMenu size="small" surfaceStyle="secondary" />,
+    );
+    const menu = container.firstElementChild as HTMLElement;
+
+    expect(menu.style.height).toBe('80px');
+    expect(menu.style.getPropertyValue('--uit-context-menu-height')).toBe('56px');
+    expect(menu.style.getPropertyValue('--uit-context-menu-surface-color')).toBe(
+      'var(--uit-color-background-elevation1)',
+    );
+  });
+
+  it.each([
+    ['default', 'up', 105],
+    ['default', 'down', 105],
+    ['small', 'up', 97],
+    ['small', 'down', 97],
+  ] as const)('reserves tail space for the %s size pointing %s', (size, tailDirection, height) => {
+    render(<ContextMenu size={size} tailDirection={tailDirection} maxWidth={200} />);
+    const menu = screen.getByRole('menu');
+
+    expect(menu.style.height).toBe(`${height}px`);
+    expect(menu.style.paddingTop).toBe(tailDirection === 'up' ? '29px' : '12px');
+    expect(menu.style.paddingBottom).toBe(tailDirection === 'down' ? '29px' : '12px');
+    expect(menu.style.paddingLeft).toBe('12px');
+    expect(menu.style.paddingRight).toBe('12px');
+  });
+
+  it('updates size and surface without replacing the menu or its focused item', () => {
+    const view = render(
+      <ContextMenu tailDirection="up" maxWidth={200}>
+        <ContextMenuItemView ariaLabel="Save" />
+      </ContextMenu>,
+    );
+    const menu = screen.getByRole('menu');
+    const item = screen.getByRole('menuitem', { name: 'Save' });
+    act(() => item.focus());
+
+    view.rerender(
+      <ContextMenu size="small" surfaceStyle="secondary" tailDirection="up" maxWidth={200}>
+        <ContextMenuItemView size="small" ariaLabel="Save" />
+      </ContextMenu>,
+    );
+
+    expect(screen.getByRole('menu')).toBe(menu);
+    expect(screen.getByRole('menuitem', { name: 'Save' })).toBe(item);
+    expect(document.activeElement).toBe(item);
+    expect(menu.style.height).toBe('97px');
+    expect(menu.style.getPropertyValue('--uit-context-menu-surface-color')).toBe(
+      'var(--uit-color-background-elevation1)',
+    );
+    expect(item.style.minWidth).toBe('48px');
+
+    view.rerender(
+      <ContextMenu showTail={false} surfaceStyle="primary" maxWidth={200}>
+        <ContextMenuItemView ariaLabel="Save" />
+      </ContextMenu>,
+    );
+
+    expect(document.activeElement).toBe(item);
+    expect(menu.style.height).toBe('88px');
+    expect(menu.style.getPropertyValue('--uit-context-menu-height')).toBe('64px');
+    expect(menu.style.getPropertyValue('--uit-context-menu-surface-color')).toBe(
+      'var(--uit-color-background-elevation3)',
+    );
+    expect(item.style.minWidth).toBe('56px');
+    view.unmount();
+  });
+
+  it('remeasures the material when size changes without ResizeObserver', () => {
+    vi.stubGlobal('ResizeObserver', undefined);
+    const rectSpy = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(function (this: HTMLElement) {
+        const height = Number.parseFloat(this.style.height) || 0;
+        return {
+          x: 0, y: 0, top: 0, right: 200, bottom: height, left: 0,
+          width: 200, height, toJSON: () => ({}),
+        } as DOMRect;
+      });
+    const view = render(<ContextMenu tailDirection="down" maxWidth={200} />);
+
+    try {
+      expect(view.container.querySelector('svg')?.getAttribute('viewBox')).toBe('0 0 200 105');
+
+      view.rerender(<ContextMenu size="small" tailDirection="down" maxWidth={200} />);
+
+      expect(screen.getByRole('menu').style.height).toBe('97px');
+      expect(view.container.querySelector('svg')?.getAttribute('viewBox')).toBe('0 0 200 97');
+
+      view.rerender(<ContextMenu tailDirection="down" maxWidth={200} />);
+      expect(view.container.querySelector('svg')?.getAttribute('viewBox')).toBe('0 0 200 105');
+    } finally {
+      view.unmount();
+      rectSpy.mockRestore();
+      vi.unstubAllGlobals();
+    }
+  });
+});
+
+describe('ContextMenu intrinsic item layout', () => {
+  let observers: ItemResizeObserver[];
+  let restoreRect: () => void;
+
+  class ItemResizeObserver {
+    readonly targets = new Set<Element>();
+    readonly disconnect = vi.fn(() => this.targets.clear());
+
+    constructor(readonly callback: ResizeObserverCallback) {
+      observers.push(this);
+    }
+
+    readonly observe = vi.fn((target: Element, _options?: ResizeObserverOptions) => this.targets.add(target));
+    readonly unobserve = vi.fn((target: Element) => this.targets.delete(target));
+  }
+
+  beforeEach(() => {
+    observers = [];
+    vi.stubGlobal('ResizeObserver', ItemResizeObserver);
+    const spy = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(function (this: HTMLElement) {
+        const height = Number.parseFloat(this.style.height) || this.offsetHeight || 0;
+        return {
+          x: 0, y: 0, top: 0, right: 200, bottom: height, left: 0,
+          width: 200, height, toJSON: () => ({}),
+        } as DOMRect;
+      });
+    restoreRect = () => spy.mockRestore();
+  });
+
+  afterEach(() => {
+    restoreRect();
+    vi.unstubAllGlobals();
+  });
+
+  function setItemHeight(item: HTMLElement, height: number) {
+    Object.defineProperty(item, 'offsetHeight', { configurable: true, value: height });
+  }
+
+  function notifyItemResize(item: HTMLElement) {
+    act(() => {
+      observers.filter(observer => observer.targets.has(item)).forEach(observer => {
+        const entries = Array.from(observer.targets, target => {
+          const rect = target.getBoundingClientRect();
+          const size = [{ inlineSize: rect.width, blockSize: rect.height }];
+          return {
+            target, contentRect: rect,
+            borderBoxSize: size, contentBoxSize: size, devicePixelContentBoxSize: size,
+          };
+        });
+        observer.callback(entries, observer as unknown as ResizeObserver);
+      });
+    });
+  }
+
+  // jsdom does not lay out glyphs. These cases supply reported line/item boxes
+  // and verify the component's response, not font rendering or host text zoom.
+  it.each([
+    ['default', 100, 56, 64, 105],
+    ['default', 125, 56, 64, 105],
+    ['default', 150, 56, 64, 105],
+    ['default', 200, 65, 73, 114],
+    ['small', 100, 48, 56, 97],
+    ['small', 125, 48, 56, 97],
+    ['small', 150, 49, 57, 98],
+    ['small', 200, 65, 73, 114],
+  ] as const)('fits reported %s item layout at %i%% coherent text growth', (size, scale, itemHeight, bodyHeight, totalHeight) => {
+    const view = render(
+      <ContextMenu size={size} tailDirection="down" maxWidth={200}>
+        <ContextMenuItemView size={size} ariaLabel="Résumé action">
+          <span style={{ fontSize: 24 * scale / 100, lineHeight: `${32 * scale / 100}px` }}>
+            Résumé action
+          </span>
+        </ContextMenuItemView>
+      </ContextMenu>,
+    );
+    const item = screen.getByRole('menuitem');
+    const menu = screen.getByRole('menu');
+    setItemHeight(item, itemHeight);
+    notifyItemResize(item);
+
+    expect(menu.style.getPropertyValue('--uit-context-menu-height')).toBe(`${bodyHeight}px`);
+    expect(menu.style.height).toBe(`${totalHeight}px`);
+    expect(view.container.querySelector('svg')?.getAttribute('viewBox')).toBe(`0 0 200 ${totalHeight}`);
+    expect(item.style.minHeight).toBe(size === 'small' ? '48px' : '56px');
+    view.unmount();
+  });
+
+  it.each(['up', 'down', undefined] as const)('keeps grown body and tail geometry aligned for %s', tailDirection => {
+    const view = render(
+      <ContextMenu tailDirection={tailDirection} maxWidth={200}>
+        <ContextMenuItemView ariaLabel="Tall content" />
+      </ContextMenu>,
+    );
+    const item = screen.getByRole('menuitem');
+    setItemHeight(item, 80);
+    notifyItemResize(item);
+    const menu = screen.getByRole('menu');
+    const height = tailDirection ? 129 : 112;
+
+    expect(menu.style.getPropertyValue('--uit-context-menu-height')).toBe('88px');
+    expect(menu.style.height).toBe(`${height}px`);
+    expect(menu.style.paddingTop).toBe(tailDirection === 'up' ? '29px' : '12px');
+    expect(menu.style.paddingBottom).toBe(tailDirection === 'down' ? '29px' : '12px');
+    expect(view.container.querySelector('svg')?.getAttribute('viewBox')).toBe(`0 0 200 ${height}`);
+    view.unmount();
+  });
+
+  it('shrinks after tallest-item removal and live size/content changes', () => {
+    const renderMenu = (size: 'default' | 'small', withTall: boolean, withItems = true) => (
+      <ContextMenu size={size} tailDirection="down" maxWidth={200}>
+        {withItems && <ContextMenuItemView key="short" size={size} ariaLabel="Short" />}
+        {withTall && <ContextMenuItemView key="tall" size={size} ariaLabel="Tall" />}
+      </ContextMenu>
+    );
+    const view = render(renderMenu('default', true));
+    const short = screen.getByRole('menuitem', { name: 'Short' });
+    const tall = screen.getByRole('menuitem', { name: 'Tall' });
+    setItemHeight(short, 56);
+    setItemHeight(tall, 96);
+    notifyItemResize(tall);
+    expect(screen.getByRole('menu').style.height).toBe('145px');
+
+    view.rerender(renderMenu('default', false));
+    expect(screen.getByRole('menu').style.height).toBe('105px');
+    setItemHeight(short, 80);
+    notifyItemResize(short);
+    expect(screen.getByRole('menu').style.height).toBe('129px');
+
+    setItemHeight(short, 48);
+    view.rerender(renderMenu('small', false));
+    expect(screen.getByRole('menu').style.height).toBe('97px');
+    view.rerender(renderMenu('small', false, false));
+    expect(screen.getByRole('menu').style.getPropertyValue('--uit-context-menu-height')).toBe('56px');
+    view.unmount();
+  });
+
+  it('uses untransformed layout height without changing focused-item identity or horizontal fades', () => {
+    const view = render(
+      <ContextMenu maxWidth={200} surfaceStyle="secondary" tailDirection="down">
+        <ContextMenuItemView ariaLabel="A long localized action with descenders" />
+        <ContextMenuItemView ariaLabel="Next" />
+      </ContextMenu>,
+    );
+    const item = screen.getByRole('menuitem', { name: 'A long localized action with descenders' });
+    const menu = screen.getByRole('menu');
+    act(() => item.focus());
+    setItemHeight(item, 80);
+    const transformed = vi.spyOn(item, 'getBoundingClientRect').mockReturnValue({
+      x: 0, y: 0, top: 0, left: 0, right: 400, bottom: 160,
+      width: 400, height: 160, toJSON: () => ({}),
+    } as DOMRect);
+    notifyItemResize(item);
+
+    expect(menu.style.getPropertyValue('--uit-context-menu-height')).toBe('88px');
+    expect(document.activeElement).toBe(item);
+    expect(menu.style.getPropertyValue('--uit-context-menu-surface-color')).toBe('var(--uit-color-background-elevation1)');
+    const scroller = view.container.querySelector<HTMLElement>('[data-scroll-view="true"]')!;
+    Object.defineProperties(scroller, {
+      clientWidth: { configurable: true, value: 176 },
+      scrollWidth: { configurable: true, value: 600 },
+      scrollLeft: { configurable: true, value: 100, writable: true },
+    });
+    fireEvent.scroll(scroller);
+    expect(view.container.querySelector<HTMLElement>('[class*="fadingEdgeLeft"]')?.style.opacity).toBe('1');
+    expect(view.container.querySelector<HTMLElement>('[class*="fadingEdgeRight"]')?.style.opacity).toBe('1');
+    transformed.mockRestore();
+    view.unmount();
+  });
+
+  it('retains item observers and font listeners across inline styles and equivalent child rerenders', () => {
+    const original = Object.getOwnPropertyDescriptor(document, 'fonts');
+    const fonts = new EventTarget() as EventTarget & { ready: Promise<unknown> };
+    fonts.ready = Promise.resolve(fonts);
+    const add = vi.spyOn(fonts, 'addEventListener');
+    const remove = vi.spyOn(fonts, 'removeEventListener');
+    Object.defineProperty(document, 'fonts', { configurable: true, value: fonts });
+    const renderMenu = (index: number) => (
+      <ContextMenu maxWidth={200} tailDirection="down" className={`theme-${index}`} style={{ fontSize: 24 }}>
+        <ContextMenuItemView key="one" ariaLabel="One" />
+        <ContextMenuItemView key="two" ariaLabel="Two" />
+      </ContextMenu>
+    );
+    let view: ReturnType<typeof render> | undefined;
+    try {
+      view = render(renderMenu(0));
+      const one = screen.getByRole('menuitem', { name: 'One' });
+      const two = screen.getByRole('menuitem', { name: 'Two' });
+      setItemHeight(one, 56);
+      const intrinsic = observers.find(observer => observer.targets.has(one) && observer.targets.has(two))!;
+      for (let index = 1; index <= 5; index += 1) {
+        view.rerender(renderMenu(index));
+        expect(screen.getByRole('menuitem', { name: 'One' })).toBe(one);
+        expect(screen.getByRole('menu').style.height).toBe('105px');
+      }
+      expect(intrinsic.observe).toHaveBeenCalledTimes(2);
+      expect(intrinsic.unobserve).not.toHaveBeenCalled();
+      expect(intrinsic.disconnect).not.toHaveBeenCalled();
+      expect(add.mock.calls.filter(([type]) => type === 'loadingdone')).toHaveLength(1);
+      expect(add.mock.calls.filter(([type]) => type === 'loadingerror')).toHaveLength(1);
+      expect(remove).not.toHaveBeenCalled();
+      setItemHeight(one, 80);
+      act(() => fonts.dispatchEvent(new Event('loadingdone')));
+      expect(screen.getByRole('menu').style.height).toBe('129px');
+      view.unmount();
+      expect(intrinsic.disconnect).toHaveBeenCalledTimes(1);
+      expect(remove.mock.calls.filter(([type]) => type === 'loadingdone')).toHaveLength(1);
+      expect(remove.mock.calls.filter(([type]) => type === 'loadingerror')).toHaveLength(1);
+    } finally {
+      view?.unmount();
+      if (original) Object.defineProperty(document, 'fonts', original);
+      else Reflect.deleteProperty(document, 'fonts');
+    }
+  });
+
+  it('remeasures real style and size updates without recreating intrinsic subscriptions', () => {
+    const renderMenu = (size: 'default' | 'small', lineHeight: number) => (
+      <ContextMenu size={size} maxWidth={200} tailDirection="down" style={{ lineHeight: `${lineHeight}px` }}>
+        <ContextMenuItemView key="one" size={size} ariaLabel="Styled content"><span>Content</span></ContextMenuItemView>
+      </ContextMenu>
+    );
+    const view = render(renderMenu('default', 56));
+    const item = screen.getByRole('menuitem');
+    const menu = screen.getByRole('menu');
+    Object.defineProperty(item, 'offsetHeight', {
+      configurable: true,
+      get: () => Number.parseFloat(menu.style.lineHeight),
+    });
+    const intrinsic = observers.find(observer => observer.targets.has(item))!;
+    notifyItemResize(item);
+    view.rerender(renderMenu('default', 80));
+    expect(menu.style.getPropertyValue('--uit-context-menu-height')).toBe('88px');
+    expect(view.container.querySelector('svg')?.getAttribute('viewBox')).toBe('0 0 200 129');
+    view.rerender(renderMenu('small', 48));
+    expect(menu.style.getPropertyValue('--uit-context-menu-height')).toBe('56px');
+    expect(item.style.minHeight).toBe('48px');
+    expect(view.container.querySelector('svg')?.getAttribute('viewBox')).toBe('0 0 200 97');
+    expect(intrinsic.observe).toHaveBeenCalledTimes(1);
+    expect(intrinsic.disconnect).not.toHaveBeenCalled();
+    view.unmount();
+  });
+
+  it('remeasures style and size changes when ResizeObserver is unavailable', () => {
+    vi.stubGlobal('ResizeObserver', undefined);
+    const renderMenu = (size: 'default' | 'small', lineHeight: number) => (
+      <ContextMenu size={size} maxWidth={200} tailDirection="down" className={`line-${lineHeight}`} style={{ lineHeight: `${lineHeight}px` }}>
+        <ContextMenuItemView key="one" size={size} ariaLabel="Styled without observer"><span>Content</span></ContextMenuItemView>
+      </ContextMenu>
+    );
+    const view = render(renderMenu('default', 56));
+    const menu = screen.getByRole('menu');
+    const item = screen.getByRole('menuitem');
+    Object.defineProperty(item, 'offsetHeight', { configurable: true, get: () => Number.parseFloat(menu.style.lineHeight) });
+    view.rerender(renderMenu('default', 96));
+    expect(menu.style.getPropertyValue('--uit-context-menu-height')).toBe('104px');
+    expect(view.container.querySelector('svg')?.getAttribute('viewBox')).toBe('0 0 200 145');
+    view.rerender(renderMenu('small', 49));
+    expect(menu.style.getPropertyValue('--uit-context-menu-height')).toBe('57px');
+    expect(view.container.querySelector('svg')?.getAttribute('viewBox')).toBe('0 0 200 98');
+    view.unmount();
+  });
+
+  it('remeasures on font completion/error without requiring ResizeObserver', () => {
+    vi.stubGlobal('ResizeObserver', undefined);
+    const original = Object.getOwnPropertyDescriptor(document, 'fonts');
+    const fonts = new EventTarget() as EventTarget & { ready: Promise<unknown> };
+    fonts.ready = Promise.resolve(fonts);
+    Object.defineProperty(document, 'fonts', { configurable: true, value: fonts });
+    let view: ReturnType<typeof render> | undefined;
+    try {
+      view = render(
+        <ContextMenu tailDirection="up" maxWidth={200}>
+          <ContextMenuItemView ariaLabel="Loaded font" />
+        </ContextMenu>,
+      );
+      const item = screen.getByRole('menuitem');
+      setItemHeight(item, 88);
+      act(() => fonts.dispatchEvent(new Event('loadingdone')));
+      expect(screen.getByRole('menu').style.height).toBe('137px');
+      expect(view.container.querySelector('svg')?.getAttribute('viewBox')).toBe('0 0 200 137');
+      setItemHeight(item, 56);
+      act(() => fonts.dispatchEvent(new Event('loadingerror')));
+      expect(screen.getByRole('menu').style.height).toBe('105px');
+    } finally {
+      view?.unmount();
+      if (original) Object.defineProperty(document, 'fonts', original);
+      else Reflect.deleteProperty(document, 'fonts');
+    }
+  });
+
+  it('bounds equal updates, unobserves removed items, and disposes callbacks on unmount', () => {
+    const view = render(
+      <ContextMenu maxWidth={200}>
+        <ContextMenuItemView key="one" ariaLabel="One" />
+        <ContextMenuItemView key="two" ariaLabel="Two" />
+      </ContextMenu>,
+    );
+    const one = screen.getByRole('menuitem', { name: 'One' });
+    const two = screen.getByRole('menuitem', { name: 'Two' });
+    const intrinsic = observers.find(observer => observer.targets.has(one) && observer.targets.has(two))!;
+    expect(intrinsic).toBeDefined();
+    expect(intrinsic.observe).toHaveBeenCalledWith(one, { box: 'border-box' });
+    expect(intrinsic.observe).toHaveBeenCalledWith(two, { box: 'border-box' });
+    setItemHeight(one, 80);
+    notifyItemResize(one);
+    const count = observers.length;
+    notifyItemResize(one);
+    expect(observers.length).toBe(count);
+    expect(screen.getByRole('menu').style.height).toBe('112px');
+
+    view.rerender(<ContextMenu maxWidth={200}><ContextMenuItemView key="two" ariaLabel="Two" /></ContextMenu>);
+    expect(intrinsic.disconnect).not.toHaveBeenCalled();
+    expect(intrinsic.unobserve).toHaveBeenCalledWith(one);
+    expect(intrinsic.targets.has(one)).toBe(false);
+    expect(intrinsic.targets.has(two)).toBe(true);
+    act(() => intrinsic.callback([], intrinsic as unknown as ResizeObserver));
+    expect(screen.getByRole('menu').style.height).toBe('88px');
+    view.unmount();
+    expect(intrinsic.disconnect).toHaveBeenCalledTimes(1);
+    const afterUnmount = observers.length;
+    act(() => intrinsic.callback([], intrinsic as unknown as ResizeObserver));
+    expect(observers.length).toBe(afterUnmount);
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+  });
+
+  it('does not treat root-font declarations or fixed-line ink growth as measured item growth', () => {
+    const rootFont = document.documentElement.style.fontSize;
+    const view = render(
+      <ContextMenu maxWidth={200}>
+        <ContextMenuItemView ariaLabel="Fixed line box">
+          <span style={{ fontSize: 24, lineHeight: '32px' }}>Agǵ</span>
+        </ContextMenuItemView>
+      </ContextMenu>,
+    );
+    const item = screen.getByRole('menuitem');
+    const text = screen.getByText('Agǵ');
+    setItemHeight(item, 56);
+    try {
+      document.documentElement.style.fontSize = '32px';
+      notifyItemResize(item);
+      expect(getComputedStyle(text).fontSize).toBe('24px');
+      expect(screen.getByRole('menu').style.height).toBe('88px');
+      text.style.fontSize = '48px';
+      notifyItemResize(item);
+      expect(getComputedStyle(text).lineHeight).toBe('32px');
+      expect(screen.getByRole('menu').style.height).toBe('88px');
+    } finally {
+      document.documentElement.style.fontSize = rootFont;
+      view.unmount();
+    }
   });
 });
 
@@ -1029,9 +1492,9 @@ describe('ContextMenu fading edges', () => {
       top: 0,
       left: 0,
       right: 180,
-      bottom: 72,
+      bottom: 64,
       width: 180,
-      height: 72,
+      height: 64,
       toJSON: () => {},
     });
     items[1].getBoundingClientRect = () => ({
@@ -1040,9 +1503,9 @@ describe('ContextMenu fading edges', () => {
       top: 0,
       left: 120,
       right: 170,
-      bottom: 72,
+      bottom: 64,
       width: 50,
-      height: 72,
+      height: 64,
       toJSON: () => {},
     });
 
@@ -1052,7 +1515,7 @@ describe('ContextMenu fading edges', () => {
     });
 
     expect(scrollContainer.scrollTop).toBe(0);
-    expect(scrollContainer.scrollLeft).toBe(62);
+    expect(scrollContainer.scrollLeft).toBe(58);
 
     requestAnimationFrameSpy.mockRestore();
   });

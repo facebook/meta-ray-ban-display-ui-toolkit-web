@@ -13,6 +13,7 @@ import type {
 import type { ContainerProps } from '@wearables-ui-toolkit/foundation/components/Container';
 import type { IconSource } from '@wearables-ui-toolkit/foundation/components/IconImage';
 import type { ButtonItemIconSize } from './ButtonItemIconSize';
+import type { ContextMenuSize } from './ContextMenu.types';
 import type { IconTintColor } from './IconTintColor';
 
 export interface ContextMenuItemViewProps
@@ -23,6 +24,13 @@ export interface ContextMenuItemViewProps
    * available for simple use cases.
    */
   children?: ReactNode;
+
+  /**
+   * Minimum-size variant. Match the containing ContextMenu's `size`.
+   *
+   * @default 'default'
+   */
+  size?: ContextMenuSize;
 
   /**
    * Icon to display in the item. The base item is a bare, children-only
@@ -37,7 +45,10 @@ export interface ContextMenuItemViewProps
   /** Click handler */
   onClick?: () => void;
 
-  /** Inline style merged with the minimum item dimensions. */
+  /**
+   * Inline style applied after the size defaults. Explicit `minWidth` and
+   * `minHeight` values override their respective defaults independently.
+   */
   style?: CSSProperties;
 }
 
@@ -57,8 +68,9 @@ export interface ButtonContextMenuItemViewProps
 
   /**
    * Icon size. Defaults to {@link ButtonItemIconSize.MEDIUM}. Use
-   * {@link ButtonItemIconSize.LARGE} for a larger icon (also tightens the
-   * content horizontal padding from 16px to 12px).
+   * {@link ButtonItemIconSize.LARGE} for a larger icon and tighter horizontal
+   * content padding when a title is present. Items without a title have no
+   * horizontal content padding at either icon size.
    */
   iconSize?: ButtonItemIconSize;
 

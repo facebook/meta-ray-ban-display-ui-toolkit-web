@@ -11,7 +11,7 @@
  * Popup-shaped horizontal scrolling menu
  *
  * Features:
- * - 72px fixed height
+ * - 64px default or 56px small minimum body height
  * - Horizontal scroll with Left/Right arrow key navigation
  * - Drop shadow material background
  * - Dismiss on Escape key or Up/Down navigation beyond edges
@@ -42,7 +42,9 @@ import {
 import { SHADOW_BLUR_RADIUS } from './private/ContextMenuPath';
 import {
   CONTEXT_MENU_FOCUS_SEARCH_FROM_ORIGIN_EVENT,
+  CONTEXT_MENU_HEIGHT,
 } from './private/ContextMenuMetrics';
+import { CONTEXT_MENU_ITEM_SIZE } from './private/ContextMenuItemMetrics';
 import {
   getContextMenuFadingEdgeStrengths,
   getContextMenuFocusedItem,
@@ -82,6 +84,8 @@ export const ContextMenu = memo(forwardRef<ContextMenuHandle, ContextMenuProps>(
     {
       children,
       onDismiss,
+      size = 'default',
+      surfaceStyle = 'primary',
       showTail = true,
       tailDirection,
       tailCenterX,
@@ -108,6 +112,7 @@ export const ContextMenu = memo(forwardRef<ContextMenuHandle, ContextMenuProps>(
     const dismissalAckTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const autoFocusHandoffActiveRef = useRef(false);
     const [measuredSize, setMeasuredSize] = useState({ width: 0, height: 0 });
+    const [intrinsicItemHeight, setIntrinsicItemHeight] = useState(0);
     const [scrollMetrics, setScrollMetrics] = useState(EMPTY_SCROLL_METRICS);
 
     useLayoutEffect(() => {
@@ -115,7 +120,9 @@ export const ContextMenu = memo(forwardRef<ContextMenuHandle, ContextMenuProps>(
       focusSearchOriginRef.current = focusSearchOrigin;
     }, [focusSearchOrigin, onDismiss]);
 
-    // Drop shadow padding
+    const minimumMenuHeight = CONTEXT_MENU_HEIGHT[size];
+    const itemClearance = minimumMenuHeight - CONTEXT_MENU_ITEM_SIZE[size];
+    const menuHeight = Math.max(minimumMenuHeight, intrinsicItemHeight + itemClearance);
     const dropShadowPadding = SHADOW_BLUR_RADIUS * 2;
 
     const showTailPointer = useMemo(
@@ -126,9 +133,10 @@ export const ContextMenu = memo(forwardRef<ContextMenuHandle, ContextMenuProps>(
       () => getContextMenuPadding(
         showTailPointer,
         tailDirection,
+        menuHeight,
         dropShadowPadding,
       ),
-      [dropShadowPadding, showTailPointer, tailDirection],
+      [dropShadowPadding, menuHeight, showTailPointer, tailDirection],
     );
 
     /**
@@ -437,6 +445,59 @@ export const ContextMenu = memo(forwardRef<ContextMenuHandle, ContextMenuProps>(
       };
     }, [isPositioned]);
 
+    const intrinsicSubscriptionRef = useRef<{
+      observer?: ResizeObserver;
+      items: Set<HTMLElement>;
+    } | null>(null);
+    const updateIntrinsicItemHeight = useCallback(() => {
+      const items = getContextMenuItems(scrollRef.current, styles.itemsContainer);
+      const nextHeight = items.reduce(
+        (height, item) => Math.max(height, item.offsetHeight ?? 0),
+        0,
+      );
+      setIntrinsicItemHeight(current => current === nextHeight ? current : nextHeight);
+    }, []);
+
+    useLayoutEffect(() => {
+      let disposed = false;
+      const updateHeight = () => {
+        if (!disposed) updateIntrinsicItemHeight();
+      };
+      const subscription = {
+        observer: typeof ResizeObserver === 'undefined'
+          ? undefined
+          : new ResizeObserver(updateHeight),
+        items: new Set<HTMLElement>(),
+      };
+      intrinsicSubscriptionRef.current = subscription;
+      const fonts = document.fonts;
+      fonts?.addEventListener('loadingdone', updateHeight);
+      fonts?.addEventListener('loadingerror', updateHeight);
+      return () => {
+        disposed = true;
+        subscription.observer?.disconnect();
+        subscription.items.clear();
+        intrinsicSubscriptionRef.current = null;
+        fonts?.removeEventListener('loadingdone', updateHeight);
+        fonts?.removeEventListener('loadingerror', updateHeight);
+      };
+    }, [updateIntrinsicItemHeight]);
+
+    useLayoutEffect(() => {
+      const subscription = intrinsicSubscriptionRef.current;
+      const items = new Set(getContextMenuItems(scrollRef.current, styles.itemsContainer));
+      if (subscription) {
+        subscription.items.forEach(item => {
+          if (!items.has(item)) subscription.observer?.unobserve(item);
+        });
+        items.forEach(item => {
+          if (!subscription.items.has(item)) subscription.observer?.observe(item, { box: 'border-box' });
+        });
+        subscription.items = items;
+      }
+      updateIntrinsicItemHeight();
+    }, [children, className, size, style, updateIntrinsicItemHeight]);
+
     useLayoutEffect(() => {
       const el = containerRef.current;
       if (!el) return;
@@ -460,7 +521,7 @@ export const ContextMenu = memo(forwardRef<ContextMenuHandle, ContextMenuProps>(
       const observer = new ResizeObserver(updateSize);
       observer.observe(el);
       return () => observer.disconnect();
-    }, [maxWidth, paddingBottom, paddingTop, showTailPointer]);
+    }, [maxWidth, paddingBottom, paddingTop, showTailPointer, totalHeight]);
 
     useLayoutEffect(() => {
       updateFadingEdges();
@@ -487,6 +548,8 @@ export const ContextMenu = memo(forwardRef<ContextMenuHandle, ContextMenuProps>(
     const containerStyle = useMemo(
       () => getContextMenuContainerStyle({
         totalHeight,
+        menuHeight,
+        surfaceStyle,
         paddingTop,
         paddingBottom,
         dropShadowPadding,
@@ -496,9 +559,11 @@ export const ContextMenu = memo(forwardRef<ContextMenuHandle, ContextMenuProps>(
       [
         dropShadowPadding,
         maxWidth,
+        menuHeight,
         paddingBottom,
         paddingTop,
         style,
+        surfaceStyle,
         totalHeight,
       ],
     );

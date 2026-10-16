@@ -23,7 +23,6 @@ export type {
 } from './ContextMenuPath.types';
 
 /** Shape constants */
-export const CONTEXT_MENU_HEIGHT = 72;
 export const SHADOW_BLUR_RADIUS = 6;
 
 // Tail dimensions (16 * 0.85 * 1.25 = 17)

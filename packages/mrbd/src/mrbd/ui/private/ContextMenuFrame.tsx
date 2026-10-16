@@ -93,7 +93,7 @@ export const ContextMenuFrame = memo(function ContextMenuFrame({
           aria-hidden="true"
           style={materialShapeStyle}
         >
-          <path d={pathD} fill="var(--uit-color-background-elevation3, #646A76)" />
+          <path d={pathD} fill="var(--uit-context-menu-surface-color)" />
         </svg>
       )}
 

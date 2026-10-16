@@ -9,13 +9,9 @@
 import {
   memo,
   useEffect,
-  useId,
-  useMemo,
   useRef,
   useState,
 } from 'react';
-import { getCachedSmoothRoundedRectPath } from '@wearables-ui-toolkit/foundation/utils/SmoothCorners';
-import { MODAL_BANNER_CORNER_RADIUS } from './ModalMetrics';
 import styles from '../Modal.module.css';
 
 export interface ModalBannerImageProps {
@@ -30,11 +26,6 @@ export interface ModalBannerImageDimensions {
 
 export const ModalBannerImage = memo(function ModalBannerImage({ src, alt }: ModalBannerImageProps) {
   const rootRef = useRef<HTMLDivElement>(null);
-  const reactId = useId();
-  const clipPathId = useMemo(
-    () => `modal-banner-clip-${reactId.replace(/:/g, '')}`,
-    [reactId],
-  );
   const [dimensions, setDimensions] = useState<ModalBannerImageDimensions | null>(null);
 
   useEffect(() => {
@@ -61,32 +52,15 @@ export const ModalBannerImage = memo(function ModalBannerImage({ src, alt }: Mod
     return () => observer.disconnect();
   }, []);
 
-  const clipPath = useMemo(
-    () =>
-      dimensions != null
-        ? getCachedSmoothRoundedRectPath({
-            width: dimensions.width,
-            height: dimensions.height,
-            cornerRadius: MODAL_BANNER_CORNER_RADIUS,
-          })
-        : null,
-    [dimensions],
-  );
-
   return (
     <div ref={rootRef} className={styles.bannerImageFrame}>
-      {dimensions != null && clipPath != null ? (
+      {dimensions != null ? (
         <svg
           className={styles.bannerImageSvg}
           viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
           preserveAspectRatio="none"
           aria-hidden="true"
         >
-          <defs>
-            <clipPath id={clipPathId} clipPathUnits="userSpaceOnUse">
-              <path d={clipPath} />
-            </clipPath>
-          </defs>
           <image
             href={src}
             x="0"
@@ -94,7 +68,6 @@ export const ModalBannerImage = memo(function ModalBannerImage({ src, alt }: Mod
             width={dimensions.width}
             height={dimensions.height}
             preserveAspectRatio="xMidYMid slice"
-            clipPath={`url(#${clipPathId})`}
           />
         </svg>
       ) : (

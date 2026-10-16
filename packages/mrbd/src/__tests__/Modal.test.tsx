@@ -143,6 +143,23 @@ describe('Modal initialization', () => {
     const modal = container.firstElementChild as HTMLElement;
     expect(modal.getAttribute('style')).toContain('overflow: visible');
   });
+
+  it('clips the banner image and tag together without clipping the modal', () => {
+    const { container } = render(
+      <Modal title="Preview" bannerSrc="/banner.jpg" bannerTag={ModalBannerTag.BETA} />,
+    );
+    const modal = container.firstElementChild as HTMLElement;
+    const banner = container.querySelector('[class*="bannerContainer"]') as HTMLElement;
+    const content = banner.querySelector('[class*="contentWrapper"]') as HTMLElement;
+    const image = banner.querySelector('[class*="bannerImageFrame"]');
+    const scrim = banner.querySelector('[class*="bannerTagScrim"]');
+
+    expect(content.style.overflow).toBe('hidden');
+    expect(image?.parentElement).toBe(content);
+    expect(scrim?.parentElement).toBe(content);
+    expect(banner.style.overflow).toBe('visible');
+    expect(modal.style.overflow).toBe('visible');
+  });
 });
 
 describe('Modal title and subtitle', () => {

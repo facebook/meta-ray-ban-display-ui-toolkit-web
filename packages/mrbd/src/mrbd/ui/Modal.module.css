@@ -16,11 +16,7 @@
  * Composes a Panel component with CSS flexbox layout.
  */
 
-/*
- * The Modal has no entrance/exit animation or backdrop. (A previous attempt
- * was non-functional — the keyframes were bound to a wrapper that was never
- * rendered, and the overlay was never wired up — so it was removed.)
- */
+/* The Modal has no entrance/exit animation or backdrop. */
 
 /**
  * Modal panel — the actual content surface.
@@ -108,13 +104,13 @@
  */
 .bannerTagScrim {
   position: absolute;
-  bottom: 0;
+  top: 0;
   left: 0;
   right: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: var(--uit-spacing-small) var(--uit-spacing-sm-med);
+  justify-content: flex-start;
+  padding: var(--uit-spacing-sm-med);
   background: linear-gradient(
     to bottom,
     var(--uit-color-background-window, rgba(0, 0, 0, 0)),

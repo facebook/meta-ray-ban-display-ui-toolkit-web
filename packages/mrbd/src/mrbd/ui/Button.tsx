@@ -63,6 +63,7 @@ import type {
 } from './Button.types';
 import type { IconSource } from '@wearables-ui-toolkit/foundation/components/IconImage';
 import { ButtonContent } from './private/ButtonContent';
+import { TrailingTag, getTrailingTagLabel } from './TrailingTag';
 import styles from './Button.module.css';
 export type {
   ButtonProps,
@@ -110,6 +111,7 @@ export const Button = memo(forwardRef<ButtonHandle, ButtonProps>(
       avatarBadgeContent,
       placeholderStyle,
       trailingTag,
+      trailingTagLabels,
       enforceMaxWidth = false,
       width,
       material: materialProp,
@@ -201,6 +203,9 @@ export const Button = memo(forwardRef<ButtonHandle, ButtonProps>(
       () => Boolean(effectiveTitle || subtitle),
       [subtitle, effectiveTitle],
     );
+    const trailingTagLabel = hasText
+      ? getTrailingTagLabel(trailingTag ?? TrailingTag.NONE, trailingTagLabels)
+      : null;
 
     // These buttons rest expanded (no collapse at DEFAULT) and must paint at
     // natural width on the first frame.
@@ -314,6 +319,7 @@ export const Button = memo(forwardRef<ButtonHandle, ButtonProps>(
       setAnimatedValues,
       subtitle,
       effectiveTitle,
+      trailingTagLabel,
     ]);
 
     useEffect(() => {
@@ -342,6 +348,7 @@ export const Button = memo(forwardRef<ButtonHandle, ButtonProps>(
       renderMode,
       subtitle,
       effectiveTitle,
+      trailingTagLabel,
     ]);
 
     // Observe both the locked content view and its natural-size children.
@@ -888,6 +895,7 @@ export const Button = memo(forwardRef<ButtonHandle, ButtonProps>(
           title={effectiveTitle}
           subtitle={subtitle}
           trailingTag={trailingTag}
+          trailingTagLabels={trailingTagLabels}
           hasText={hasText}
           shouldTruncate={shouldTruncate}
           iconLeadingMargin={animatedValues.iconLeadingMargin}

@@ -57,52 +57,66 @@ export function measureButtonNaturalContentWidth({
   const originalOuterWidth = outerContainer.style.width;
   const originalOuterTransition = outerContainer.style.transition;
   const originalContentWidth = contentView.style.width;
+  const textChildren = Array.from(contentView.children).filter(
+    (child): child is HTMLElement =>
+      child instanceof HTMLElement &&
+      (child.classList.contains(classNames.textContent) ||
+        child.classList.contains(classNames.trailingTag)),
+  );
+  const originalChildStyles = textChildren.map(child => ({
+    child,
+    flexShrink: child.style.flexShrink,
+    minWidth: child.style.minWidth,
+  }));
 
   outerContainer.style.width = 'auto';
   outerContainer.style.transition = 'none';
   contentView.style.width = 'max-content';
+  for (const child of textChildren) {
+    child.style.flexShrink = '0';
+    child.style.minWidth = 'max-content';
+  }
 
-  const usesIconLayout =
-    renderMode === LeadingAccessoryRenderMode.ICON ||
-    renderMode === LeadingAccessoryRenderMode.LOADER;
-  const iconElement = usesIconLayout
-    ? Array.from(contentView.children).find(
-        (child): child is HTMLElement =>
-          child instanceof HTMLElement &&
-          child.classList.contains(classNames.iconContent),
-      )
-    : null;
-  const iconLeadingMargin = iconElement != null
-    ? Number.parseFloat(window.getComputedStyle(iconElement).marginLeft) || 0
-    : 0;
-  const expandedIconOffsetCorrection = usesIconLayout && hasText
-    ? Math.max(0, iconLeadingMargin - ICON_IMAGEVIEW_LEADING_MARGIN_WITH_TEXT)
-    : 0;
+  try {
+    const usesIconLayout =
+      renderMode === LeadingAccessoryRenderMode.ICON ||
+      renderMode === LeadingAccessoryRenderMode.LOADER;
+    const iconElement = usesIconLayout
+      ? Array.from(contentView.children).find(
+          (child): child is HTMLElement =>
+            child instanceof HTMLElement &&
+            child.classList.contains(classNames.iconContent),
+        )
+      : null;
+    const iconLeadingMargin = iconElement != null
+      ? Number.parseFloat(window.getComputedStyle(iconElement).marginLeft) || 0
+      : 0;
+    const expandedIconOffsetCorrection = usesIconLayout && hasText
+      ? Math.max(0, iconLeadingMargin - ICON_IMAGEVIEW_LEADING_MARGIN_WITH_TEXT)
+      : 0;
 
-  const childMarginBoxWidth = Array.from(contentView.children).reduce(
-    (maxWidth, child) => {
-      if (!(child instanceof HTMLElement)) {
-        return maxWidth;
-      }
-
-      return Math.max(
-        maxWidth,
-        getChildMarginBoxWidth(
-          child,
-          expandedIconOffsetCorrection,
-          classNames,
-        ),
-      );
-    },
-    0,
-  );
-  const measured = Math.ceil(
-    childMarginBoxWidth > 0 ? childMarginBoxWidth : contentView.offsetWidth,
-  );
-
-  contentView.style.width = originalContentWidth;
-  outerContainer.style.width = originalOuterWidth;
-  outerContainer.style.transition = originalOuterTransition;
-
-  return measured;
+    const childMarginBoxWidth = Array.from(contentView.children).reduce(
+      (maxWidth, child) => {
+        if (!(child instanceof HTMLElement)) {
+          return maxWidth;
+        }
+        return Math.max(
+          maxWidth,
+          getChildMarginBoxWidth(child, expandedIconOffsetCorrection, classNames),
+        );
+      },
+      0,
+    );
+    return Math.ceil(
+      childMarginBoxWidth > 0 ? childMarginBoxWidth : contentView.offsetWidth,
+    );
+  } finally {
+    for (const { child, flexShrink, minWidth } of originalChildStyles) {
+      child.style.flexShrink = flexShrink;
+      child.style.minWidth = minWidth;
+    }
+    contentView.style.width = originalContentWidth;
+    outerContainer.style.width = originalOuterWidth;
+    outerContainer.style.transition = originalOuterTransition;
+  }
 }

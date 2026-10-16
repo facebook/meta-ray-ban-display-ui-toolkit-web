@@ -57,6 +57,28 @@ function renderContent(overrides = {}) {
 }
 
 describe('ButtonContent', () => {
+  it.each([false, true])('allocates text and localized tag width only when constrained: %s', shouldTruncate => {
+    const { container } = renderContent({
+      title: 'Try action',
+      trailingTag: TrailingTag.BETA,
+      trailingTagLabels: { [TrailingTag.BETA]: 'Versión de prueba' },
+      shouldTruncate,
+    });
+    const title = screen.getByText('Try action');
+    const textColumn = title.parentElement as HTMLDivElement;
+    const tagText = screen.getByText('Versión de prueba');
+    const tag = tagText.closest('[class*="trailingTag"]') as HTMLDivElement;
+
+    expect(textColumn.style.flexShrink).toBe(shouldTruncate ? '1' : '0');
+    expect(textColumn.style.minWidth).toBe(shouldTruncate ? '0px' : '');
+    expect(tag.style.flexShrink).toBe(shouldTruncate ? '1' : '0');
+    expect(tag.style.minWidth).toBe(shouldTruncate ? '0px' : '');
+    expect(tag.className.includes('trailingTagTruncate')).toBe(shouldTruncate);
+    expect(tagText.textContent).toBe('Versión de prueba');
+    expect(tag.getAttribute('aria-hidden')).toBe('true');
+    expect(container.querySelector('[class*="contentView"]')).not.toBeNull();
+  });
+
   it('renders icon and text in the content viewport hierarchy', () => {
     const { container } = renderContent();
 

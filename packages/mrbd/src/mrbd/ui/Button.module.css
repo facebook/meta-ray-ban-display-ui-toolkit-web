@@ -133,3 +133,10 @@
 .trailingTag {
   flex-shrink: 0;
 }
+
+.trailingTagTruncate :global(.uit-text-meta3) {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

@@ -6,7 +6,7 @@
  *
  */
 
-import { Button, ButtonGroup, TooltipMode } from '@wearables-ui-toolkit/mrbd';
+import { Button, ButtonGroup, TooltipMode, TrailingTag } from '@wearables-ui-toolkit/mrbd';
 import circleArrowRightFilled from '@wearables-ui-toolkit/icons/svg/circlearrowright__filled.svg';
 import bellFilled from '@wearables-ui-toolkit/icons/svg/bell__filled.svg';
 import bookmarkFilled from '@wearables-ui-toolkit/icons/svg/bookmark__filled.svg';
@@ -59,6 +59,19 @@ export function ButtonPage() {
           disabled
           tooltipText="Action unavailable"
           tooltipMode={TooltipMode.DISABLED_CLICK}
+        />
+      </DemoSection>
+      <DemoSection
+        title="Localized trailing tag"
+        description="Choose a semantic tag and provide its localized display label. Omitted or blank labels retain the default text."
+      >
+        <Button
+          title="Essayer"
+          icon={circleArrowRightFilled}
+          alwaysShowText
+          trailingTag={TrailingTag.BETA}
+          trailingTagLabels={{ [TrailingTag.BETA]: 'Bêta' }}
+          onClick={() => {}}
         />
       </DemoSection>
       <GuidancePanel

@@ -14,7 +14,7 @@ import type {
   StatusIndicatorType,
 } from './Avatar.types';
 import type { IconTintColor } from './IconTintColor';
-import type { TrailingTag } from './TrailingTag';
+import type { TrailingTag, TrailingTagLabels } from './TrailingTag';
 
 export interface ButtonProps extends Omit<
   ContainerProps,
@@ -71,11 +71,15 @@ export interface ButtonProps extends Omit<
   placeholderStyle?: PlaceholderStyle;
 
   /**
-   * Semantic trailing tag shown after the title. Callers pick a closed
-   * {@link TrailingTag} case; the component owns the displayed label (no
-   * caller-supplied tag text). Defaults to {@link TrailingTag.NONE} when unset.
+   * Semantic trailing tag shown after the title. Defaults to
+   * {@link TrailingTag.NONE} when unset.
    */
   trailingTag?: TrailingTag;
+  /**
+   * Localized display labels keyed by visible trailing tag. Missing, empty,
+   * or whitespace-only labels use the built-in fallback.
+   */
+  trailingTagLabels?: TrailingTagLabels;
   enforceMaxWidth?: boolean;
   width?: number | string;
 }

@@ -22,7 +22,11 @@ import type {
   StatusIndicatorType,
 } from '../Avatar.types';
 import { IconTintColor, getIconTintCSSVariable, getIconTintBlendMode } from '../IconTintColor';
-import { TrailingTag, getTrailingTagLabel } from '../TrailingTag';
+import {
+  TrailingTag,
+  getTrailingTagLabel,
+  type TrailingTagLabels,
+} from '../TrailingTag';
 import { Avatar, AvatarSize } from '../Avatar';
 import {
   IndeterminateLoader,
@@ -72,6 +76,7 @@ interface ButtonContentProps {
   title?: string;
   subtitle?: string;
   trailingTag?: TrailingTag;
+  trailingTagLabels?: TrailingTagLabels;
   hasText: boolean;
   shouldTruncate: boolean;
   iconLeadingMargin: number;
@@ -118,6 +123,7 @@ export const ButtonContent = memo(function ButtonContent({
   title,
   subtitle,
   trailingTag,
+  trailingTagLabels,
   hasText,
   shouldTruncate,
   iconLeadingMargin,
@@ -179,7 +185,10 @@ export const ButtonContent = memo(function ButtonContent({
     renderMode === LeadingAccessoryRenderMode.NONE
       ? TEXT_LEADING_MARGIN_WITHOUT_ICON_AVATAR
       : TEXT_LEADING_MARGIN_WITH_ICON_AVATAR;
-  const trailingTagLabel = getTrailingTagLabel(trailingTag ?? TrailingTag.NONE);
+  const trailingTagLabel = getTrailingTagLabel(
+    trailingTag ?? TrailingTag.NONE,
+    trailingTagLabels,
+  );
   const shouldRenderTrailingTag = trailingTagLabel != null && hasText;
 
   const textContentStyle: CSSProperties = useMemo(
@@ -188,10 +197,12 @@ export const ButtonContent = memo(function ButtonContent({
       marginRight: shouldRenderTrailingTag ? TEXT_TRAILING_MARGIN_WITH_TAG : TEXT_TRAILING_MARGIN,
       paddingTop: TEXT_CONTENT_VERTICAL_PADDING,
       paddingBottom: TEXT_CONTENT_VERTICAL_PADDING,
+      flexShrink: shouldTruncate ? 1 : 0,
+      minWidth: shouldTruncate ? 0 : undefined,
       opacity: textOpacity,
       transition: 'none',
     }),
-    [shouldRenderTrailingTag, textLeadingMargin, textOpacity],
+    [shouldRenderTrailingTag, shouldTruncate, textLeadingMargin, textOpacity],
   );
   const iconIndicatorStyle = useMemo(
     () => ({
@@ -207,9 +218,10 @@ export const ButtonContent = memo(function ButtonContent({
       marginRight: TAG_TRAILING_MARGIN,
       opacity: textOpacity,
       transition: 'none',
-      flexShrink: 0,
+      flexShrink: shouldTruncate ? 1 : 0,
+      minWidth: shouldTruncate ? 0 : undefined,
     }),
-    [textOpacity],
+    [shouldTruncate, textOpacity],
   );
 
   return (
@@ -280,7 +292,7 @@ export const ButtonContent = memo(function ButtonContent({
         {shouldRenderTrailingTag && (
           <Tag
             text={trailingTagLabel}
-            className={styles.trailingTag}
+            className={`${styles.trailingTag} ${shouldTruncate ? styles.trailingTagTruncate : ''}`}
             style={trailingTagStyle}
             aria-hidden
           />

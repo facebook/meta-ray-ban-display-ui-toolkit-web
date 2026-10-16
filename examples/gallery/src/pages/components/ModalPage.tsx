@@ -6,7 +6,13 @@
  *
  */
 
-import { Button, ButtonGroup, Modal } from '@wearables-ui-toolkit/mrbd';
+import {
+  Button,
+  ButtonGroup,
+  Modal,
+  ModalBannerTag,
+  TrailingTag,
+} from '@wearables-ui-toolkit/mrbd';
 import { DemoSection } from '../../components/DemoSection';
 import { GalleryPage } from '../../components/GalleryPage';
 import { GuidancePanel } from '../../components/GuidancePanel';
@@ -35,10 +41,25 @@ export function ModalPage() {
           }
         />
       </DemoSection>
+      <DemoSection
+        title="Localized banner tag"
+        description="Supply a label from your app’s localization layer without changing the banner tag’s meaning or styling."
+      >
+        <Modal
+          className="gallery-modal-example"
+          title="Feature preview"
+          subtitle="Try this feature before choosing whether to keep using it."
+          bannerSrc={avatarPortrait}
+          bannerAlt="Portrait used as preview artwork"
+          bannerTag={ModalBannerTag.BETA}
+          bannerTagLabels={{ [TrailingTag.BETA]: 'Bêta' }}
+          buttons={<Button title="Continue" alwaysShowText onClick={() => {}} />}
+        />
+      </DemoSection>
       <GuidancePanel
         summary="Modal concentrates attention on information or a decision using one non-nested panel surface."
         useWhen={<ul><li>Users must acknowledge information or choose before continuing.</li></ul>}
-        capabilities={<ul><li>Title, subtitle, icon, portrait, banner, list, and action slots.</li></ul>}
+        capabilities={<ul><li>Title, subtitle, icon, portrait, banner, list, and action slots.</li><li>Localized banner-tag labels with built-in fallback.</li></ul>}
         avoid={<ul><li>Opening a modal for routine confirmation.</li><li>Nesting another modal or rounded panel inside it.</li><li>Adding an in-app back button.</li></ul>}
       />
     </GalleryPage>

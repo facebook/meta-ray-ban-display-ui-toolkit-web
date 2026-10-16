@@ -15,7 +15,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { readFileSync } from 'node:fs';
 import {
   Modal,
@@ -24,6 +24,7 @@ import {
   ModalBannerTag,
 } from '../mrbd/ui/Modal';
 import { StatusIndicatorType } from '../mrbd/ui/Avatar.types';
+import { TrailingTag } from '../mrbd/ui/TrailingTag';
 import {
   getModalBannerHeightRatio,
   getModalBannerTagText,
@@ -316,6 +317,12 @@ describe('Modal helpers', () => {
     ).toBe(true);
   });
 
+  it('resolves localized banner text without exposing a tag for NONE', () => {
+    const labels = { [TrailingTag.BETA]: 'Bêta' };
+    expect(getModalBannerTagText(ModalBannerTag.BETA, labels)).toBe('Bêta');
+    expect(getModalBannerTagText(ModalBannerTag.NONE, labels)).toBeNull();
+  });
+
   it('builds accessibility description parts', () => {
     expect(
       getModalContentDescription({
@@ -541,6 +548,121 @@ describe('Modal leading area (mutually exclusive)', () => {
       />
     );
     expect(container.textContent).toContain('Beta');
+  });
+
+  it.each([
+    ['Bêta', 'Bêta'],
+    ['', 'Beta'],
+    [' \t\n', 'Beta'],
+    ['\u00a0\u2003', 'Beta'],
+    ['  Bêta  ', '  Bêta  '],
+  ])('renders localized or fallback banner label %j', (label, expectedLabel) => {
+    const { container } = render(
+      <Modal
+        title="Preview"
+        subtitle="Details"
+        bannerSrc="/banner.jpg"
+        bannerTag={ModalBannerTag.BETA}
+        bannerTagLabels={{ [TrailingTag.BETA]: label }}
+      />,
+    );
+    expect(screen.getByText(expectedLabel, { normalizer: value => value }).textContent).toBe(expectedLabel);
+    expect(container.firstElementChild).toHaveAttribute(
+      'aria-label',
+      `Preview, Details, ${expectedLabel}`,
+    );
+    expect(container.firstElementChild).not.toHaveAttribute('bannertaglabels');
+  });
+
+  it('updates banner text and accessible name while preserving focused actions', () => {
+    const props = {
+      title: 'Preview',
+      subtitle: 'Details',
+      bannerSrc: '/banner.jpg',
+      bannerTag: ModalBannerTag.BETA,
+      buttons: <button>Continue</button>,
+    };
+    const { container, rerender } = render(
+      <Modal {...props} bannerTagLabels={{ [TrailingTag.BETA]: 'Bêta' }} />,
+    );
+    const modal = container.firstElementChild;
+    const banner = container.querySelector('[class*="bannerContainer"]');
+    const bannerStyle = banner?.getAttribute('style');
+    const action = screen.getByRole('button', { name: 'Continue' });
+    act(() => action.focus());
+
+    for (const [labels, expectedLabel] of [
+      [{ [TrailingTag.BETA]: 'Version d’essai' }, 'Version d’essai'],
+      [{ [TrailingTag.BETA]: '' }, 'Beta'],
+      [{}, 'Beta'],
+      [undefined, 'Beta'],
+    ] as const) {
+      rerender(<Modal {...props} bannerTagLabels={labels} />);
+      expect(screen.getByText(expectedLabel).textContent).toBe(expectedLabel);
+      expect(container.firstElementChild).toBe(modal);
+      expect(modal).toHaveAttribute('aria-label', `Preview, Details, ${expectedLabel}`);
+      expect(container.querySelector('[class*="bannerContainer"]')).toBe(banner);
+      expect(banner?.getAttribute('style')).toBe(bannerStyle);
+      expect(screen.getByRole('button', { name: 'Continue' })).toBe(action);
+      expect(action).toHaveFocus();
+    }
+  });
+
+  it.each([
+    { bannerSrc: '/banner.jpg', bannerTag: ModalBannerTag.NONE, contentMode: ModalContentMode.STANDARD },
+    { bannerSrc: undefined, bannerTag: ModalBannerTag.BETA, contentMode: ModalContentMode.STANDARD },
+    { bannerSrc: '', bannerTag: ModalBannerTag.BETA, contentMode: ModalContentMode.STANDARD },
+    { bannerSrc: '/banner.jpg', bannerTag: ModalBannerTag.BETA, contentMode: ModalContentMode.TITLE_ONLY },
+  ])('keeps localized banner labels hidden for %j', props => {
+    const { container } = render(
+      <Modal {...props} title="Preview" bannerTagLabels={{ [TrailingTag.BETA]: 'Bêta' }} />,
+    );
+    expect(screen.queryByText('Bêta')).toBeNull();
+    expect(screen.queryByText('Beta')).toBeNull();
+    expect(container.firstElementChild).toHaveAttribute('aria-label', 'Preview');
+  });
+
+  it('updates tag visibility when the banner source is cleared and restored', () => {
+    const props = {
+      title: 'Preview',
+      bannerTag: ModalBannerTag.BETA,
+      bannerTagLabels: { [TrailingTag.BETA]: 'Bêta' },
+      buttons: <button>Continue</button>,
+    };
+    const { container, rerender } = render(<Modal {...props} bannerSrc="/banner.jpg" />);
+    const modal = container.firstElementChild;
+    const action = screen.getByRole('button', { name: 'Continue' });
+    act(() => action.focus());
+    expect(screen.getByText('Bêta')).toBeInTheDocument();
+    expect(modal).toHaveAttribute('aria-label', 'Preview, Bêta');
+
+    for (const source of ['', '/updated-banner.jpg']) {
+      rerender(<Modal {...props} bannerSrc={source} />);
+      if (source.length === 0) {
+        expect(screen.queryByText('Bêta')).toBeNull();
+        expect(modal).toHaveAttribute('aria-label', 'Preview');
+      } else {
+        expect(screen.getByText('Bêta')).toBeInTheDocument();
+        expect(modal).toHaveAttribute('aria-label', 'Preview, Bêta');
+      }
+      expect(container.firstElementChild).toBe(modal);
+      expect(screen.getByRole('button', { name: 'Continue' })).toBe(action);
+      expect(action).toHaveFocus();
+    }
+  });
+
+  it('preserves an explicit accessible name when the banner label is localized', () => {
+    const { container } = render(
+      <Modal
+        title="Preview"
+        bannerSrc="/banner.jpg"
+        bannerTag={ModalBannerTag.BETA}
+        bannerTagLabels={{ [TrailingTag.BETA]: 'Bêta' }}
+        aria-label="Account setup"
+      />,
+    );
+    expect(screen.getByText('Bêta')).toBeInTheDocument();
+    expect(container.firstElementChild).toHaveAttribute('aria-label', 'Account setup');
   });
 });
 

@@ -123,6 +123,7 @@ export const Modal = memo(forwardRef<HTMLDivElement, ModalProps>(
       bannerAlt = 'Banner image',
       bannerSize = ModalBannerSize.STANDARD,
       bannerTag = ModalBannerTag.NONE,
+      bannerTagLabels,
       logoSrc,
       logoAlt = 'Logo',
       avatarSrc,
@@ -194,13 +195,13 @@ export const Modal = memo(forwardRef<HTMLDivElement, ModalProps>(
     const showBannerTag = useMemo(
       () => shouldShowModalBannerTag({
         bannerTag,
-        hasBanner,
+        hasBanner: hasBanner && Boolean(bannerSrc),
       }),
-      [bannerTag, hasBanner],
+      [bannerTag, bannerSrc, hasBanner],
     );
     const bannerTagText = useMemo(
-      () => getModalBannerTagText(bannerTag),
-      [bannerTag],
+      () => getModalBannerTagText(bannerTag, bannerTagLabels),
+      [bannerTag, bannerTagLabels],
     );
     const contentDescription = useMemo(
       () => getModalContentDescription({

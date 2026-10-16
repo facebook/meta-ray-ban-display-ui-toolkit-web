@@ -16,7 +16,11 @@ import {
   MODAL_BANNER_STANDARD_HEIGHT_RATIO,
   MODAL_BANNER_TALLER_HEIGHT_RATIO,
 } from './ModalMetrics';
-import { getTrailingTagLabel, TrailingTag } from '../TrailingTag';
+import {
+  getTrailingTagLabel,
+  TrailingTag,
+  type TrailingTagLabels,
+} from '../TrailingTag';
 import type {
   ModalBannerTagVisibilityInput,
   ModalClickableForReadMoreInput,
@@ -105,10 +109,13 @@ export function shouldShowModalTitle(title?: string): boolean {
  * {@link getTrailingTagLabel} so it is sourced from a single place here, staying
  * consistent and localizable.
  */
-export function getModalBannerTagText(tag: ModalBannerTag): string | null {
+export function getModalBannerTagText(
+  tag: ModalBannerTag,
+  labels?: TrailingTagLabels,
+): string | null {
   switch (tag) {
     case ModalBannerTag.BETA:
-      return getTrailingTagLabel(TrailingTag.BETA);
+      return getTrailingTagLabel(TrailingTag.BETA, labels);
     case ModalBannerTag.NONE:
     default:
       return null;

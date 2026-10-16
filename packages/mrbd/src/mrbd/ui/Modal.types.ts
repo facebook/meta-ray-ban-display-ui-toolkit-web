@@ -19,6 +19,7 @@ import type {
   StatusIndicatorType,
 } from './Avatar.types';
 import type { IconTintColor } from './IconTintColor';
+import type { TrailingTagLabels } from './TrailingTag';
 
 /**
  * Content mode variants.
@@ -113,6 +114,12 @@ export interface ModalProps extends Omit<
    * Default: NONE
    */
   bannerTag?: ModalBannerTag;
+
+  /**
+   * Localized display labels for banner-tag cases. Missing, empty or
+   * whitespace-only labels use the built-in fallback.
+   */
+  bannerTagLabels?: TrailingTagLabels;
 
   /**
    * Logo image source URL.

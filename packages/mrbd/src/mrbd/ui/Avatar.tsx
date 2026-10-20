@@ -45,6 +45,10 @@ import {
 } from './private/AvatarMetrics';
 import { AvatarClipDefs } from './private/AvatarClipDefs';
 import { AvatarBadge } from './private/AvatarBadge';
+import {
+  AVATAR_PLACEHOLDER_ICON,
+  IMAGE_PLACEHOLDER_ICON,
+} from './private/AvatarPlaceholderIcons';
 import { IconImage } from '@wearables-ui-toolkit/foundation/components/IconImage';
 import styles from './Avatar.module.css';
 export {
@@ -144,6 +148,11 @@ export const Avatar = memo(forwardRef<HTMLDivElement, AvatarProps>(
       [dimension, primaryImageShape],
     );
 
+    const defaultPlaceholderIcon = placeholderStyle === PlaceholderStyle.IMAGE
+      ? IMAGE_PLACEHOLDER_ICON
+      : AVATAR_PLACEHOLDER_ICON;
+    const primaryPlaceholderIcon = placeholderIcon ?? defaultPlaceholderIcon;
+    const resolvedSecondaryPlaceholderIcon = secondaryPlaceholderIcon ?? defaultPlaceholderIcon;
     const placeholderIconSize = PLACEHOLDER_ICON_SIZE[size];
     const duoPlaceholderIconSize = DUO_PLACEHOLDER_ICON_SIZE[size];
     const placeholderStyleVars = useMemo(
@@ -310,9 +319,7 @@ export const Avatar = memo(forwardRef<HTMLDivElement, AvatarProps>(
               style={placeholderStyleVars}
               data-placeholder-style={placeholderStyle}
             >
-              {placeholderIcon != null && (
-                <IconImage source={placeholderIcon} />
-              )}
+              <IconImage source={primaryPlaceholderIcon} />
             </div>
           )}
         </div>
@@ -349,9 +356,7 @@ export const Avatar = memo(forwardRef<HTMLDivElement, AvatarProps>(
                     style={duoPlaceholderStyleVars}
                     data-placeholder-style={placeholderStyle}
                   >
-                    {placeholderIcon != null && (
-                      <IconImage source={placeholderIcon} />
-                    )}
+                    <IconImage source={primaryPlaceholderIcon} />
                   </div>
                 )}
               </div>
@@ -382,9 +387,7 @@ export const Avatar = memo(forwardRef<HTMLDivElement, AvatarProps>(
                     className={styles.avatarPlaceholder}
                     style={duoPlaceholderStyleVars}
                   >
-                    {secondaryPlaceholderIcon != null && (
-                      <IconImage source={secondaryPlaceholderIcon} />
-                    )}
+                    <IconImage source={resolvedSecondaryPlaceholderIcon} />
                   </div>
                 )}
               </div>

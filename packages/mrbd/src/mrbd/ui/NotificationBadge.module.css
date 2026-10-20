@@ -22,9 +22,21 @@
   white-space: nowrap;
 }
 
+@supports (text-box-trim: trim-both) and (text-box-edge: cap alphabetic) {
+  .label.digitLabel {
+    line-height: 1;
+    padding-block: 0;
+    text-box-trim: trim-both;
+    text-box-edge: cap alphabetic;
+  }
+}
+
 .label {
   display: block;
   min-width: 1ch;
+  line-height: normal;
+  padding-block: 1.5px;
+  flex-shrink: 0;
   text-align: center;
   font-variant-numeric: tabular-nums;
 }

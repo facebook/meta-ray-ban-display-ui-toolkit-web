@@ -85,7 +85,11 @@
 .titleTextView {
   composes: uit-text-label-emphasized from global;
   color: var(--uit-color-text-primary);
-  height: 34px;
+  box-sizing: border-box;
+  min-height: 34px;
+  height: auto;
+  line-height: calc(4em / 3);
+  padding-block: 1px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -94,6 +98,8 @@
 .subtitleTextView {
   composes: uit-text-meta2 from global;
   color: var(--uit-color-text-secondary);
+  line-height: calc(14em / 11);
+  padding-block: 1.5px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

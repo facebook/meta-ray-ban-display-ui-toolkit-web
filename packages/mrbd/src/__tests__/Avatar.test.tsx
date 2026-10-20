@@ -22,6 +22,7 @@ import {
   AvatarSize,
   AvatarShape,
   AvatarStyle,
+  PlaceholderStyle,
   StatusIndicatorType,
 } from '../mrbd/ui/Avatar';
 
@@ -150,11 +151,51 @@ describe('Avatar rendering', () => {
     ).not.toBeNull();
   });
 
-  it('renders empty placeholder surface when no src and no icon is provided', () => {
+  it('renders the default user glyph in the small placeholder', () => {
     const { container } = render(<Avatar alt="John" />);
     const placeholder = container.querySelector('[class*="avatarPlaceholder"]');
-    expect(placeholder).not.toBeNull();
-    expect(placeholder?.innerHTML).toBe('');
+    expect(placeholder).toHaveStyle('--uit-avatar-placeholder-icon-size: 20px');
+    expect(placeholder?.querySelector('svg')).toHaveAttribute('viewBox', '3799.7107 193.8560 8.0078 8.0078');
+    expect(placeholder?.querySelectorAll('path')).toHaveLength(2);
+    expect(placeholder?.querySelector('svg')).toHaveAttribute('aria-hidden', 'true');
+    expect(screen.getByRole('img')).toHaveAccessibleName('John');
+  });
+
+  it('changes the default glyph with placeholderStyle while preserving caller overrides', () => {
+    const { container, rerender } = render(<Avatar alt="Artwork" placeholderStyle={PlaceholderStyle.IMAGE} />);
+    const placeholder = () => container.querySelector('[class*="avatarPlaceholder"]');
+    expect(placeholder()?.querySelector('svg')).toHaveAttribute('viewBox', '2078.6966 156.4862 8.0078 8.0078');
+    expect(placeholder()?.querySelector('path')).toHaveAttribute('fill-rule', 'evenodd');
+    rerender(<Avatar alt="Artwork" placeholderStyle={PlaceholderStyle.IMAGE} placeholderIcon={{ uri: '/custom.svg' }} />);
+    expect(placeholder()?.querySelector('svg')).toBeNull();
+    expect(placeholder()?.querySelector('[style*="mask-image"]')).toHaveStyle('mask-image: url("/custom.svg")');
+    rerender(<Avatar alt="Artwork" placeholderStyle={PlaceholderStyle.AVATAR} />);
+    expect(placeholder()?.querySelector('svg')).toHaveAttribute('viewBox', '3799.7107 193.8560 8.0078 8.0078');
+  });
+
+  it('keeps image and custom content ahead of default glyphs and restores them when cleared', () => {
+    const { container, rerender } = render(<Avatar alt="John" src="/photo.webp" />);
+    expect(container.querySelector('[class*="avatarPlaceholder"]')).toBeNull();
+    expect(container.querySelector('img')).toHaveAttribute('src', '/photo.webp');
+    rerender(<Avatar alt="John" src="/photo.webp" primaryContent={<span>Custom</span>} />);
+    expect(screen.getByText('Custom')).toBeInTheDocument();
+    expect(container.querySelector('img')).toBeNull();
+    expect(container.querySelector('[class*="avatarPlaceholder"]')).toBeNull();
+    rerender(<Avatar alt="John" />);
+    expect(container.querySelector('[class*="avatarPlaceholder"] svg')).not.toBeNull();
+  });
+
+  it('keeps default duo placeholders at the derived glyph size without changing layout selection', () => {
+    const { container, rerender } = render(<Avatar alt="Pair" secondarySrc="" />);
+    const placeholders = container.querySelectorAll('[class*="avatarPlaceholder"]');
+    expect(placeholders).toHaveLength(2);
+    for (const placeholder of placeholders) {
+      expect(placeholder).toHaveStyle('--uit-avatar-placeholder-icon-size: 10px');
+      expect(placeholder.querySelector('svg')).toHaveAttribute('viewBox', '3799.7107 193.8560 8.0078 8.0078');
+    }
+    rerender(<Avatar alt="Pair" />);
+    expect(container.querySelectorAll('[class*="avatarPlaceholder"]')).toHaveLength(1);
+    expect(container.querySelector('[class*="avatarPlaceholder"]')).toHaveStyle('--uit-avatar-placeholder-icon-size: 20px');
   });
 
   it('renders caller-provided placeholder icon', () => {
@@ -168,7 +209,7 @@ describe('Avatar rendering', () => {
     expect(icon?.getAttribute('style')).toContain('/icons/placeholder.svg');
   });
 
-  it('removes placeholder icon when placeholderIcon is cleared', () => {
+  it('restores the default placeholder icon when the caller icon is cleared', () => {
     const { container, rerender } = render(
       <Avatar alt="alice" placeholderIcon={{ uri: '/icons/placeholder.svg' }} />,
     );
@@ -180,6 +221,9 @@ describe('Avatar rendering', () => {
     expect(
       container.querySelector('[class*="avatarPlaceholder"] [style*="mask-image"]'),
     ).toBeNull();
+    expect(container.querySelector('[class*="avatarPlaceholder"] svg')).toHaveAttribute(
+      'viewBox', '3799.7107 193.8560 8.0078 8.0078',
+    );
   });
 });
 

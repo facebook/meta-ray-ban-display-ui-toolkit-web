@@ -34,11 +34,18 @@ export interface ContainerHeaderProps extends HTMLAttributes<HTMLDivElement> {
   /** Content for the avatar primary surface. The Avatar owns the slot size. */
   avatarPrimaryContent?: ReactNode;
 
-  /** Avatar alt text for accessibility. */
+  /** Avatar alt text. The heading supplies the accessible name. */
   avatarAlt?: string;
 
   /** Status indicator to display on the avatar. */
   statusIndicator?: StatusIndicatorType;
+
+  /**
+   * Per-status accessibility labels used by the heading and avatar. Omitted
+   * statuses fall back to the built-in English labels. Empty or whitespace-only
+   * labels omit the status from the heading without hiding the indicator.
+   */
+  statusIndicatorLabels?: Partial<Record<StatusIndicatorType, string>>;
 
   /**
    * Glyph drawn over the avatar status-indicator dot. Only shows when

@@ -37,7 +37,7 @@ const DEFAULT_STYLE: CSSProperties = {};
  * Non-interactive display header with title/subtitle and optional leading visual.
  *
  * Supports two leading visuals plus a none state:
- * 1. Avatar (if avatarSrc or avatarPrimaryContent is provided)
+ * 1. Avatar (if primary or badge image/content is provided)
  * 2. Icon (if icon is provided, and no avatar)
  * 3. None (text only — neither avatar nor icon provided)
  *
@@ -56,6 +56,7 @@ export const ContainerHeader = memo(forwardRef<HTMLDivElement, ContainerHeaderPr
       avatarPrimaryContent,
       avatarAlt = 'Avatar',
       statusIndicator,
+      statusIndicatorLabels,
       statusIndicatorIcon,
       primaryImageShape,
       placeholderStyle,
@@ -75,6 +76,8 @@ export const ContainerHeader = memo(forwardRef<HTMLDivElement, ContainerHeaderPr
     } = getContainerHeaderLeadingVisualState({
       avatarSrc,
       avatarPrimaryContent,
+      avatarBadgeSrc,
+      avatarBadgeContent,
       icon,
     });
     const hasTitle = Boolean(title);
@@ -85,8 +88,9 @@ export const ContainerHeader = memo(forwardRef<HTMLDivElement, ContainerHeaderPr
         subtitle,
         // The status indicator only renders on the avatar; describe it only then.
         statusIndicator: hasAvatar ? statusIndicator : undefined,
+        statusIndicatorLabels,
       }),
-      [title, subtitle, hasAvatar, statusIndicator],
+      [title, subtitle, hasAvatar, statusIndicator, statusIndicatorLabels],
     );
     const rootClassName = useMemo(
       () => `${styles.containerHeader} ${className}`,
@@ -120,6 +124,7 @@ export const ContainerHeader = memo(forwardRef<HTMLDivElement, ContainerHeaderPr
               alt={avatarAlt}
               size={AvatarSize.SMALL}
               statusIndicator={statusIndicator}
+              statusIndicatorLabels={statusIndicatorLabels}
               statusIndicatorIcon={statusIndicatorIcon}
               primaryImageShape={primaryImageShape}
               placeholderStyle={placeholderStyle}

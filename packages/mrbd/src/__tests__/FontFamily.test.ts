@@ -54,7 +54,9 @@ describe('UI Toolkit for Meta Ray-Ban Display typography', () => {
     for (const className of Object.values(TextAppearance)) {
       const rule = classRule(className);
       expect(rule, className).toContain(`font-family: ${EXPECTED_FONT_STACK}`);
-      expect(rule, className).toMatch(/font-size:\s*\d+(?:\.\d+)?px;/);
+      const size = rule.match(/font-size:\s*var\(--uit-scaled-font-size-(\d+),\s*(\d+)px\);/);
+      expect(size, className).not.toBeNull();
+      expect(size?.[1], className).toBe(size?.[2]);
       expect(rule, className).toMatch(/line-height:\s*\d+(?:\.\d+)?px;/);
       expect(rule, className).toMatch(/font-weight:\s*\d+;/);
     }

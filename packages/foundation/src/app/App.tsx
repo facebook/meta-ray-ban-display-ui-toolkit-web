@@ -19,6 +19,8 @@ import {
 import { FloatingPortalRootProvider } from '../portal/FloatingPortalRoot';
 import { FocusNavigationProvider } from '../navigation/FocusNavigationProvider';
 import { PlatformProvider } from './PlatformContext';
+import { useFontScale } from './useFontScale';
+import { getScaledTextSizeProperties } from '../theme/FontScale';
 import '../theme/theme.css';
 
 const ROOT_STYLE: CSSProperties = {
@@ -102,9 +104,10 @@ export const App = memo(function App({
   useAppFontFaces();
   const [portalRoot, setPortalRoot] = useState<HTMLDivElement | null>(null);
   const contentRootRef = useRef<HTMLDivElement>(null);
+  const fontScale = useFontScale(contentRootRef);
   const rootStyle = useMemo(
-    () => style == null ? ROOT_STYLE : { ...ROOT_STYLE, ...style },
-    [style],
+    () => ({ ...ROOT_STYLE, ...getScaledTextSizeProperties(fontScale), ...style }),
+    [fontScale, style],
   );
 
   useLayoutEffect(() => {

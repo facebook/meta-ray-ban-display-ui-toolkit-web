@@ -25,13 +25,7 @@ const ref: RefObject<HTMLDivElement | null> = { current: null };
 function renderContent(overrides = {}) {
   return render(
     <ButtonContent
-      contentViewContainerRef={ref}
       contentViewRef={ref}
-      contentViewContainerStyle={{
-        width: '100%',
-        height: '100%',
-        overflow: 'hidden',
-      }}
       contentViewStyle={{
         width: 'fit-content',
         height: '100%',
@@ -86,8 +80,10 @@ describe('ButtonContent', () => {
     expect(icon).not.toBeNull();
     expect(icon?.getAttribute('style')).toContain(`url("${TEST_ICON_SRC}")`);
     expect(screen.getByText('Reply')).toBeInTheDocument();
-    expect(container.querySelector('[class*="contentViewContainer"]')).not.toBeNull();
-    expect(container.querySelector('[class*="contentView"]')).not.toBeNull();
+    const content = container.querySelector('[class*="contentView"]');
+    expect(content).toBe(container.firstElementChild);
+    expect(ref.current).toBe(content);
+    expect(container.querySelector('[class*="contentViewContainer"]')).toBeNull();
   });
 
   it('tints a currentColor icon with the resolved primary icon CSS variable', () => {

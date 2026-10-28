@@ -41,7 +41,7 @@ export interface VerticalMenuAnchorProps {
 export interface VerticalMenuProps extends Omit<
   StaticContainerProps,
   | 'children'
-  | 'clipContent'
+  | 'contentClip'
   | 'cornerRadius'
   | 'height'
   | 'material'

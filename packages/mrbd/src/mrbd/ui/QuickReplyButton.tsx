@@ -27,6 +27,7 @@ import {
   useCallback,
   type CSSProperties,
 } from 'react';
+import type { ContainerRootStyle } from '@wearables-ui-toolkit/foundation';
 import { Container } from '@wearables-ui-toolkit/foundation/components/Container';
 import type { ContainerStateChangeAnimation } from '@wearables-ui-toolkit/foundation/components/Container';
 import { MaterialLibrary } from '@wearables-ui-toolkit/foundation/material/MaterialLibrary';
@@ -59,7 +60,7 @@ import styles from './QuickReplyButton.module.css';
 
 export type { QuickReplyButtonProps } from './QuickReplyButton.types';
 
-const EMPTY_QUICK_REPLY_BUTTON_STYLE: CSSProperties = {};
+const EMPTY_QUICK_REPLY_BUTTON_STYLE: ContainerRootStyle = {};
 const DEFAULT_QUICK_REPLY_SHAPE_PROVIDER =
   new RoundedRectangleShapeProvider(CornerRadius.FULL);
 
@@ -333,12 +334,12 @@ export const QuickReplyButton = memo(forwardRef<HTMLDivElement, QuickReplyButton
     );
 
     // ---- Container style ----
-    const containerStyle: CSSProperties = useMemo(
+    const containerStyle: ContainerRootStyle & Record<'--uit-button-layout-compensation', string> = useMemo(
       () => ({
         transform: `scale(${contentScale})`,
         opacity: disabledOpacity,
         transition: 'none',
-        ['--uit-button-layout-compensation' as string]:
+        '--uit-button-layout-compensation':
           `${getQuickReplyLayoutCompensation(animatedValues.width, contentScale)}px`,
         ...style,
       }),

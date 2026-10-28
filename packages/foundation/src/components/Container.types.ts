@@ -11,6 +11,7 @@ import type {
   ElementType,
   ReactElement,
   ReactNode,
+  Ref,
 } from 'react';
 import type { InteractableBaseProps } from '../base/InteractableBase';
 import type { InteractableBaseImplementationProps } from '../base/InteractableBase.types';
@@ -22,6 +23,7 @@ import type {
 } from '../base/Interactions';
 import type { ContainerMaterial } from '../material/ContainerMaterial';
 import type { ShapeProvider } from '../material/ShapeProvider';
+import type { ContainerRootStyle, ContainerContentStyle, ContentClipMode } from './ContainerContent.types';
 import type { ContainerMaterialTransition } from './ContainerMaterialLayers.types';
 
 export interface ContainerStateChangeAnimation {
@@ -46,7 +48,16 @@ export interface ContainerOwnProps {
   material?: ContainerMaterial;
   width?: number | string;
   height?: number | string;
-  clipContent?: boolean;
+  /** Shape clipping, rectangular bounds clipping, or visible content overflow. */
+  contentClip?: ContentClipMode;
+  /** Content layout class; geometry and clipping remain toolkit-owned. */
+  contentClassName?: string;
+  /** Content padding, layout and typography styles. */
+  contentStyle?: ContainerContentStyle;
+  /** Ref to the content layout element. */
+  contentRef?: Ref<HTMLDivElement>;
+  /** Outer placement and whole-component composition styles. */
+  style?: ContainerRootStyle;
   /**
    * Controls the complete interaction state while preserving the standard
    * material, scale, and disabled-state transitions. DOM interaction state does

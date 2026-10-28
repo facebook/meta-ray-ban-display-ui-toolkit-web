@@ -110,7 +110,7 @@ function WebAppIconPreview({ app }: { app: DemoApp }) {
       <Container
         aria-label={app.title}
         className="gallery-web-app-icon-demo-surface"
-        clipContent={false}
+        contentClip="none"
         contentScaleForStateFn={iconScaleForState}
         data-uit-capture-id={`web-app-icon-${app.title.toLowerCase().split(' ').join('-')}`}
         height={ICON_SURFACE_SIZE}
@@ -139,7 +139,7 @@ function WebAppIconFallbackPreview() {
       <Container
         aria-label="Web app icon without artwork"
         className="gallery-web-app-icon-demo-surface"
-        clipContent={false}
+        contentClip="none"
         contentScaleForStateFn={iconScaleForState}
         data-uit-capture-id="web-app-icon-fallback"
         height={ICON_SURFACE_SIZE}

@@ -7,6 +7,7 @@
  */
 
 import { useLayoutEffect, useRef, useState, type RefObject } from 'react';
+import { SharedBoxResizeObserver } from './SharedBoxResizeObserver';
 import { PREPARING_ENTER_PHASE_SELECTOR } from '../navigation/PageTransitionPhase';
 
 const FALLBACK_STABILIZATION_FRAMES = 10;
@@ -264,11 +265,11 @@ export function useMeasuredElementDimensions<T extends HTMLElement>(
 
     const observer = typeof ResizeObserver === 'undefined'
       ? null
-      : new ResizeObserver((entries) => {
+      : new SharedBoxResizeObserver((entries) => {
           observerHasReported = true;
           cancelStabilization(stabilizationKey);
           scheduleUpdateSize(entries[0]);
-        });
+        }, 'border-box');
     observer?.observe(element, { box: 'border-box' });
     element.addEventListener(
       MANAGED_LAYOUT_TRANSITION_COMPLETE_EVENT,

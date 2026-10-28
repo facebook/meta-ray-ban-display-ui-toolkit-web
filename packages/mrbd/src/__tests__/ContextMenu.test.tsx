@@ -424,7 +424,7 @@ describe('ContextMenu intrinsic item layout', () => {
       const one = screen.getByRole('menuitem', { name: 'One' });
       const two = screen.getByRole('menuitem', { name: 'Two' });
       setItemHeight(one, 56);
-      const intrinsic = observers.find(observer => observer.targets.has(one) && observer.targets.has(two))!;
+      const intrinsic = [...observers].reverse().find(observer => observer.targets.has(one) && observer.targets.has(two) && observer.observe.mock.calls.some(([target, options]) => target === one && options?.box === 'border-box'))!;
       for (let index = 1; index <= 5; index += 1) {
         view.rerender(renderMenu(index));
         expect(screen.getByRole('menuitem', { name: 'One' })).toBe(one);
@@ -463,7 +463,7 @@ describe('ContextMenu intrinsic item layout', () => {
       configurable: true,
       get: () => Number.parseFloat(menu.style.lineHeight),
     });
-    const intrinsic = observers.find(observer => observer.targets.has(item))!;
+    const intrinsic = [...observers].reverse().find(observer => observer.targets.size === 1 && observer.targets.has(item))!;
     notifyItemResize(item);
     view.rerender(renderMenu('default', 80));
     expect(menu.style.getPropertyValue('--uit-context-menu-height')).toBe('88px');
@@ -534,7 +534,7 @@ describe('ContextMenu intrinsic item layout', () => {
     );
     const one = screen.getByRole('menuitem', { name: 'One' });
     const two = screen.getByRole('menuitem', { name: 'Two' });
-    const intrinsic = observers.find(observer => observer.targets.has(one) && observer.targets.has(two))!;
+    const intrinsic = [...observers].reverse().find(observer => observer.targets.has(one) && observer.targets.has(two) && observer.observe.mock.calls.some(([target, options]) => target === one && options?.box === 'border-box'))!;
     expect(intrinsic).toBeDefined();
     expect(intrinsic.observe).toHaveBeenCalledWith(one, { box: 'border-box' });
     expect(intrinsic.observe).toHaveBeenCalledWith(two, { box: 'border-box' });

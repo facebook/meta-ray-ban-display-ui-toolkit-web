@@ -801,7 +801,7 @@ export const InputTextViewFrame = memo(forwardRef<HTMLDivElement, InputTextViewF
           className={styles.container}
           material={material}
           width={resolvedContainerWidth}
-          clipContent
+          contentClip="shape"
           interactionStateOverride={interactionStateOverride}
           contentScaleForStateFn={contentScaleForState}
           tabIndex={-1}

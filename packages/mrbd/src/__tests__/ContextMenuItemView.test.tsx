@@ -61,7 +61,7 @@ describe('ContextMenuItemView dimensions (56px minimum)', () => {
 
   it('larger explicit dimensions override minimum', () => {
     const { container } = render(
-      <ContextMenuItemView style={{ width: 200, height: 200 }} />
+      <ContextMenuItemView width={200} height={200} />
     );
     const style = container.firstElementChild?.getAttribute('style') ?? '';
     expect(style).toContain('width: 200');
@@ -72,7 +72,7 @@ describe('ContextMenuItemView dimensions (56px minimum)', () => {
     const view = render(<ButtonContextMenuItemView icon={TEST_ICON} title="Save" />);
     const item = screen.getByRole('menuitem', { name: 'Save' });
     expect(item.style.getPropertyValue('--uit-context-menu-item-min-height')).toBe('56px');
-    expect(item.style.height).toBe('auto');
+    expect(item.style.height).toBe('');
 
     view.rerender(<ButtonContextMenuItemView size="small" icon={TEST_ICON} title="Save" />);
     expect(screen.getByRole('menuitem', { name: 'Save' })).toBe(item);
@@ -82,7 +82,7 @@ describe('ContextMenuItemView dimensions (56px minimum)', () => {
     view.rerender(<ButtonContextMenuItemView size="small" icon={TEST_ICON} title="Save" style={{ minHeight: 80 }} />);
     expect(item.style.minHeight).toBe('80px');
     expect(item.style.getPropertyValue('--uit-context-menu-item-min-height')).toBe('80px');
-    expect(item.style.height).toBe('auto');
+    expect(item.style.height).toBe('');
     view.unmount();
   });
 
@@ -117,7 +117,7 @@ describe('ContextMenuItemView dimensions (56px minimum)', () => {
     const item = container.firstElementChild as HTMLElement;
     expect(item.style.minHeight).toBe('4rem');
     expect(item.style.getPropertyValue('--uit-context-menu-item-min-height')).toBe('4rem');
-    expect(item.style.height).toBe('auto');
+    expect(item.style.height).toBe('');
   });
 
   it.each(['default', 'small'] as const)('preserves %s minimums for an icon-only item and selected emoji', size => {

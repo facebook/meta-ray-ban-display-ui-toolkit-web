@@ -9,6 +9,7 @@
 import { memo, useMemo, type CSSProperties } from 'react';
 import {
   Container,
+  type ContainerRootStyle,
   CornerRadius,
   RoundedRectangleShapeProvider,
   VisualState,
@@ -31,7 +32,7 @@ const ICON_MATERIAL_STYLE: CSSProperties = {
   height: 'var(--launcher-icon-size)',
   width: 'var(--launcher-icon-size)',
 };
-const ICON_MATERIAL_SURFACE_STYLE: CSSProperties = {
+const ICON_MATERIAL_SURFACE_STYLE: ContainerRootStyle = {
   opacity: 'var(--launcher-app-icon-material-opacity)',
 };
 const preserveContentScale = () => 1;

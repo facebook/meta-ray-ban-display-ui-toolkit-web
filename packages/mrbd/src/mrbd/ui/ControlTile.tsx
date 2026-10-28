@@ -25,6 +25,7 @@ import {
   type CSSProperties,
   type KeyboardEvent,
 } from 'react';
+import type { ContainerRootStyle } from '@wearables-ui-toolkit/foundation';
 import {
   Container,
   PartialFocusSupportedAxis,
@@ -80,7 +81,7 @@ import styles from './ControlTile.module.css';
 
 export type { ControlTileProps } from './ControlTile.types';
 
-const EMPTY_CONTROL_TILE_STYLE: CSSProperties = {};
+const EMPTY_CONTROL_TILE_STYLE: ContainerRootStyle = {};
 const DEFAULT_CONTROL_TILE_SHAPE_PROVIDER =
   new RoundedRectangleShapeProvider(CornerRadius.MEDIUM);
 
@@ -367,7 +368,7 @@ export const ControlTile = memo(forwardRef<HTMLDivElement, ControlTileProps>(
     // ---- Container style ----
     // No fixed width/height — tile fills its parent via flex and uses min-height.
     // Parent container (e.g. a flex row with gap) determines actual tile width.
-    const containerStyle: CSSProperties = useMemo(
+    const containerStyle: ContainerRootStyle = useMemo(
       () => ({
         ...style,
       }),

@@ -14,8 +14,8 @@ import {
   forwardRef,
   memo,
   useMemo,
-  type CSSProperties,
 } from 'react';
+import type { ContainerRootStyle } from './ContainerContent.types';
 import { StaticContainerInternal } from './private/StaticContainerInternal';
 import { PrivateBackgroundStyle } from './private/StaticContainerBackgroundStyle';
 import {
@@ -34,7 +34,7 @@ import styles from './TextSwitcher.module.css';
 
 export type { TextSwitcherProps } from './TextSwitcher.types';
 
-const DEFAULT_STYLE: CSSProperties = {};
+const DEFAULT_STYLE: ContainerRootStyle = {};
 const DEFAULT_TEXT_SWITCHER_SHAPE_PROVIDER =
   new RoundedRectangleShapeProvider(CornerRadius.LARGE);
 
@@ -71,7 +71,7 @@ export const TextSwitcher = memo(forwardRef<HTMLDivElement, TextSwitcherProps>(
       [materialProp],
     );
 
-    const containerStyle = useMemo<CSSProperties>(
+    const containerStyle = useMemo<ContainerRootStyle>(
       () => ({
         opacity: containerOpacity,
         transition: animated

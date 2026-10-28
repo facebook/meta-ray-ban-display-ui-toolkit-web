@@ -7,6 +7,7 @@
  */
 
 import type { CSSProperties } from 'react';
+import type { ContainerRootStyle } from '@wearables-ui-toolkit/foundation';
 import { State } from '@wearables-ui-toolkit/foundation/base/Interactions';
 import {
   Interpolators,
@@ -46,9 +47,9 @@ export function shouldRunSubNavigationAutoHideTimer(
 
 export function getSubNavigationContainerStyle(
   visible: boolean,
-  style: CSSProperties,
+  style: ContainerRootStyle,
   animated: boolean = true,
-): CSSProperties {
+): ContainerRootStyle {
   return {
     opacity: visible ? 1 : 0,
     transition: animated

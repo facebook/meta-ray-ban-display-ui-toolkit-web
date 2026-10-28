@@ -113,7 +113,7 @@ export const ModalLeadingArea = memo(function ModalLeadingArea({
         material={bannerMaterial}
         shapeProvider={MODAL_BANNER_SHAPE_PROVIDER}
         backgroundStyle={MODAL_BANNER_BACKGROUND_STYLE}
-        clipContent
+        contentClip="shape"
         width="100%"
         aria-hidden="true"
       >

@@ -32,8 +32,8 @@ import {
   useCallback,
   useMemo,
   useState,
-  type CSSProperties,
 } from 'react';
+import type { ContainerRootStyle } from '@wearables-ui-toolkit/foundation';
 import { PanelInternal } from '@wearables-ui-toolkit/foundation/internal';
 import {
   getModalBannerTagText,
@@ -73,7 +73,7 @@ const DEFAULT_MODAL_SHAPE_PROVIDER =
 export { ModalBannerSize, ModalBannerTag, ModalContentMode } from './Modal.types';
 export type { ModalListItem, ModalProps } from './Modal.types';
 
-const DEFAULT_STYLE: CSSProperties = {};
+const DEFAULT_STYLE: ContainerRootStyle = {};
 
 // ============================================================================
 // Component
@@ -262,7 +262,7 @@ export const Modal = memo(forwardRef<HTMLDivElement, ModalProps>(
         style={style}
         material={modalMaterial}
         shapeProvider={shapeProvider}
-        clipContent={false}
+        contentClip="none"
         {...panelProps}
         focusable={shouldFocusModal}
         clickable={shouldClickModal}

@@ -52,6 +52,7 @@ const VerticalMenuButtonImpl = forwardRef<
     as: RootComponent = 'button',
     type: rootType,
     className = '',
+    contentClassName = '',
     'aria-label': ariaLabel,
     ...containerProps
   },
@@ -71,6 +72,7 @@ const VerticalMenuButtonImpl = forwardRef<
       ref={ref}
       type={RootComponent === 'button' ? rootType ?? 'button' : rootType}
       className={`${styles.button} ${className}`.trim()}
+      contentClassName={`${styles.content} ${contentClassName}`.trim()}
       width="100%"
       height="auto"
       material={material}
@@ -81,12 +83,10 @@ const VerticalMenuButtonImpl = forwardRef<
       aria-label={ariaLabel ?? text}
       data-uit-vertical-menu-button=""
     >
-      <div className={styles.content}>
         {icon != null && <IconImage source={icon} className={styles.icon} />}
         <TextView className={styles.text} textStyle={TextStyle.META2}>
           {text}
         </TextView>
-      </div>
     </ContainerInternal>
   );
 });

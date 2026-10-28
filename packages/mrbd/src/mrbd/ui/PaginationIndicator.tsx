@@ -26,6 +26,7 @@ import {
   type CSSProperties,
   type HTMLAttributes,
 } from 'react';
+import type { ContainerRootStyle } from '@wearables-ui-toolkit/foundation';
 import { Chip } from './Chip';
 import {
   calculatePaginationDotStates,
@@ -44,7 +45,7 @@ export { PaginationMode } from './PaginationIndicator.types';
 export type { PaginationIndicatorProps } from './PaginationIndicator.types';
 
 const EMPTY_PAGINATION_STYLE: CSSProperties = {};
-const TEXT_CHIP_STYLE: CSSProperties = { pointerEvents: 'none' };
+const TEXT_CHIP_STYLE: ContainerRootStyle = { pointerEvents: 'none' };
 
 /**
  * PaginationIndicator component

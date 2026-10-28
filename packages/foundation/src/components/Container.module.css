@@ -14,7 +14,7 @@
 }
 
 .container {
-  /* Material overflow stays visible; the content wrapper owns clipContent. */
+  /* Materials remain independent of the content surface's clipping. */
   color-scheme: dark;
   /* Creates a stacking context so that:
    * 1. backgroundLayers (z-index:-1) paint within this container, not behind the parent
@@ -60,15 +60,6 @@
   bottom: 0;
   border-radius: inherit;
   pointer-events: none;
-}
-
-.contentWrapper {
-  /* No position or z-index — this is intentional.
-   * Without position:relative, this div does NOT create a stacking context.
-   * This allows child mix-blend-mode (e.g. Tag's screen blend) to composite
-   * directly with the background layers below in the container's stacking
-   * context (established by isolation:isolate on .container).
-   * Paint order: background (z-index:-1) → content (normal flow) → foreground (z-index:1). */
 }
 
 .foregroundLayers {

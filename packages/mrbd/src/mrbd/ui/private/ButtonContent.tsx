@@ -6,6 +6,8 @@
  *
  */
 
+import type { ContainerRootStyle } from '@wearables-ui-toolkit/foundation';
+
 import type {
   CSSProperties,
   Ref,
@@ -47,9 +49,7 @@ import { Tag } from '../Tag';
 import styles from '../Button.module.css';
 
 interface ButtonContentProps {
-  contentViewContainerRef: Ref<HTMLDivElement>;
   contentViewRef: Ref<HTMLDivElement>;
-  contentViewContainerStyle: CSSProperties;
   contentViewStyle: CSSProperties;
   renderMode: LeadingAccessoryRenderMode;
   icon?: IconSource;
@@ -99,9 +99,7 @@ interface ButtonContentProps {
  * natural-width row containing icon/avatar/loader, labels, and optional trailing tag.
  */
 export const ButtonContent = memo(function ButtonContent({
-  contentViewContainerRef,
   contentViewRef,
-  contentViewContainerStyle,
   contentViewStyle,
   renderMode,
   icon,
@@ -213,7 +211,7 @@ export const ButtonContent = memo(function ButtonContent({
     }),
     [renderMode, showIconActiveIndicator],
   );
-  const trailingTagStyle: CSSProperties = useMemo(
+  const trailingTagStyle: ContainerRootStyle = useMemo(
     () => ({
       marginRight: TAG_TRAILING_MARGIN,
       opacity: textOpacity,
@@ -225,12 +223,7 @@ export const ButtonContent = memo(function ButtonContent({
   );
 
   return (
-    <div
-      className={styles.contentViewContainer}
-      style={contentViewContainerStyle}
-      ref={contentViewContainerRef}
-    >
-      <div className={styles.contentView} style={contentViewStyle} ref={contentViewRef}>
+    <div className={styles.contentView} style={contentViewStyle} ref={contentViewRef}>
         {renderMode === LeadingAccessoryRenderMode.ICON && (
           <div className={styles.iconContent} style={iconStyle}>
             <div className={styles.iconRotationContent} style={iconRotationStyle}>
@@ -297,7 +290,6 @@ export const ButtonContent = memo(function ButtonContent({
             aria-hidden
           />
         )}
-      </div>
     </div>
   );
 });

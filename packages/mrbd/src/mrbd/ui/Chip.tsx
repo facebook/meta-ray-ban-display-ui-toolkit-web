@@ -28,6 +28,7 @@ import {
 } from 'react';
 import {
   StaticContainer,
+  type ContainerRootStyle,
 } from '@wearables-ui-toolkit/foundation';
 import { IconImage } from '@wearables-ui-toolkit/foundation/components/IconImage';
 import { RoundedRectangleShapeProvider } from '@wearables-ui-toolkit/foundation/material/ShapeProvider';
@@ -54,7 +55,7 @@ import styles from './Chip.module.css';
 export { ChipAvatarSize, ChipStyle } from './Chip.types';
 export type { ChipProps } from './Chip.types';
 
-const DEFAULT_STYLE: CSSProperties = {};
+const DEFAULT_STYLE: ContainerRootStyle = {};
 
 /**
  * Get CSS class for text style
@@ -127,7 +128,7 @@ export const Chip = memo(forwardRef<HTMLDivElement, ChipProps>(
       chipStyle = ChipStyle.DEEMPHASIZED,
       className = '',
       contentClassName: contentClassNameProp = '',
-      clipContent = true,
+      contentClip = 'shape',
       style = DEFAULT_STYLE,
       shapeProvider: shapeProviderProp,
       ...staticContainerProps
@@ -413,7 +414,7 @@ export const Chip = memo(forwardRef<HTMLDivElement, ChipProps>(
         shapeProvider={shapeProvider}
         className={chipClassName}
         contentClassName={contentClassName}
-        clipContent={shouldClipLayoutContent ? clipContent : false}
+        contentClip={shouldClipLayoutContent ? contentClip : 'none'}
         layoutTransitionAnchor={layoutAnimationAnchor}
         layoutTransitionSignature={layoutSignature}
         layoutTransitionToken={layoutAnimationToken}

@@ -24,6 +24,7 @@ import {
   memo,
   useMemo,
 } from 'react';
+import type { ContainerRootStyle } from '@wearables-ui-toolkit/foundation';
 import { Container } from '@wearables-ui-toolkit/foundation/components/Container';
 import { IconImage } from '@wearables-ui-toolkit/foundation/components/IconImage';
 import { MaterialLibrary } from '@wearables-ui-toolkit/foundation/material/MaterialLibrary';
@@ -52,7 +53,7 @@ export type {
   EmojiContextMenuItemViewProps,
 } from './ContextMenuItemView.types';
 
-const EMPTY_CONTEXT_MENU_ITEM_STYLE: CSSProperties = {};
+const EMPTY_CONTEXT_MENU_ITEM_STYLE: ContainerRootStyle = {};
 const DEFAULT_CONTEXT_MENU_ITEM_SHAPE_PROVIDER =
   new RoundedRectangleShapeProvider(CornerRadius.FULL);
 
@@ -86,7 +87,7 @@ export const ContextMenuItemView = memo(forwardRef<HTMLDivElement, ContextMenuIt
       [materialProp],
     );
     const itemSize = CONTEXT_MENU_ITEM_SIZE[size];
-    const containerStyle: CSSProperties & Record<'--uit-context-menu-item-min-height', string> = useMemo(
+    const containerStyle: ContainerRootStyle & Record<'--uit-context-menu-item-min-height', string> = useMemo(
       () => {
         const minimumHeight = style.minHeight ?? itemSize;
         return {

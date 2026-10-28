@@ -58,7 +58,7 @@ const HomeAppIcon = memo(function HomeAppIcon({ card }: { card: HomeCard }) {
     <StaticContainer
       aria-hidden="true"
       className="homeNotificationWebAppIcon"
-      clipContent={false}
+      contentClip="none"
       height={HOME_APP_ICON_SIZE}
       material={rendering.material}
       shapeProvider={HOME_APP_ICON_SHAPE_PROVIDER}

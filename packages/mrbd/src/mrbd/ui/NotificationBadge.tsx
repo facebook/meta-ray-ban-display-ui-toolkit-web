@@ -11,11 +11,11 @@ import {
   memo,
   useMemo,
   useRef,
-  type CSSProperties,
 } from 'react';
 import {
   BackgroundStyle,
   StaticContainer,
+  type ContainerRootStyle,
 } from '@wearables-ui-toolkit/foundation';
 import {
   TextColor,
@@ -33,7 +33,7 @@ import styles from './NotificationBadge.module.css';
 
 export type { NotificationBadgeProps } from './NotificationBadge.types';
 const MIN_NOTIFICATION_BADGE_SIZE = 32;
-const DEFAULT_STYLE: CSSProperties = {};
+const DEFAULT_STYLE: ContainerRootStyle = {};
 const DEFAULT_NOTIFICATION_BADGE_SHAPE_PROVIDER =
   new RoundedRectangleShapeProvider(CornerRadius.FULL);
 
@@ -51,7 +51,7 @@ export const NotificationBadge = memo(forwardRef<
   const labelRef = useRef<HTMLSpanElement>(null);
   useBadgeGlyphCentering(labelRef, text, style, className);
   const material = useMemo(createNotificationBadgeMaterial, []);
-  const badgeStyle = useMemo(
+  const badgeStyle = useMemo<ContainerRootStyle>(
     () => ({ ...style, minWidth: style.minWidth ?? MIN_NOTIFICATION_BADGE_SIZE }),
     [style],
   );

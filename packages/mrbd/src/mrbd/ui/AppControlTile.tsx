@@ -32,9 +32,9 @@ import {
   forwardRef,
   memo,
   useMemo,
-  type CSSProperties,
   type ReactNode,
 } from 'react';
+import type { ContainerRootStyle } from '@wearables-ui-toolkit/foundation';
 import { Container } from '@wearables-ui-toolkit/foundation/components/Container';
 import {
   CornerRadius,
@@ -56,7 +56,7 @@ import styles from './AppControlTile.module.css';
 
 export type { AppControlTileProps } from './AppControlTile.types';
 
-const EMPTY_APP_CONTROL_TILE_STYLE: CSSProperties = {};
+const EMPTY_APP_CONTROL_TILE_STYLE: ContainerRootStyle = {};
 const DEFAULT_APP_CONTROL_TILE_SHAPE_PROVIDER =
   new RoundedRectangleShapeProvider(CornerRadius.MEDIUM);
 
@@ -163,7 +163,7 @@ export const AppControlTile = memo(forwardRef<HTMLDivElement, AppControlTileProp
      * can grow) instead of a fixed height. When height is provided, the fixed
      * height is passed to Container directly.
      */
-    const containerStyle = useMemo<CSSProperties>(
+    const containerStyle = useMemo<ContainerRootStyle>(
       () => (height == null ? { minHeight: APP_CONTROL_TILE_MIN_HEIGHT, ...style } : style),
       [height, style],
     );

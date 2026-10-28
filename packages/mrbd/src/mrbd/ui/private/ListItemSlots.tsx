@@ -6,6 +6,8 @@
  *
  */
 
+import type { ContainerRootStyle } from '@wearables-ui-toolkit/foundation';
+
 import {
   memo,
   useMemo,
@@ -49,7 +51,7 @@ import {
 } from './AvatarMetrics';
 import styles from '../ListItem.module.css';
 
-const LIST_ITEM_TAG_STYLE: CSSProperties = { mixBlendMode: 'normal' };
+const LIST_ITEM_TAG_STYLE: ContainerRootStyle = { mixBlendMode: 'normal' };
 
 export interface ListItemLeadingSlotProps {
   layout: Pick<ListItemLayoutState, 'hasLeading' | 'hasAvatar'>;

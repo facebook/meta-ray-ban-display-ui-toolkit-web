@@ -29,6 +29,7 @@ import {
   type CSSProperties,
   type KeyboardEvent,
 } from 'react';
+import type { ContainerRootStyle } from '@wearables-ui-toolkit/foundation';
 import { Container } from '@wearables-ui-toolkit/foundation/components/Container';
 import { MaterialLibrary } from '@wearables-ui-toolkit/foundation/material/MaterialLibrary';
 import { State, InteractionState } from '@wearables-ui-toolkit/foundation/base/Interactions';
@@ -54,7 +55,7 @@ export type {
   SubNavigationProps,
 } from './SubNavigation.types';
 
-const EMPTY_SUB_NAVIGATION_STYLE: CSSProperties = {};
+const EMPTY_SUB_NAVIGATION_STYLE: ContainerRootStyle = {};
 
 // Visually-hidden but screen-reader-available styling for the polite live region.
 const SR_ONLY_STYLE: CSSProperties = {

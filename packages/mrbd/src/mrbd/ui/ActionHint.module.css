@@ -21,7 +21,6 @@
 .actionHint {
   display: inline-flex;
   /* Corner radius (XSMALL = 16px) set by actionHint material's cornerRadius config */
-  overflow: hidden;
 }
 
 .content {

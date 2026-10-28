@@ -6,7 +6,7 @@
  *
  */
 
-import type { CSSProperties } from 'react';
+import type { ContainerContentStyle } from '@wearables-ui-toolkit/foundation';
 import {
   TAG_HORIZONTAL_PADDING,
   TAG_VERTICAL_PADDING,
@@ -19,7 +19,7 @@ export function getTagClassName(
   return [baseClassName, className].filter(Boolean).join(' ');
 }
 
-export function getTagStyle(style: CSSProperties): CSSProperties {
+export function getTagStyle(style: ContainerContentStyle): ContainerContentStyle {
   return {
     padding: `${TAG_VERTICAL_PADDING}px ${TAG_HORIZONTAL_PADDING}px`,
     ...style,

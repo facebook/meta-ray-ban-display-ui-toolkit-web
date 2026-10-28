@@ -6,10 +6,8 @@
  *
  */
 
-import type {
-  CSSProperties,
-  ReactNode,
-} from 'react';
+import type { ReactNode } from 'react';
+import type { ContainerRootStyle } from '@wearables-ui-toolkit/foundation';
 import type { ContainerProps } from '@wearables-ui-toolkit/foundation/components/Container';
 import type { IconSource } from '@wearables-ui-toolkit/foundation/components/IconImage';
 import type { ButtonItemIconSize } from './ButtonItemIconSize';
@@ -45,11 +43,17 @@ export interface ContextMenuItemViewProps
   /** Click handler */
   onClick?: () => void;
 
+  /** Width of the item in pixels or a CSS sizing value. */
+  width?: number | string;
+
+  /** Height of the item in pixels or a CSS sizing value. */
+  height?: number | string;
+
   /**
    * Inline style applied after the size defaults. Explicit `minWidth` and
    * `minHeight` values override their respective defaults independently.
    */
-  style?: CSSProperties;
+  style?: ContainerRootStyle;
 }
 
 /**

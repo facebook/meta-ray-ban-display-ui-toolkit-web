@@ -22,6 +22,8 @@ import type {
 import { ContainerMaterialCanvas } from './ContainerMaterialCanvas';
 import { ZERO_PARTIAL_FOCUS_POSITION } from './useContainerPartialFocusFeedback';
 import styles from '../Container.module.css';
+import { ContentSurface } from './ContentSurface';
+import type { ContainerContentStyle, ContentClipMode } from '../ContainerContent.types';
 
 const STATIC_INTERACTION_TRANSITION = {
   duration: 0,
@@ -42,7 +44,13 @@ interface StaticContainerFrameProps {
   effectiveUseSmoothCorners: boolean;
   smoothCornerPath: string | null;
   materialShapePath: string | null;
-  clipContent: boolean;
+  contentClip: ContentClipMode;
+  contentStyle?: ContainerContentStyle;
+  outerWidth?: number;
+  outerHeight?: number;
+  fallbackRadius?: string;
+  fillWidth: boolean;
+  fillHeight: boolean;
   backgroundLayers: MaterialLayer[];
   foregroundLayers: MaterialLayer[];
   visualState: VisualState;
@@ -52,7 +60,6 @@ interface StaticContainerFrameProps {
   idPrefix: string;
   backgroundLayerStyle: CSSProperties;
   foregroundLayerStyle: CSSProperties;
-  contentWrapperStyle: CSSProperties;
   foregroundBlendsWithContent: boolean;
   backgroundBlendsWithBackdrop: boolean;
 }
@@ -74,7 +81,13 @@ export const StaticContainerFrame = memo(function StaticContainerFrame({
   effectiveUseSmoothCorners,
   smoothCornerPath,
   materialShapePath,
-  clipContent,
+  contentClip,
+  contentStyle,
+  outerWidth,
+  outerHeight,
+  fallbackRadius,
+  fillWidth,
+  fillHeight,
   backgroundLayers,
   foregroundLayers,
   visualState,
@@ -84,7 +97,6 @@ export const StaticContainerFrame = memo(function StaticContainerFrame({
   idPrefix,
   backgroundLayerStyle,
   foregroundLayerStyle,
-  contentWrapperStyle,
   foregroundBlendsWithContent,
   backgroundBlendsWithBackdrop,
 }: StaticContainerFrameProps) {
@@ -123,33 +135,6 @@ export const StaticContainerFrame = memo(function StaticContainerFrame({
       foregroundLayerStyle,
     ],
   );
-  const effectiveContentWrapperStyle = useMemo(
-    () => ({
-      ...contentWrapperStyle,
-      position: backgroundBlendsWithBackdrop || foregroundBlendsWithContent
-        ? 'relative' as const
-        : contentWrapperStyle.position,
-      zIndex: backgroundBlendsWithBackdrop
-        ? 1
-        : contentWrapperStyle.zIndex,
-      overflow: clipContent ? 'hidden' : 'visible',
-      borderRadius: clipContent ? 'inherit' : contentWrapperStyle.borderRadius,
-      clipPath: effectiveUseSmoothCorners && clipContent
-        ? contentClipPath
-        : contentWrapperStyle.clipPath,
-      WebkitClipPath: effectiveUseSmoothCorners && clipContent
-        ? contentClipPath
-        : (contentWrapperStyle as { WebkitClipPath?: string }).WebkitClipPath,
-    }),
-    [
-      backgroundBlendsWithBackdrop,
-      clipContent,
-      contentClipPath,
-      contentWrapperStyle,
-      effectiveUseSmoothCorners,
-      foregroundBlendsWithContent,
-    ],
-  );
 
   return (
     <div
@@ -185,13 +170,21 @@ export const StaticContainerFrame = memo(function StaticContainerFrame({
         />
       </div>
 
-      <div
-        ref={contentRef}
-        className={`${styles.contentWrapper} ${contentClassName}`}
-        style={effectiveContentWrapperStyle}
+      <ContentSurface
+        surfaceRef={contentRef}
+        contentClassName={contentClassName}
+        contentStyle={contentStyle}
+        contentClip={contentClip}
+        outerWidth={outerWidth}
+        outerHeight={outerHeight}
+        fallbackRadius={fallbackRadius}
+        fillWidth={fillWidth}
+        fillHeight={fillHeight}
+        clipPath={effectiveUseSmoothCorners ? contentClipPath : undefined}
+        backgroundBlendsWithBackdrop={backgroundBlendsWithBackdrop}
       >
         {children}
-      </div>
+      </ContentSurface>
 
       <div
         ref={foregroundLayerRef}

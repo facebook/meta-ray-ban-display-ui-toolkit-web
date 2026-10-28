@@ -162,6 +162,7 @@ export const LauncherAppTile = memo(function LauncherAppTile({
     <Container
       ref={ref}
       className="launcherAppTile"
+      contentClassName="launcherAppTileContent"
       height="var(--launcher-tile-height)"
       material={material}
       shapeProvider={LAUNCHER_APP_TILE_SHAPE_PROVIDER}
@@ -175,7 +176,6 @@ export const LauncherAppTile = memo(function LauncherAppTile({
       aria-pressed={isPinningMode ? isPinned : undefined}
       data-uit-capture-id={`launcher-app-${app.id}`}
     >
-      <div className="launcherAppTileContent">
         <LauncherIconMaterial
           className="launcherAppTileIconMaterial"
           icon={app.icon}
@@ -189,7 +189,6 @@ export const LauncherAppTile = memo(function LauncherAppTile({
         >
           {app.title}
         </TextView>
-      </div>
       <div className="launcherAppPinBadge" aria-hidden="true">
         <div className="launcherAppPinBadgeBase" />
         <div className="launcherAppPinBadgeSelected" />

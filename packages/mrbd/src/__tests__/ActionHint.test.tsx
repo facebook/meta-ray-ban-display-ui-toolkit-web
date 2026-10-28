@@ -82,8 +82,10 @@ describe('ActionHint optional text', () => {
 describe('ActionHint padding', () => {
   it('has 12px horizontal, 8px vertical padding', () => {
     const { container } = render(<ActionHint text="Test" />);
-    const style = container.firstElementChild?.getAttribute('style') ?? '';
-    expect(style).toContain('padding: 8px 12px');
+    const root = container.firstElementChild;
+    const surface = container.querySelector('[data-uit-content-surface]');
+    expect(root).toHaveStyle({ padding: '0px' });
+    expect(surface).toHaveStyle({ padding: '8px 12px' });
   });
 });
 

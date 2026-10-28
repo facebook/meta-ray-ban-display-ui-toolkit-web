@@ -316,7 +316,10 @@ const ContainerImpl = forwardRef<HTMLElement, ContainerImplementationProps>(
       material: materialProp,
       width = 'auto',
       height = 'auto',
-      clipContent = true,
+      contentClip = 'shape',
+      contentClassName = '',
+      contentStyle,
+      contentRef: callerContentRef,
       interactionStateOverride,
       visualStateOverride,
       materialTransition,
@@ -417,6 +420,8 @@ const ContainerImpl = forwardRef<HTMLElement, ContainerImplementationProps>(
       interactionStateOverride != null,
     );
     const containerRef = useRef<HTMLElement>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
+    const setContentRef = useComposedRef(callerContentRef ?? null, contentRef);
     const setContainerRef = useComposedRef(ref, containerRef);
     const measuredDims = useMeasuredElementDimensions(containerRef);
     const {
@@ -1064,12 +1069,11 @@ const ContainerImpl = forwardRef<HTMLElement, ContainerImplementationProps>(
     const containerStyle: CSSProperties = useMemo(
       () => ({
         position: 'relative',
-        width,
-        height,
+        width: width === 'auto' ? undefined : width,
+        height: height === 'auto' ? undefined : height,
         borderRadius: effectiveUseSmoothCorners
           ? undefined
           : shapeContext.shapeProvider.getCssBorderRadius?.() ?? '0px',
-        overflow: 'visible',
         translate: material.backgroundBlendsWithBackdrop() &&
           combinedTranslationX === 0 &&
           combinedTranslationY === 0
@@ -1084,10 +1088,15 @@ const ContainerImpl = forwardRef<HTMLElement, ContainerImplementationProps>(
         opacity: combinedAlpha,
         isolation: material.backgroundBlendsWithBackdrop() ? 'auto' : undefined,
         ...style,
+        display: style?.display != null && !['block', 'flex', 'grid', 'inline-block', 'inline-flex', 'inline-grid', 'flow-root', 'none'].includes(style.display) ? 'inline-flex' : style?.display,
+        padding: 0,
+        borderWidth: 0,
+        boxSizing: 'border-box',
+        overflow: 'visible',
       }),
       // Task 1: no materialRevision — only reads corner radius, not layers
       [
-        clipContent,
+        contentClip,
         combinedAlpha,
         combinedScaleX,
         combinedScaleY,
@@ -1230,6 +1239,7 @@ const ContainerImpl = forwardRef<HTMLElement, ContainerImplementationProps>(
         }
       >
         <ContainerFrame
+          contentRef={setContentRef}
           backgroundLayers={isMaterialVisible ? backgroundLayers : EMPTY_MATERIAL_LAYERS}
           foregroundLayers={isMaterialVisible ? foregroundLayers : EMPTY_MATERIAL_LAYERS}
           effectiveVisualState={effectiveVisualState}
@@ -1244,7 +1254,14 @@ const ContainerImpl = forwardRef<HTMLElement, ContainerImplementationProps>(
           insetSmoothCornerPath={insetSmoothCornerPath}
           materialLayerPositionStyle={materialLayerPositionStyle}
           hasInset={hasInset}
-          clipContent={clipContent}
+          contentClip={contentClip}
+          contentClassName={contentClassName}
+          contentStyle={contentStyle}
+          outerWidth={containerW}
+          outerHeight={containerH}
+          fallbackRadius={shapeContext.shapeProvider.getCssBorderRadius?.()}
+          fillWidth={width !== 'auto'}
+          fillHeight={height !== 'auto'}
           layerPathD={layerPathD}
           layerW={layerW}
           layerH={layerH}

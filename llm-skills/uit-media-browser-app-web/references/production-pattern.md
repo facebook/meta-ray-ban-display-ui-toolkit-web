@@ -203,7 +203,7 @@ inside a wider rounded container.
       var(--uit-spacing-xlarge) - var(--uit-spacing-small)
     )
   )`}
-  clipContent>
+  contentClip="shape">
   <img className="media-image" src={photo.src} alt={photo.alt} />
 </StaticContainer>
 ```

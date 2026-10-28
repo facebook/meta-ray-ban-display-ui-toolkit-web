@@ -9,6 +9,7 @@
 import {
   memo,
   useMemo,
+  type Ref,
   type CSSProperties,
   type ReactNode,
 } from 'react';
@@ -21,11 +22,15 @@ import type {
 import { ContainerMaterialCanvas } from './ContainerMaterialCanvas';
 import type { ContainerMaterialTransition } from '../ContainerMaterialLayers.types';
 import styles from '../Container.module.css';
+import { ContentSurface } from './ContentSurface';
+import type { ContainerContentStyle, ContentClipMode } from '../ContainerContent.types';
 
 const CLIP_PATH_STYLE: CSSProperties = { position: 'absolute' };
 
 interface ContainerFrameProps {
   children?: ReactNode;
+  contentClassName?: string;
+  contentRef: Ref<HTMLDivElement>;
   backgroundLayers: MaterialLayer[];
   foregroundLayers: MaterialLayer[];
   effectiveVisualState: VisualState;
@@ -40,7 +45,13 @@ interface ContainerFrameProps {
   insetSmoothCornerPath: string | null;
   materialLayerPositionStyle: CSSProperties;
   hasInset: boolean;
-  clipContent: boolean;
+  contentClip: ContentClipMode;
+  contentStyle?: ContainerContentStyle;
+  outerWidth?: number;
+  outerHeight?: number;
+  fallbackRadius?: string;
+  fillWidth: boolean;
+  fillHeight: boolean;
   layerPathD: string | null;
   layerW: number;
   layerH: number;
@@ -61,6 +72,8 @@ interface ContainerFrameProps {
  */
 export const ContainerFrame = memo(function ContainerFrame({
   children,
+  contentClassName,
+  contentRef,
   backgroundLayers,
   foregroundLayers,
   effectiveVisualState,
@@ -75,7 +88,13 @@ export const ContainerFrame = memo(function ContainerFrame({
   insetSmoothCornerPath,
   materialLayerPositionStyle,
   hasInset,
-  clipContent,
+  contentClip,
+  contentStyle,
+  outerWidth,
+  outerHeight,
+  fallbackRadius,
+  fillWidth,
+  fillHeight,
   layerPathD,
   layerW,
   layerH,
@@ -98,28 +117,6 @@ export const ContainerFrame = memo(function ContainerFrame({
       hasInset,
       insetClipPathId,
       insetSmoothCornerPath,
-    ],
-  );
-  const contentWrapperStyle = useMemo(
-    () => ({
-      width: '100%',
-      height: '100%',
-      position: backgroundBlendsWithBackdrop || foregroundBlendsWithContent
-        ? 'relative' as const
-        : undefined,
-      zIndex: backgroundBlendsWithBackdrop ? 1 : undefined,
-      overflow: clipContent ? 'hidden' : 'visible',
-      borderRadius: clipContent ? 'inherit' : undefined,
-      clipPath: (effectiveUseSmoothCorners && clipContent)
-        ? cssSmoothCornerClipPath
-        : undefined,
-    }),
-    [
-      backgroundBlendsWithBackdrop,
-      clipContent,
-      cssSmoothCornerClipPath,
-      effectiveUseSmoothCorners,
-      foregroundBlendsWithContent,
     ],
   );
   const backgroundWrapperStyle = useMemo(
@@ -192,12 +189,21 @@ export const ContainerFrame = memo(function ContainerFrame({
         />
       </div>
 
-      <div
-        className={styles.contentWrapper}
-        style={contentWrapperStyle}
+      <ContentSurface
+        surfaceRef={contentRef}
+        contentClassName={contentClassName}
+        contentStyle={contentStyle}
+        contentClip={contentClip}
+        outerWidth={outerWidth}
+        outerHeight={outerHeight}
+        fallbackRadius={fallbackRadius}
+        fillWidth={fillWidth}
+        fillHeight={fillHeight}
+        clipPath={effectiveUseSmoothCorners ? cssSmoothCornerClipPath : undefined}
+        backgroundBlendsWithBackdrop={backgroundBlendsWithBackdrop}
       >
         {children}
-      </div>
+      </ContentSurface>
 
       <div
         className={styles.foregroundLayers}

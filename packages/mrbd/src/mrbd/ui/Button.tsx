@@ -23,7 +23,9 @@ import {
   useImperativeHandle,
   type CSSProperties,
 } from 'react';
+import type { ContainerContentStyle, ContainerRootStyle } from '@wearables-ui-toolkit/foundation';
 import { Container } from '@wearables-ui-toolkit/foundation/components/Container';
+import { useComposedRef } from '@wearables-ui-toolkit/foundation/utils/useComposedRef';
 import type { ContainerStateChangeAnimation } from '@wearables-ui-toolkit/foundation/components/Container';
 import { MaterialLibrary } from '@wearables-ui-toolkit/foundation/material/MaterialLibrary';
 import {
@@ -71,7 +73,8 @@ export type {
   ButtonActionTransitionOptions,
 } from './Button.types';
 
-const EMPTY_BUTTON_STYLE: CSSProperties = {};
+const EMPTY_BUTTON_STYLE: ContainerRootStyle = {};
+const EMPTY_BUTTON_CONTENT_STYLE: ContainerContentStyle = {};
 const DEFAULT_BUTTON_SHAPE_PROVIDER =
   new RoundedRectangleShapeProvider(CornerRadius.FULL);
 
@@ -120,6 +123,9 @@ export const Button = memo(forwardRef<ButtonHandle, ButtonProps>(
       onClick,
       style = EMPTY_BUTTON_STYLE,
       className = '',
+      contentClassName = '',
+      contentStyle = EMPTY_BUTTON_CONTENT_STYLE,
+      contentRef: callerContentRef,
       ...containerProps
     },
     ref
@@ -185,6 +191,7 @@ export const Button = memo(forwardRef<ButtonHandle, ButtonProps>(
     // Refs for the two-container structure
     const contentViewContainerRef = useRef<HTMLDivElement>(null); // Outer, animated width
     const contentViewRef = useRef<HTMLDivElement>(null); // Inner, natural width
+    const setContentViewContainerRef = useComposedRef(callerContentRef ?? null, contentViewContainerRef);
 
     /**
      * Determine leading accessory render mode
@@ -771,7 +778,7 @@ export const Button = memo(forwardRef<ButtonHandle, ButtonProps>(
     /**
      * Container styles
      */
-    const containerStyle: CSSProperties = useMemo(
+    const containerStyle: ContainerRootStyle = useMemo(
       () => ({
         transform: `scale(${animatedValues.scale})`,
         transition: 'none',
@@ -815,21 +822,6 @@ export const Button = memo(forwardRef<ButtonHandle, ButtonProps>(
         : animatedValues.width;
 
     /**
-     * Content view container styles (outer, clipped viewport).
-     * Width is driven by the Container's numeric width prop so material strokes/glow
-     * and the clipped content viewport consume the same animation frame.
-     */
-    const contentViewContainerStyle: CSSProperties = useMemo(
-      () => ({
-        width: '100%',
-        height: '100%',
-        overflow: 'hidden',
-        transition: 'none',
-      }),
-      [],
-    );
-
-    /**
      * Content view styles (inner, natural width)
      * This is locked to its measured width so text is always full-size (just gets clipped)
      * EXCEPTION: When shouldTruncate is true (content exceeds max width), constrain for ellipsis
@@ -846,6 +838,14 @@ export const Button = memo(forwardRef<ButtonHandle, ButtonProps>(
       [measuredContentWidth, shouldTruncate, targetWidth],
     );
 
+    const surfaceClassName = useMemo(
+      () => `${styles.contentViewContainer} ${contentClassName}`.trim(),
+      [contentClassName],
+    );
+    const surfaceStyle = useMemo(
+      () => ({ ...contentStyle, transition: 'none' }),
+      [contentStyle],
+    );
     const buttonClassName = useMemo(
       () => `${styles.button} ${className}`,
       [className],
@@ -866,14 +866,15 @@ export const Button = memo(forwardRef<ButtonHandle, ButtonProps>(
         stateChangeAnimations={createStateChangeAnimations}
         width={containerWidth}
         height={BUTTON_HEIGHT}
-        clipContent={false}
+        contentClip="bounds"
+        contentRef={setContentViewContainerRef}
+        contentClassName={surfaceClassName}
+        contentStyle={surfaceStyle}
         role="button"
         data-uit-button-group-item-height={BUTTON_HEIGHT}
       >
         <ButtonContent
-          contentViewContainerRef={contentViewContainerRef}
           contentViewRef={contentViewRef}
-          contentViewContainerStyle={contentViewContainerStyle}
           contentViewStyle={contentViewStyle}
           renderMode={renderMode}
           icon={effectiveIcon}

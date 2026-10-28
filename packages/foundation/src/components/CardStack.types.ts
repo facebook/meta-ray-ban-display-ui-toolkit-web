@@ -10,7 +10,7 @@
  * CardStack public API and configuration surface.
  */
 
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import type { CardProps } from './Card';
 import { ScrimType } from './Card';
 
@@ -48,7 +48,10 @@ export interface BackgroundCardConfig {
   children?: ReactNode;
 }
 
-export interface CardStackProps extends Omit<CardProps, 'children'> {
+export interface CardStackProps extends Omit<CardProps, 'children' | 'style'> {
+  /** Inline styles for the stack wrapper. */
+  style?: CSSProperties;
+
   /** Primary card content. */
   children?: ReactNode;
 

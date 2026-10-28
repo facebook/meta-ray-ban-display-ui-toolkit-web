@@ -13,7 +13,7 @@
  * Unlike Container, this does NOT extend InteractableBase — no focus/press state management.
  * Visual state is caller-selected and does not respond to interaction.
  *
- * Used as base for: Chip, Tag, TooltipContainer, ContextMenu
+ * Used as base for Chip and Tag.
  */
 
 import {
@@ -102,7 +102,9 @@ const StaticContainerComponent = memo(forwardRef<HTMLDivElement, StaticContainer
       height = 'auto',
       backgroundStyle = BackgroundStyle.PRIMARY,
       _privateBackgroundStyle,
-      clipContent = true,
+      contentClip = 'shape',
+      contentStyle,
+      contentRef: callerContentRef,
       useSmoothCorners = true,
       layoutTransitionToken = 0,
       layoutTransitionSignature,
@@ -125,6 +127,7 @@ const StaticContainerComponent = memo(forwardRef<HTMLDivElement, StaticContainer
       _privateBackgroundStyle ?? backgroundStyle;
     const containerRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
+    const setContentRef = useComposedRef(callerContentRef ?? null, contentRef);
     const backgroundLayerRef = useRef<HTMLDivElement>(null);
     const foregroundLayerRef = useRef<HTMLDivElement>(null);
     const materialHostRef = useRef<object>({});
@@ -277,6 +280,10 @@ const StaticContainerComponent = memo(forwardRef<HTMLDivElement, StaticContainer
       backgroundLayerRef,
       containerRef,
       contentRef,
+      clippingContentRef: contentRef,
+      contentClip,
+      rootWidth: width,
+      rootHeight: height,
       foregroundLayerRef,
       onComplete: onLayoutTransitionComplete,
       shapeSnapshot: smoothShapeSnapshot,
@@ -287,19 +294,23 @@ const StaticContainerComponent = memo(forwardRef<HTMLDivElement, StaticContainer
      * Container styles
      *
      * Material overflow remains visible; StaticContainerFrame clips only the
-     * content subtree when clipContent is enabled.
+     * content subtree according to contentClip.
      */
     const containerStyle: CSSProperties = useMemo(
       () => ({
         ...style,
+        display: style?.display != null && !['block', 'flex', 'grid', 'inline-block', 'inline-flex', 'inline-grid', 'flow-root', 'none'].includes(style.display) ? 'inline-flex' : style?.display,
         position: 'relative',
-        width,
-        height,
+        width: width === 'auto' ? undefined : width,
+        height: height === 'auto' ? undefined : height,
         borderRadius: effectiveUseSmoothCorners
           ? undefined
           : shapeProvider.getCssBorderRadius?.() ?? '0px',
         isolation: material.backgroundBlendsWithBackdrop() ? 'auto' : undefined,
         overflow: 'visible',
+        padding: 0,
+        borderWidth: 0,
+        boxSizing: 'border-box',
       }),
       [effectiveUseSmoothCorners, height, material, shapeProvider, style, width],
     );
@@ -364,20 +375,6 @@ const StaticContainerComponent = memo(forwardRef<HTMLDivElement, StaticContainer
       ],
     );
 
-    /**
-     * Content wrapper styles
-     *
-     * Children stack without centering.
-     * z-index 1: between background (0) and foreground (3).
-     */
-    const contentWrapperStyle: CSSProperties = useMemo(
-      () => ({
-        width: width === 'auto' ? undefined : '100%',
-        height: height === 'auto' ? undefined : '100%',
-      }),
-      [height, width],
-    );
-
     const shapeContext = useMemo(
       () => ({
         materialInset: resolvedInset ?? undefined,
@@ -391,7 +388,7 @@ const StaticContainerComponent = memo(forwardRef<HTMLDivElement, StaticContainer
       <StaticContainerFrame
         rootProps={rest}
         containerRef={setContainerRef}
-        contentRef={contentRef}
+        contentRef={setContentRef}
         backgroundLayerRef={backgroundLayerRef}
         foregroundLayerRef={foregroundLayerRef}
         className={className}
@@ -400,7 +397,13 @@ const StaticContainerComponent = memo(forwardRef<HTMLDivElement, StaticContainer
         effectiveUseSmoothCorners={effectiveUseSmoothCorners}
         smoothCornerPath={smoothCornerPath}
         materialShapePath={materialShapePath}
-        clipContent={clipContent}
+        contentClip={contentClip}
+        contentStyle={contentStyle}
+        outerWidth={containerW}
+        outerHeight={containerH}
+        fallbackRadius={shapeProvider.getCssBorderRadius?.()}
+        fillWidth={width !== 'auto'}
+        fillHeight={height !== 'auto'}
         backgroundLayers={isMaterialVisible ? backgroundLayers : EMPTY_MATERIAL_LAYERS}
         foregroundLayers={isMaterialVisible ? foregroundLayers : EMPTY_MATERIAL_LAYERS}
         visualState={visualState}
@@ -410,7 +413,6 @@ const StaticContainerComponent = memo(forwardRef<HTMLDivElement, StaticContainer
         idPrefix={idPrefix}
         backgroundLayerStyle={backgroundLayerStyle}
         foregroundLayerStyle={foregroundLayerStyle}
-        contentWrapperStyle={contentWrapperStyle}
         foregroundBlendsWithContent={material.foregroundBlendsWithContent()}
         backgroundBlendsWithBackdrop={material.backgroundBlendsWithBackdrop()}
       >

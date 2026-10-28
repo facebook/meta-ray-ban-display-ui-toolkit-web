@@ -60,7 +60,7 @@
       "name": "uit-media-browser-app-web",
       "description": "Build a production UI Toolkit for Meta Ray-Ban Display media collection with a horizontal Carousel of image Cards and a static reading detail route. Use when real media is the primary collection, selecting an item opens detail, and selection/focus must restore after Back.",
       "file_count": 7,
-      "sha256": "sha256:abf67778580468d692cfcd720fa8f2f4b45d441669720d12576fde69c683a445"
+      "sha256": "sha256:450eb097256a877786aae3145a4c913d523ac710288af03e23ab283eeb947429"
     },
     {
       "name": "uit-navigation-focus-web",
@@ -108,7 +108,7 @@
       "name": "uit-surfaces-media-web",
       "description": "Build or review UI Toolkit for Meta Ray-Ban Display Container, StaticContainer, Panel, Surface, Card, CardStack, Carousel, MediaWrapper, Scrim, and Vignette compositions. Use for interactive/static materials, information grouping, custom widgets, image cards, arbitrary card content, media collections, horizontal paging, text-over-media contrast, pannable-media edges, responsive sizing, clipping, or nested-container problems.",
       "file_count": 3,
-      "sha256": "sha256:57fcc3e57ef92035b57b5d09b1a200c3934a008556d6b5b819ac9aaaf62f41d5"
+      "sha256": "sha256:d2423aaa096725bc44c9698c54be5a50098ddd12853ea7aea2abab516adcfb5f"
     },
     {
       "name": "uit-tabbed-controls-app-web",

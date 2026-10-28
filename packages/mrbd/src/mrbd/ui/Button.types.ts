@@ -21,6 +21,7 @@ export interface ButtonProps extends Omit<
   | 'children'
   | 'width'
   | 'height'
+  | 'contentClip'
   | 'materialTransition'
   | 'visualStateOverride'
   | 'visualStateForInteractionStateFn'

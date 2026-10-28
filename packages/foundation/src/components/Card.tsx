@@ -21,6 +21,7 @@ import {
   type ReactNode,
 } from 'react';
 import { Container } from './Container';
+import type { ContainerRootStyle } from './ContainerContent.types';
 import { useComposedRef } from '../utils/useComposedRef';
 import { useMeasuredElementDimensions } from '../utils/useMeasuredElementDimensions';
 import { CARD_FULL_SCRIM_FALLBACK_HEIGHT } from './private/CardMetrics';
@@ -49,7 +50,7 @@ export type {
 } from './Card.types';
 
 const DEFAULT_CARD_LAYER_STYLE: CSSProperties = {};
-const DEFAULT_CARD_STYLE: CSSProperties = {};
+const DEFAULT_CARD_STYLE: ContainerRootStyle = {};
 const DEFAULT_CARD_SHAPE_PROVIDER =
   new RoundedRectangleShapeProvider(CornerRadius.MEDIUM);
 
@@ -205,6 +206,7 @@ export const Card = memo(forwardRef<HTMLDivElement, CardProps>(
         material={baseMaterial}
         shapeProvider={shapeProvider}
         className={cardClassName}
+        contentClip="shape"
         style={style}
         height={height}
         tabIndex={0}

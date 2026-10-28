@@ -324,8 +324,8 @@ export const publicApiSections = [
     exports: [
       {
         source: '@wearables-ui-toolkit/foundation',
-        values: ['Container'],
-        types: ['ContainerProps'],
+        values: ['Container', 'ContentLayout'],
+        types: ['ContainerProps', 'ContainerRootStyle', 'ContainerContentStyle', 'ContentClipMode'],
       },
       {
         source: '@wearables-ui-toolkit/foundation',

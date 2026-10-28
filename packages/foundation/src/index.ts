@@ -217,6 +217,8 @@ export {
 // Foundation - Components
 export { Container } from './components/Container';
 export type { ContainerProps } from './components/Container';
+export { ContentLayout } from './components/ContentLayout';
+export type { ContainerRootStyle, ContainerContentStyle, ContentClipMode } from './components/ContainerContent.types';
 export { IconImage } from './components/IconImage';
 export type {
   IconSource,

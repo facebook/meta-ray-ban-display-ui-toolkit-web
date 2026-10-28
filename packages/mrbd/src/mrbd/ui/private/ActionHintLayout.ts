@@ -7,6 +7,7 @@
  */
 
 import type { CSSProperties } from 'react';
+import type { ContainerContentStyle } from '@wearables-ui-toolkit/foundation';
 import {
   ACTION_HINT_HORIZONTAL_PADDING,
   ACTION_HINT_ICON_END_MARGIN,
@@ -21,7 +22,7 @@ export function getActionHintClassName(
   return `${baseClassName} ${className}`;
 }
 
-export function getActionHintContainerStyle(style: CSSProperties): CSSProperties {
+export function getActionHintContainerStyle(style: ContainerContentStyle): ContainerContentStyle {
   return {
     display: 'inline-flex',
     padding: `${ACTION_HINT_VERTICAL_PADDING}px ${ACTION_HINT_HORIZONTAL_PADDING}px`,

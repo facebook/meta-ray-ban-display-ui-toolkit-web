@@ -10,7 +10,8 @@
  * Modal public API for Meta Ray-Ban Display.
  */
 
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import type { ContainerRootStyle } from '@wearables-ui-toolkit/foundation';
 import type { IconSource } from '@wearables-ui-toolkit/foundation/components/IconImage';
 import type { PanelProps } from '@wearables-ui-toolkit/foundation/components/Panel';
 import type {
@@ -202,5 +203,5 @@ export interface ModalProps extends Omit<
   className?: string;
 
   /** Additional inline styles for the modal panel */
-  style?: CSSProperties;
+  style?: ContainerRootStyle;
 }

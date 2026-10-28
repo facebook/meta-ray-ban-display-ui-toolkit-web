@@ -27,14 +27,14 @@ import {
   CARD_SCRIM_HEIGHT_MEDIUM,
   CARD_SCRIM_HEIGHT_SMALL,
   CARD_SCRIM_HEIGHT_TALL,
-} from '@wearables-ui-toolkit/foundation/components/private/CardMetrics';
+} from '../../../foundation/src/components/private/CardMetrics';
 import {
   getBottomCardScrimGradient,
   getCardScrimHeight,
   getCardScrimStyle,
   getTopCardScrimGradient,
   isCardScrimVisible,
-} from '@wearables-ui-toolkit/foundation/components/private/CardScrim';
+} from '../../../foundation/src/components/private/CardScrim';
 import { CornerRadius } from '@wearables-ui-toolkit/foundation';
 import { TailShapeProvider } from '@wearables-ui-toolkit/foundation/material/ShapeProvider';
 import {
@@ -278,7 +278,7 @@ describe('Card tail clipping', () => {
         shapeProvider={new TailShapeProvider('left', CornerRadius.SMALL)}
       />,
     );
-    const contentWrapper = container.querySelector('[class*="contentWrapper"]');
+    const contentWrapper = container.querySelector('[data-uit-content-clip]');
 
     expect(contentWrapper?.getAttribute('style')).toContain(
       `clip-path: path("${getCachedTailBubblePath(
@@ -298,7 +298,7 @@ describe('Card tail clipping', () => {
         shapeProvider={new TailShapeProvider('right', CornerRadius.SMALL)}
       />,
     );
-    const contentWrapper = container.querySelector('[class*="contentWrapper"]');
+    const contentWrapper = container.querySelector('[data-uit-content-clip]');
 
     expect(contentWrapper?.getAttribute('style')).toContain(
       `clip-path: path("${getCachedTailBubblePath(

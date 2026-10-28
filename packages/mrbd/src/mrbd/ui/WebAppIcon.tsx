@@ -15,6 +15,7 @@ import {
   useState,
   type CSSProperties,
 } from 'react';
+import type { ContainerRootStyle } from '@wearables-ui-toolkit/foundation';
 import { StaticContainer } from '@wearables-ui-toolkit/foundation/components/StaticContainer';
 import {
   createWebAppIconMaterial,
@@ -203,7 +204,7 @@ export const WebAppIcon = memo(forwardRef<HTMLDivElement, WebAppIconProps>(
       width: targetWidth,
       height: targetHeight,
     }), [style, targetHeight, targetWidth]);
-    const containerStyle = useMemo<CSSProperties>(() => ({
+    const containerStyle = useMemo<ContainerRootStyle>(() => ({
       left: (targetWidth - WEB_APP_ICON_CONTAINER_SIZE * presentationScale) / 2,
       top: (targetHeight - WEB_APP_ICON_CONTAINER_SIZE * presentationScale) / 2,
       transform: `scale(${presentationScale})`,
@@ -241,7 +242,7 @@ export const WebAppIcon = memo(forwardRef<HTMLDivElement, WebAppIconProps>(
           material={rendering.material}
           shapeProvider={rendering.shapeProvider}
           visualState={visualState}
-          clipContent={false}
+          contentClip="none"
         />
       </div>
     );

@@ -150,11 +150,14 @@ describe('Modal initialization', () => {
     );
     const modal = container.firstElementChild as HTMLElement;
     const banner = container.querySelector('[class*="bannerContainer"]') as HTMLElement;
-    const content = banner.querySelector('[class*="contentWrapper"]') as HTMLElement;
+    const content = banner.querySelector('[data-uit-content-surface]') as HTMLElement;
+    const clip = banner.querySelector('[data-uit-content-clip]') as HTMLElement;
     const image = banner.querySelector('[class*="bannerImageFrame"]');
     const scrim = banner.querySelector('[class*="bannerTagScrim"]');
 
-    expect(content.style.overflow).toBe('hidden');
+    expect(clip.style.overflow).toBe('hidden');
+    expect(clip).toBe(content);
+    expect(clip.parentElement).toBe(banner);
     expect(image?.parentElement).toBe(content);
     expect(scrim?.parentElement).toBe(content);
     expect(banner.style.overflow).toBe('visible');
@@ -513,7 +516,7 @@ describe('Modal leading area (mutually exclusive)', () => {
     const bannerBlock = CSS_SOURCE.match(/\.bannerContainer\s*\{([^}]*)\}/)?.[1] ?? '';
 
     expect(banner?.className).toMatch(/\bcontainer\b/);
-    expect(banner?.querySelector('[class*="contentWrapper"] img')).not.toBeNull();
+    expect(banner?.querySelector('[data-uit-content-surface] img')).not.toBeNull();
     expect(bannerBlock).not.toContain('border-radius');
   });
 

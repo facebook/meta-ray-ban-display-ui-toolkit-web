@@ -7,12 +7,14 @@
  */
 
 import type { HTMLAttributes } from 'react';
+import type { ContainerRootStyle } from '@wearables-ui-toolkit/foundation';
 import type { ShapeProvider } from '@wearables-ui-toolkit/foundation/material/ShapeProvider';
 
 export interface NotificationBadgeProps extends Omit<
   HTMLAttributes<HTMLDivElement>,
-  'children'
+  'children' | 'style'
 > {
+  style?: ContainerRootStyle;
   /** Notification count or short label displayed in the badge. */
   text?: string | number;
   shapeProvider?: ShapeProvider;

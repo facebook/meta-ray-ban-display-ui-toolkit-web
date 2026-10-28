@@ -212,8 +212,16 @@ export {
 } from '@wearables-ui-toolkit/foundation';
 
 // Foundation - Components
-export { Container } from '@wearables-ui-toolkit/foundation';
-export type { ContainerProps } from '@wearables-ui-toolkit/foundation';
+export {
+  Container,
+  ContentLayout,
+} from '@wearables-ui-toolkit/foundation';
+export type {
+  ContainerProps,
+  ContainerRootStyle,
+  ContainerContentStyle,
+  ContentClipMode,
+} from '@wearables-ui-toolkit/foundation';
 export { IconImage } from '@wearables-ui-toolkit/foundation';
 export type {
   IconSource,

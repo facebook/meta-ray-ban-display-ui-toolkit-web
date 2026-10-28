@@ -19,13 +19,15 @@ import type { ContainerMaterial } from '../material/ContainerMaterial';
 import type { ShapeProvider } from '../material/ShapeProvider';
 import { MaterialLibrary } from '../material/MaterialLibrary';
 import { Container } from './Container';
+import type { ContainerRootStyle } from './ContainerContent.types';
 import styles from './IconWithContainerMaterial.module.css';
 
-const DEFAULT_STYLE: CSSProperties = {};
+const DEFAULT_STYLE: ContainerRootStyle = {};
 const DEFAULT_ICON_INSET_PERCENT = 20;
 const ICON_CONTENT_SCALE = () => 1;
 
-export interface IconWithContainerMaterialProps extends HTMLAttributes<HTMLDivElement> {
+export interface IconWithContainerMaterialProps extends Omit<HTMLAttributes<HTMLDivElement>, 'style'> {
+  style?: ContainerRootStyle;
   icon: ReactNode;
   material?: ContainerMaterial;
   shapeProvider?: ShapeProvider;

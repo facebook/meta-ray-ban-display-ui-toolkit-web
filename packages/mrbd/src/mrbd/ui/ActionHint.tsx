@@ -20,8 +20,8 @@ import {
   forwardRef,
   memo,
   useMemo,
-  type CSSProperties,
 } from 'react';
+import type { ContainerContentStyle } from '@wearables-ui-toolkit/foundation';
 import { StaticContainer } from '@wearables-ui-toolkit/foundation';
 import { IconImage } from '@wearables-ui-toolkit/foundation/components/IconImage';
 import { MaterialLibrary } from '@wearables-ui-toolkit/foundation/material/MaterialLibrary';
@@ -39,7 +39,7 @@ import styles from './ActionHint.module.css';
 
 export type { ActionHintProps } from './ActionHint.types';
 
-const DEFAULT_STYLE: CSSProperties = {};
+const DEFAULT_STYLE: ContainerContentStyle = {};
 const DEFAULT_ACTION_HINT_SHAPE_PROVIDER =
   new RoundedRectangleShapeProvider(CornerRadius.XSMALL);
 
@@ -73,7 +73,9 @@ export const ActionHint = memo(forwardRef<HTMLDivElement, ActionHintProps>(
       text = '',
       icon,
       className = '',
-      style = DEFAULT_STYLE,
+      style,
+      contentStyle = DEFAULT_STYLE,
+      contentClassName = '',
       shapeProvider = DEFAULT_ACTION_HINT_SHAPE_PROVIDER,
       ...staticContainerProps
     },
@@ -88,8 +90,8 @@ export const ActionHint = memo(forwardRef<HTMLDivElement, ActionHintProps>(
      */
     const hasIcon = icon != null;
     const containerStyle = useMemo(
-      () => getActionHintContainerStyle(style),
-      [style],
+      () => getActionHintContainerStyle(contentStyle),
+      [contentStyle],
     );
     const classNames = useMemo(
       () => getActionHintClassName(styles.actionHint, className),
@@ -102,12 +104,13 @@ export const ActionHint = memo(forwardRef<HTMLDivElement, ActionHintProps>(
       <StaticContainer
         ref={ref}
         className={classNames}
-        style={containerStyle}
+        style={style}
+        contentStyle={containerStyle}
+        contentClassName={`${styles.content} ${contentClassName}`.trim()}
         material={material}
         shapeProvider={shapeProvider}
         {...staticContainerProps}
       >
-        <div className={styles.content}>
           {hasIcon && (
             <div
               className={styles.icon}
@@ -117,7 +120,6 @@ export const ActionHint = memo(forwardRef<HTMLDivElement, ActionHintProps>(
             </div>
           )}
           <span className={styles.text}>{text}</span>
-        </div>
       </StaticContainer>
     );
   }

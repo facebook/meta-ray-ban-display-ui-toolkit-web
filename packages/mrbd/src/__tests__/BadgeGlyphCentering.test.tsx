@@ -21,6 +21,7 @@ function installInkFixture() {
   vi.stubGlobal('ResizeObserver', class {
     constructor(private callback: ResizeObserverCallback) {}
     observe(element: Element) { callbacks.set(element, this.callback); }
+    unobserve(element: Element) { callbacks.delete(element); }
     disconnect = disconnect;
   });
   const measureText = vi.fn(() => ({width: 24}));

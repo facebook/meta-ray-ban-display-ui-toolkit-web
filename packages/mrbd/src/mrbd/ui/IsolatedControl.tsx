@@ -29,8 +29,8 @@ import {
   useImperativeHandle,
   useMemo,
   useRef,
-  type CSSProperties,
 } from 'react';
+import type { ContainerRootStyle } from '@wearables-ui-toolkit/foundation';
 import {
   Container,
   PartialFocusSupportedAxis,
@@ -57,7 +57,7 @@ export type {
   IsolatedControlProps,
 } from './IsolatedControl.types';
 
-const EMPTY_ISOLATED_CONTROL_STYLE: CSSProperties = {};
+const EMPTY_ISOLATED_CONTROL_STYLE: ContainerRootStyle = {};
 
 // ---------- Component ----------
 
@@ -132,9 +132,8 @@ export const IsolatedControl = memo(forwardRef<IsolatedControlHandle, IsolatedCo
       () => getIsolatedControlContentStyle(hasIcon),
       [hasIcon],
     );
-    const containerStyle = useMemo(
+    const containerStyle = useMemo<ContainerRootStyle>(
       () => ({
-        height: ISOLATED_CONTROL_HEIGHT,
         minWidth: getIsolatedControlMinWidth(hasIcon),
         ...style,
       }),
@@ -154,6 +153,7 @@ export const IsolatedControl = memo(forwardRef<IsolatedControlHandle, IsolatedCo
         ref={rootRef}
         className={containerClassName}
         style={containerStyle}
+        height={ISOLATED_CONTROL_HEIGHT}
         {...containerProps}
         disabled={disabled}
         onStateChange={handleStateChange}

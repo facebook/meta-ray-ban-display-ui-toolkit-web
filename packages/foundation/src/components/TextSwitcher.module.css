@@ -16,7 +16,6 @@
 .textSwitcher {
   display: inline-flex;
   position: relative;
-  overflow: hidden;
 }
 
 /**

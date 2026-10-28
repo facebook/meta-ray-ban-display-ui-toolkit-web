@@ -4,7 +4,8 @@
 
 Container combines InteractableBase with material/shape/clipping/content presentation. Important advanced props:
 
-- `material`, `shapeProvider`, `clipContent`;
+- `material`, `shapeProvider`, `contentClip` (`'shape'`, `'bounds'`, or `'none'`);
+- shared `contentStyle` and `contentClassName` for content padding and layout;
 - responsive `width`/`height`;
 - `visualStateOverride` for externally driven render state;
 - `materialTransition` for scrubbed/scripted state transition;

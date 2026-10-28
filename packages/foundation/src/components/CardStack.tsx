@@ -71,7 +71,6 @@ export type { BackgroundCardConfig, CardStackProps } from './CardStack.types';
 const EMPTY_CARD_STACK_STYLE: CSSProperties = {};
 const DEFAULT_CARD_STACK_SHAPE_PROVIDER =
   new RoundedRectangleShapeProvider(CornerRadius.MEDIUM);
-const FULL_SIZE_CARD_STYLE: CSSProperties = { width: '100%', height: '100%' };
 const CARD_STACK_IMAGE_STYLE: CSSProperties = getCardStackImageStyle();
 const PRESERVE_CARD_SCALE = () => 1;
 
@@ -204,7 +203,6 @@ export const CardStack = memo(forwardRef<HTMLDivElement, CardStackProps>(
               width={cardWidth}
               height={cardHeight}
               shapeProvider={shapeProvider}
-              style={FULL_SIZE_CARD_STYLE}
               tabIndex={-1}
               role="presentation"
               contentScaleForStateFn={PRESERVE_CARD_SCALE}
@@ -232,7 +230,6 @@ export const CardStack = memo(forwardRef<HTMLDivElement, CardStackProps>(
             width={cardWidth}
             height={cardHeight}
             tabIndex={primaryTabIndex}
-            style={FULL_SIZE_CARD_STYLE}
             contentScaleForStateFn={PRESERVE_CARD_SCALE}
             onStateChange={handlePrimaryStateChange}
           >

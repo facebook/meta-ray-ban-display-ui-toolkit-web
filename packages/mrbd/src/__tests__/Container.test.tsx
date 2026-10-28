@@ -12,11 +12,12 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { act, render, fireEvent, waitFor } from '@testing-library/react';
-import { createRef } from 'react';
+import { createRef, useState } from 'react';
 import { Container, PartialFocusSupportedAxis } from '@wearables-ui-toolkit/foundation/components/Container';
 import { MaterialLibrary } from '@wearables-ui-toolkit/foundation/material/MaterialLibrary';
 import { VisualState, State, InteractionConstants } from '@wearables-ui-toolkit/foundation/base/Interactions';
 import { FastScrollTracker } from '@wearables-ui-toolkit/foundation/base/InteractableFastScrollTracker';
+import { RoundedRectangleShapeProvider, CornerRadius, defaultShapeProvider } from '@wearables-ui-toolkit/foundation/material/ShapeProvider';
 import { createFocusedMaterialLayer } from '@wearables-ui-toolkit/foundation/material/DefaultContainerMaterialLayerFactories';
 import {
   FORCE_FOCUS_SYNC_EVENT,
@@ -1114,7 +1115,7 @@ describe('Container material', () => {
     );
     const root = container.firstElementChild as HTMLElement;
     const content = container.querySelector<HTMLElement>(
-      '[class*="contentWrapper"]',
+      '[data-uit-content-clip]',
     );
     const background = container.querySelector<HTMLElement>(
       '[class*="backgroundLayers"]',
@@ -1181,7 +1182,7 @@ describe('Container material', () => {
       '[class*="backgroundLayers"]',
     );
     const content = container.querySelector<HTMLElement>(
-      '[class*="contentWrapper"]',
+      '[data-uit-content-clip]',
     );
 
     expect(root).toHaveAttribute(
@@ -1725,29 +1726,77 @@ describe('Container material', () => {
 
 });
 
-describe('Container clipContent', () => {
+describe('Container contentClip', () => {
+  it('applies the outer 160x80 smooth path to the padded root-aligned surface', () => {
+    function StatefulContent() {
+      const [value, setValue] = useState('initial');
+      return <input value={value} onChange={event => setValue(event.currentTarget.value)} />;
+    }
+    const shapeProvider = new RoundedRectangleShapeProvider(CornerRadius.LARGE);
+    const expectedPath = shapeProvider.getShapePath({ width: 160, height: 80 });
+    const contentRef = createRef<HTMLDivElement>();
+    const view = (padding: string, contentClip: 'shape' | 'bounds' | 'none' = 'shape') => (
+      <Container width={160} height={80} shapeProvider={shapeProvider} contentClip={contentClip} contentScaleForStateFn={() => 1} contentStyle={{ padding }} contentClassName="padded-content" contentRef={contentRef}>
+        <StatefulContent />
+      </Container>
+    );
+    const { container, rerender } = render(view('4px 12px'));
+    const root = container.firstElementChild as HTMLElement;
+    const input = root.querySelector('input')!;
+    const surface = input.parentElement!;
+    expect(contentRef.current).toBe(surface);
+    expect(surface).toHaveClass('padded-content');
+    expect(surface.parentElement).toBe(root);
+    expect(root.querySelectorAll('[data-uit-content-surface]')).toHaveLength(1);
+    expect(root).toHaveStyle({ padding: '0px', borderWidth: '0px', overflow: 'visible' });
+    expect(surface.style.clipPath).toContain(expectedPath);
+    expect(surface).toHaveStyle({ padding: '4px 12px', margin: '0px', overflow: 'hidden', boxSizing: 'border-box', width: '100%', height: '100%' });
+    fireEvent.change(input, { target: { value: 'retained' } });
+    act(() => input.focus());
+    rerender(view('4px 4px 4px 20px'));
+    expect(surface).toHaveStyle({ paddingLeft: '20px', paddingRight: '4px', margin: '0px' });
+    expect(surface.style.clipPath).toContain(expectedPath);
+    for (const mode of ['bounds', 'none', 'shape'] as const) {
+      rerender(view('4px 4px 4px 20px', mode));
+      if (mode === 'bounds') {
+        expect(surface.style.clipPath).toContain('inset(');
+        expect(surface.style.clipPath).toContain('160px');
+        expect(surface.style.clipPath).toContain('80px');
+      } else {
+        expect(surface.style.clipPath).toBe(mode === 'shape' ? `path("${expectedPath}")` : '');
+      }
+      expect(surface.style.overflow).toBe(mode === 'none' ? 'visible' : 'hidden');
+      expect(contentRef.current).toBe(surface);
+      expect(root.querySelector('input')).toBe(input);
+      expect(input).toHaveValue('retained');
+      expect(document.activeElement).toBe(input);
+    }
+  });
+
   it('clips only the content wrapper by default', () => {
     const { container } = render(
       <Container>Clipped</Container>
     );
     const root = container.firstElementChild as HTMLElement;
     const content = container.querySelector<HTMLElement>(
-      '[class*="contentWrapper"]',
+      '[data-uit-content-clip]',
     );
     expect(root.style.overflow).toBe('visible');
     expect(content?.style.overflow).toBe('hidden');
   });
 
-  it('does not clip when clipContent is false', () => {
+  it('does not clip when contentClip is none', () => {
     const { container } = render(
-      <Container clipContent={false}>Not clipped</Container>
+      <Container contentClip="none">Not clipped</Container>
     );
     const root = container.firstElementChild as HTMLElement;
     const content = container.querySelector<HTMLElement>(
-      '[class*="contentWrapper"]',
+      '[data-uit-content-surface]',
     );
     expect(root.style.overflow).toBe('visible');
     expect(content?.style.overflow).toBe('visible');
+    expect(content?.style.clipPath).toBe('');
+    expect(content).not.toHaveAttribute('data-uit-content-clip');
   });
 
   it('clips HTML content with the rendered smooth path geometry', async () => {
@@ -1771,11 +1820,12 @@ describe('Container clipContent', () => {
     );
 
     await waitFor(() => {
-      const contentWrapper = container.querySelector('[class*="contentWrapper"]') as HTMLElement;
+      const contentWrapper = container.querySelector('[data-uit-content-clip]') as HTMLElement;
       // Content is clipped with the rendered smooth-corner path geometry,
       // computed from the measured 321.5 x 123.25 bounds...
       const clipPath = contentWrapper?.getAttribute('style') ?? '';
       expect(clipPath).toContain('clip-path: path(');
+      expect(contentWrapper.style.clipPath).toContain(defaultShapeProvider.getShapePath({ width: 321.5, height: 123.25 }));
       // ...and the material canvas is sized from the same bounds plus the
       // overflow padding (CANVAS_PADDING = 32 per side) -> 385.5 x 187.25.
       const canvas = container.querySelector<HTMLCanvasElement>(

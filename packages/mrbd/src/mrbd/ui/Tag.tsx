@@ -19,8 +19,8 @@ import {
   forwardRef,
   memo,
   useMemo,
-  type CSSProperties,
 } from 'react';
+import type { ContainerContentStyle } from '@wearables-ui-toolkit/foundation';
 import { StaticContainer } from '@wearables-ui-toolkit/foundation';
 import {
   getTagClassName,
@@ -32,7 +32,7 @@ import styles from './Tag.module.css';
 
 export type { TagProps } from './Tag.types';
 
-const EMPTY_TAG_STYLE: CSSProperties = {};
+const EMPTY_TAG_STYLE: ContainerContentStyle = {};
 
 // ============================================================================
 // Component
@@ -53,14 +53,15 @@ export const Tag = memo(forwardRef<HTMLDivElement, TagProps>(
       text,
       material: materialProp,
       className = '',
-      style = EMPTY_TAG_STYLE,
+      style,
+      contentStyle = EMPTY_TAG_STYLE,
       ...staticContainerProps
     },
     ref
   ) {
     const tagStyle = useMemo(
-      () => getTagStyle(style),
-      [style],
+      () => getTagStyle(contentStyle),
+      [contentStyle],
     );
     const tagClassName = useMemo(
       () => getTagClassName(styles.tag, className),
@@ -73,7 +74,8 @@ export const Tag = memo(forwardRef<HTMLDivElement, TagProps>(
         ref={ref}
         material={materialProp}
         className={tagClassName}
-        style={tagStyle}
+        style={style}
+        contentStyle={tagStyle}
         {...staticContainerProps}
       >
         {hasText && (

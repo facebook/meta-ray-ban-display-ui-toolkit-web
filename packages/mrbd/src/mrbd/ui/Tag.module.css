@@ -15,8 +15,6 @@
 
 .tag {
   display: inline-flex;
-  align-items: flex-start;
-  justify-content: flex-start;
   /*
    * The whole tag layer composites with the `screen` blend mode (result =
    * a + b - a*b), not `plus-lighter` (additive clamp), so it blends against the

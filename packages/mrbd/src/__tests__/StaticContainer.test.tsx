@@ -11,8 +11,9 @@
  * Non-interactive container used by Chip, Tag, TooltipContainer.
  */
 
+import { createRef, useState } from 'react';
 import { afterEach, describe, it, expect, vi } from 'vitest';
-import { act, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { StaticContainer, BackgroundStyle } from '@wearables-ui-toolkit/foundation';
 import {
   ContainerMaterial,
@@ -24,12 +25,18 @@ import {
   type ShapeProvider,
   type StrokePathParams,
 } from '@wearables-ui-toolkit/foundation';
+import { defaultShapeProvider } from '@wearables-ui-toolkit/foundation/material/ShapeProvider';
 import { MaterialLibrary } from '@wearables-ui-toolkit/foundation/material/MaterialLibrary';
 import { createStaticContainerMaterial } from '@wearables-ui-toolkit/foundation/material/StaticContainerMaterial';
 import {
   MATERIAL_CANVAS_LAYOUT_GEOMETRY_EVENT,
-} from '@wearables-ui-toolkit/foundation/components/private/ContainerMaterialCanvas';
+} from '../../../foundation/src/components/private/ContainerMaterialCanvas';
+import {
+  createTextInputContainerMaterial,
+  setTextInputMaterialLoading,
+} from '@wearables-ui-toolkit/foundation/material/TextInputContainerMaterial';
 import { VisualState } from '@wearables-ui-toolkit/foundation/base/Interactions';
+import type { ContentClipMode } from '../../../foundation/src/components/ContainerContent.types';
 import { drawLayer } from './helpers/canvasRecorder';
 
 const ORIGINAL_REQUEST_ANIMATION_FRAME = window.requestAnimationFrame;
@@ -67,6 +74,148 @@ function rect(
 }
 
 describe('StaticContainer rendering', () => {
+  it.each(['shape', 'bounds', 'none'] as const)('retains surface content-box history independently of %s clipping', (contentClip) => {
+    const originalResizeObserver = globalThis.ResizeObserver;
+    const observers: Array<{
+      callback: ResizeObserverCallback;
+      targets: Array<{ element: Element; options?: ResizeObserverOptions }>;
+    }> = [];
+    class TestResizeObserver {
+      readonly targets: Array<{ element: Element; options?: ResizeObserverOptions }> = [];
+      constructor(callback: ResizeObserverCallback) {
+        observers.push({ callback, targets: this.targets });
+      }
+      observe(element: Element, options?: ResizeObserverOptions): void {
+        this.targets.push({ element, options });
+      }
+      unobserve(): void {}
+      disconnect(): void {}
+    }
+    vi.stubGlobal('ResizeObserver', TestResizeObserver);
+    const contentRef = createRef<HTMLDivElement>();
+    const view = render(
+      <StaticContainer contentClip={contentClip} contentRef={contentRef} width={120} height={48} contentStyle={{ padding: '4px 12px' }}>
+        Content
+      </StaticContainer>,
+    );
+    try {
+      const root = view.container.firstElementChild as HTMLElement;
+      const surface = contentRef.current!;
+      expect(observers).toHaveLength(2);
+      const historyObserver = observers.find(observer => observer.targets.some(target =>
+        target.element === surface && target.options?.box === 'content-box',
+      ));
+      expect(historyObserver).toBeDefined();
+      expect(historyObserver!.targets.some(target => target.element === root)).toBe(false);
+      expect(observers.some(observer => observer.targets.some(target =>
+        target.element === root && target.options?.box === 'border-box',
+      ))).toBe(true);
+      const initialClipPath = surface.style.clipPath;
+      const computedStyle = vi.spyOn(window, 'getComputedStyle');
+      surface.style.padding = '8px 20px';
+      act(() => historyObserver!.callback([{ target: surface } as ResizeObserverEntry], {} as ResizeObserver));
+      expect(computedStyle.mock.calls.filter(([element]) => element === root)).toHaveLength(0);
+      expect(root).toHaveStyle({ padding: '0px', borderWidth: '0px' });
+      expect(surface).toHaveStyle({ padding: '8px 20px', margin: '0px' });
+      expect(surface.style.clipPath).toBe(initialClipPath);
+      expect(surface.style.overflow).toBe(contentClip === 'none' ? 'visible' : 'hidden');
+    } finally {
+      view.unmount();
+      vi.stubGlobal('ResizeObserver', originalResizeObserver);
+    }
+  });
+
+  it('keeps the physical smooth path and root alignment when ancestor CSS changes content padding', async () => {
+    const sheet = document.createElement('style');
+    sheet.textContent = '.cascade-content { padding: 4px 12px; } .cascade-alt .cascade-content { padding: 4px 4px 4px 20px; }';
+    document.head.appendChild(sheet);
+    const shapeProvider = new RoundedRectangleShapeProvider(CornerRadius.LARGE);
+    const expectedPath = shapeProvider.getShapePath({ width: 120, height: 48 });
+    const view = (alternate: boolean) => (
+      <div className={alternate ? 'cascade-alt' : ''}>
+        <StaticContainer className="cascade-root" contentClassName="cascade-content" width={120} height={48} shapeProvider={shapeProvider}>
+          {alternate ? 'After' : 'Before'}
+        </StaticContainer>
+      </div>
+    );
+    try {
+      const { container, rerender } = render(view(false));
+      const root = container.querySelector('.cascade-root') as HTMLElement;
+      const attributes = root.getAttributeNames().map((name) => [name, root.getAttribute(name)]);
+      const surface = root.querySelector('.cascade-content') as HTMLElement;
+      expect(surface).toHaveStyle({ paddingLeft: '12px', paddingRight: '12px' });
+      expect(surface.style.clipPath).toContain(expectedPath);
+      rerender(view(true));
+      expect(container.querySelector('.cascade-root')).toBe(root);
+      expect(root.getAttributeNames().map((name) => [name, root.getAttribute(name)])).toEqual(attributes);
+      expect(root).toHaveStyle({ width: '120px', height: '48px', padding: '0px', borderWidth: '0px' });
+      expect(surface.parentElement).toBe(root);
+      expect(root.querySelectorAll('[data-uit-content-surface]')).toHaveLength(1);
+      await waitFor(() => expect(surface).toHaveStyle({ paddingLeft: '20px', paddingRight: '4px', margin: '0px' }));
+      expect(surface.style.clipPath).toContain(expectedPath);
+    } finally {
+      sheet.remove();
+    }
+  });
+
+  it('does not re-read root styles or change the padded surface on material revisions', () => {
+    const material = createTextInputContainerMaterial(() => MaterialLibrary.default());
+    const ref = vi.fn();
+    const { container } = render(
+      <StaticContainer ref={ref} material={material} width={120} height={48} contentStyle={{ padding: '4px 12px' }}>
+        Content
+      </StaticContainer>,
+    );
+    const root = container.firstElementChild as HTMLElement;
+    const surface = root.querySelector('[data-uit-content-surface]');
+    const computedStyle = vi.spyOn(window, 'getComputedStyle');
+    act(() => setTextInputMaterialLoading(material, true));
+    act(() => setTextInputMaterialLoading(material, false));
+    expect(computedStyle.mock.calls.filter(([element]) => element === root)).toHaveLength(0);
+    expect(root.querySelector('[data-uit-content-surface]')).toBe(surface);
+    expect(surface).toHaveStyle({ padding: '4px 12px', margin: '0px' });
+    expect(root).toHaveStyle({ padding: '0px', borderWidth: '0px' });
+  });
+
+  it('preserves descendant state, DOM identity and focus when clipping changes', () => {
+    function StatefulContent() {
+      const [value, setValue] = useState('initial');
+      return (
+        <input
+          aria-label="Editable content"
+          value={value}
+          onChange={(event) => setValue(event.currentTarget.value)}
+        />
+      );
+    }
+    const child = <StatefulContent />;
+    const contentRef = createRef<HTMLDivElement>();
+    const view = (contentClip: ContentClipMode) => (
+      <StaticContainer width={160} height={80} contentClip={contentClip} contentRef={contentRef} contentClassName="editable-surface">{child}</StaticContainer>
+    );
+    const { getByRole, rerender } = render(view('none'));
+    const input = getByRole('textbox');
+    const surface = contentRef.current!;
+    const root = surface.parentElement!;
+    expect(input.parentElement).toBe(surface);
+    expect(surface).toHaveClass('editable-surface');
+    fireEvent.change(input, { target: { value: 'retained' } });
+    act(() => input.focus());
+
+    for (const contentClip of ['shape', 'bounds', 'none'] as const) {
+      rerender(view(contentClip));
+      expect(contentRef.current).toBe(surface);
+      expect(surface.parentElement).toBe(root);
+      expect(root.querySelectorAll('[data-uit-content-surface]')).toHaveLength(1);
+      expect(getByRole('textbox')).toBe(input);
+      expect(input).toHaveValue('retained');
+      expect(input).toHaveFocus();
+      expect(surface.style.overflow).toBe(contentClip === 'none' ? 'visible' : 'hidden');
+      if (contentClip === 'none') expect(surface.style.clipPath).toBe('');
+      if (contentClip === 'bounds') expect(surface.style.clipPath).toContain('inset(');
+    }
+  });
+
   it('renders children', () => {
     const { container } = render(
       <StaticContainer>
@@ -107,7 +256,7 @@ describe('StaticContainer rendering', () => {
       </StaticContainer>,
     );
     const content = container.querySelector<HTMLElement>(
-      '[class*="contentWrapper"]',
+      '[data-uit-content-clip="true"]',
     );
 
     expect(content).toHaveStyle({ width: '100%', height: '100%' });
@@ -117,8 +266,8 @@ describe('StaticContainer rendering', () => {
         <span>Intrinsic content</span>
       </StaticContainer>,
     );
-    expect(content?.style.width).toBe('');
-    expect(content?.style.height).toBe('');
+    expect(content?.style.width).toBe('auto');
+    expect(content?.style.height).toBe('auto');
   });
 });
 
@@ -227,7 +376,7 @@ describe('StaticContainer material', () => {
     );
     const root = container.firstElementChild as HTMLElement;
     const content = container.querySelector<HTMLElement>(
-      '[class*="contentWrapper"]',
+      '[data-uit-content-clip="true"]',
     );
 
     expect(shadow?.clipsToShape).toBe(false);
@@ -319,7 +468,7 @@ describe('StaticContainer material', () => {
     const root = container.firstElementChild as HTMLElement;
     const background = canvas?.parentElement;
     const content = container.querySelector<HTMLElement>(
-      '[class*="contentWrapper"]',
+      '[data-uit-content-clip="true"]',
     );
 
     expect(canvas?.style.mixBlendMode).toBe('screen');
@@ -362,7 +511,7 @@ describe('StaticContainer material', () => {
       '[class*="backgroundLayers"]',
     );
     const content = container.querySelector<HTMLElement>(
-      '[class*="contentWrapper"]',
+      '[data-uit-content-clip="true"]',
     );
     const canvas = background?.querySelector('canvas');
 
@@ -525,22 +674,24 @@ describe('StaticContainer props', () => {
     );
     const root = container.firstElementChild as HTMLElement;
     const content = container.querySelector<HTMLElement>(
-      '[class*="contentWrapper"]',
+      '[data-uit-content-clip="true"]',
     );
     expect(root.style.overflow).toBe('visible');
     expect(content?.style.overflow).toBe('hidden');
   });
 
-  it('does not clip when clipContent is false', () => {
+  it('does not clip when contentClip is none', () => {
     const { container } = render(
-      <StaticContainer clipContent={false}>Not clipped</StaticContainer>
+      <StaticContainer contentClip="none">Not clipped</StaticContainer>
     );
     const root = container.firstElementChild as HTMLElement;
     const content = container.querySelector<HTMLElement>(
-      '[class*="contentWrapper"]',
+      '[data-uit-content-surface]',
     );
     expect(root.style.overflow).toBe('visible');
     expect(content?.style.overflow).toBe('visible');
+    expect(content?.style.clipPath).toBe('');
+    expect(content).not.toHaveAttribute('data-uit-content-clip');
   });
 
   it('uses rendered fractional bounds for smooth clip geometry', async () => {
@@ -556,7 +707,7 @@ describe('StaticContainer props', () => {
 
       await waitFor(() => {
         const content = container.querySelector<HTMLElement>(
-          '[class*="contentWrapper"]',
+          '[data-uit-content-clip="true"]',
         );
         const canvas = container.querySelector('canvas') as HTMLCanvasElement | null;
         const bgLayers = container.querySelector(
@@ -565,7 +716,7 @@ describe('StaticContainer props', () => {
         // Canvas adds 32px padding on each side, so width/height = layer + 64.
         expect(canvas?.getAttribute('style')).toContain('width: 187.5px');
         expect(canvas?.getAttribute('style')).toContain('height: 109.25px');
-        expect(content?.style.clipPath).toContain('path(');
+        expect(content?.style.clipPath).toContain(defaultShapeProvider.getShapePath({ width: 123.5, height: 45.25 }));
         expect(bgLayers.style.clipPath).toBe('');
         expect(container.querySelector('clipPath')).toBeNull();
       });
@@ -588,7 +739,7 @@ describe('StaticContainer props', () => {
       await waitFor(() => {
         const root = container.firstElementChild as HTMLElement;
         const content = container.querySelector<HTMLElement>(
-          '[class*="contentWrapper"]',
+          '[data-uit-content-clip="true"]',
         );
         const bgLayers = container.querySelector(
           '[class*="backgroundLayers"]',
@@ -617,20 +768,24 @@ describe('StaticContainer props', () => {
     }
   });
 
-  it('uses the target geometry while a size animation is active', async () => {
-    const resizeCallbackRef: { current?: ResizeObserverCallback } = {};
+  it('uses the animation target geometry and returns to observed border-box geometry when it settles', async () => {
+    const observers: Array<{
+      callback: ResizeObserverCallback;
+      targets: Map<Element, ResizeObserverOptions | undefined>;
+    }> = [];
     const originalResizeObserver = globalThis.ResizeObserver;
     const originalGetAnimations = HTMLElement.prototype.getAnimations;
     let currentRect = rect(100, 40);
     let activeAnimations: Animation[] = [];
 
     class TestResizeObserver {
+      readonly targets = new Map<Element, ResizeObserverOptions | undefined>();
       constructor(callback: ResizeObserverCallback) {
-        resizeCallbackRef.current = callback;
+        observers.push({ callback, targets: this.targets });
       }
-
-      observe(): void {}
-      disconnect(): void {}
+      observe(element: Element, options?: ResizeObserverOptions): void { this.targets.set(element, options); }
+      unobserve(element: Element): void { this.targets.delete(element); }
+      disconnect(): void { this.targets.clear(); }
     }
 
     vi.stubGlobal('ResizeObserver', TestResizeObserver);
@@ -648,54 +803,67 @@ describe('StaticContainer props', () => {
       .spyOn(HTMLElement.prototype, 'offsetHeight', 'get')
       .mockImplementation(() => currentRect.height);
 
-    const { container } = render(
-      <StaticContainer>
-        Animated
-      </StaticContainer>
+    const { container, unmount } = render(
+      <StaticContainer>Animated</StaticContainer>,
     );
+    try {
+      const root = container.firstElementChild as HTMLElement;
+      const borderObserver = observers.find(observer => observer.targets.get(root)?.box === 'border-box');
+      expect(borderObserver).toBeDefined();
+      await waitFor(() => {
+        const canvas = container.querySelector('canvas') as HTMLCanvasElement | null;
+        expect(canvas?.style.width).toBe('164px');
+        expect(canvas?.style.height).toBe('104px');
+      });
 
-    await waitFor(() => {
-      const canvas = container.querySelector('canvas') as HTMLCanvasElement | null;
-      // 100x40 layer + 32px padding on each side = 164x104.
-      expect(canvas?.getAttribute('style')).toContain('width: 164px');
-      expect(canvas?.getAttribute('style')).toContain('height: 104px');
-    });
+      activeAnimations = [{
+        playState: 'running',
+        effect: {
+          getKeyframes: () => [{ width: '100px' }, { width: '200px' }],
+        },
+      } as unknown as Animation];
+      currentRect = rect(140, 40);
+      const emitBorderBox = (width: number) => {
+        const entry = {
+          target: root,
+          borderBoxSize: [{ blockSize: 40, inlineSize: width }],
+        } as unknown as ResizeObserverEntry;
+        act(() => borderObserver!.callback([entry], {} as ResizeObserver));
+      };
+      emitBorderBox(140);
+      await waitFor(() => {
+        const canvas = container.querySelector('canvas') as HTMLCanvasElement | null;
+        const surface = container.querySelector<HTMLElement>('[data-uit-content-surface]');
+        expect(canvas?.style.width).toBe('264px');
+        expect(canvas?.style.height).toBe('104px');
+        expect(surface?.style.clipPath).toContain(defaultShapeProvider.getShapePath({ width: 200, height: 40 }));
+      });
 
-    const sizeAnimation = {
-      playState: 'running',
-      effect: {
-        getKeyframes: () => [{ width: '100px' }, { width: '200px' }],
-      },
-    } as unknown as Animation;
-    activeAnimations = [sizeAnimation];
-    currentRect = rect(200, 40);
-    const resizeCallback = resizeCallbackRef.current;
-    if (resizeCallback == null) {
-      throw new Error('ResizeObserver callback was not initialized');
+      activeAnimations = [];
+      currentRect = rect(180, 40);
+      emitBorderBox(180);
+      await waitFor(() => {
+        const canvas = container.querySelector('canvas') as HTMLCanvasElement | null;
+        const surface = container.querySelector<HTMLElement>('[data-uit-content-surface]');
+        expect(canvas?.style.width).toBe('244px');
+        expect(canvas?.style.height).toBe('104px');
+        expect(surface?.style.clipPath).toContain(defaultShapeProvider.getShapePath({ width: 180, height: 40 }));
+      });
+    } finally {
+      unmount();
+      rectSpy.mockRestore();
+      offsetWidthSpy.mockRestore();
+      offsetHeightSpy.mockRestore();
+      if (originalGetAnimations == null) {
+        Reflect.deleteProperty(HTMLElement.prototype, 'getAnimations');
+      } else {
+        Object.defineProperty(HTMLElement.prototype, 'getAnimations', {
+          configurable: true,
+          value: originalGetAnimations,
+        });
+      }
+      vi.stubGlobal('ResizeObserver', originalResizeObserver);
     }
-    const entry = {
-      borderBoxSize: [{
-        blockSize: 40,
-        inlineSize: 200,
-      }],
-    } as unknown as ResizeObserverEntry;
-    resizeCallback([entry], {} as ResizeObserver);
-
-    await waitFor(() => {
-      const canvas = container.querySelector('canvas') as HTMLCanvasElement | null;
-      // After resize to the animation's target 200x40 + 64 padding.
-      expect(canvas?.getAttribute('style')).toContain('width: 264px');
-      expect(canvas?.getAttribute('style')).toContain('height: 104px');
-    });
-
-    rectSpy.mockRestore();
-    offsetWidthSpy.mockRestore();
-    offsetHeightSpy.mockRestore();
-    Object.defineProperty(HTMLElement.prototype, 'getAnimations', {
-      configurable: true,
-      value: originalGetAnimations,
-    });
-    vi.stubGlobal('ResizeObserver', originalResizeObserver);
   });
 
   it('updates smooth corner paths through the container transition coordinator', async () => {
@@ -716,13 +884,13 @@ describe('StaticContainer props', () => {
 
     await waitFor(() => {
       const content = container.querySelector<HTMLElement>(
-        '[class*="contentWrapper"]',
+        '[data-uit-content-clip="true"]',
       );
       expect(content?.style.clipPath).toContain('path(');
     });
 
     const initialContentClip = container.querySelector<HTMLElement>(
-      '[class*="contentWrapper"]',
+      '[data-uit-content-clip="true"]',
     )?.style.clipPath;
 
     rerender(
@@ -738,7 +906,7 @@ describe('StaticContainer props', () => {
 
     await waitFor(() => {
       const content = container.querySelector<HTMLElement>(
-        '[class*="contentWrapper"]',
+        '[data-uit-content-clip="true"]',
       );
       const backgroundLayers = container.querySelector<HTMLElement>(
         '[class*="backgroundLayers"]',
@@ -819,7 +987,7 @@ describe('StaticContainer props', () => {
 
       await waitFor(() => {
         const content = container.querySelector<HTMLElement>(
-          '[class*="contentWrapper"]',
+          '[data-uit-content-clip="true"]',
         );
         expect(content?.style.clipPath).toContain(
           'M 3,5 L 100,0 L 100,44 Z',
@@ -849,7 +1017,7 @@ describe('StaticContainer props', () => {
       });
 
       const content = container.querySelector<HTMLElement>(
-        '[class*="contentWrapper"]',
+        '[data-uit-content-clip="true"]',
       );
       expect(content?.style.clipPath).toContain(
         'M 3,5 L 100,0 L 100,44 Z',
@@ -1272,7 +1440,7 @@ describe('StaticContainer props', () => {
 
       await waitFor(() => {
         const content = container.querySelector<HTMLElement>(
-          '[class*="contentWrapper"]',
+          '[data-uit-content-clip="true"]',
         );
         const canvas = container.querySelector<HTMLCanvasElement>('canvas');
         expect(content?.style.clipPath).toContain('path(');
@@ -1303,7 +1471,7 @@ describe('StaticContainer props', () => {
         '[class*="foregroundLayers"]',
       );
       const content = container.querySelector<HTMLElement>(
-        '[class*="contentWrapper"]',
+        '[data-uit-content-clip="true"]',
       );
       const canvas = backgroundLayers?.querySelector<HTMLCanvasElement>('canvas');
       // The synchronized transition keeps the shape anchored to the start size.
@@ -1397,7 +1565,7 @@ describe('StaticContainer props', () => {
       throw new Error('Expected StaticContainer background layers');
     }
     const content = container.querySelector<HTMLElement>(
-      '[class*="contentWrapper"]',
+      '[data-uit-content-clip="true"]',
     );
 
     const lateCanvas = document.createElement('canvas');
@@ -1593,5 +1761,220 @@ describe('StaticContainer props', () => {
     rectSpy.mockRestore();
     offsetWidthSpy.mockRestore();
     offsetHeightSpy.mockRestore();
+  });
+
+  it('retains physical bounds clips through completion, restart cancellation, and clipping-mode changes with a triangle provider', () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    let now = 0;
+    let nextFrameId = 1;
+    const frames = new Map<number, FrameRequestCallback>();
+    vi.spyOn(performance, 'now').mockImplementation(() => now);
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      const frameId = nextFrameId++;
+      frames.set(frameId, callback);
+      return frameId;
+    });
+    const cancelFrame = vi.spyOn(window, 'cancelAnimationFrame').mockImplementation((frameId) => {
+      frames.delete(frameId);
+    });
+    const runFrame = (time: number) => {
+      now = time;
+      const pending = Array.from(frames.values());
+      frames.clear();
+      act(() => pending.forEach(callback => callback(time)));
+    };
+    let naturalWidth = 100;
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(() => rect(naturalWidth, 40));
+    vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockImplementation(() => naturalWidth);
+    vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(40);
+    const trianglePath = (width: number, height: number) => `M 0,0 L ${width},0 L ${width / 2},${height} Z`;
+    const shapeProvider: ShapeProvider = {
+      getShapePath: ({ width, height }) => trianglePath(width, height),
+      getStrokePath: () => 'M 1,1 L 2,1 L 1.5,2 Z',
+      getCssBorderRadius: () => '16px',
+    };
+    const material = new ContainerMaterial({
+      layers: [createLayer('triangle-material', LayerPlacement.BACKGROUND, () => ({ backgroundColor: 'black' }))],
+    });
+    const contentRef = createRef<HTMLDivElement>();
+    const onComplete = vi.fn();
+    const draw = (width: number, contentClip: ContentClipMode, token: number) => (
+      <StaticContainer width={width} height={40} shapeProvider={shapeProvider} material={material} contentClip={contentClip} contentRef={contentRef} contentStyle={{ padding: '4px 12px' }} layoutTransitionToken={token} onLayoutTransitionComplete={onComplete}>
+        <input aria-label="Bounds transition editor" defaultValue="initial" />
+      </StaticContainer>
+    );
+    const setProperty = vi.spyOn(CSSStyleDeclaration.prototype, 'setProperty');
+    const removeProperty = vi.spyOn(CSSStyleDeclaration.prototype, 'removeProperty');
+    const view = render(draw(100, 'shape', 0));
+    try {
+      const root = view.container.firstElementChild as HTMLElement;
+      const surface = contentRef.current!;
+      const input = view.getByRole('textbox');
+      const materialLayer = root.querySelector<HTMLElement>('[data-uit-material-layer="triangle-material"]')!;
+      const expectRetained = () => {
+        expect(contentRef.current).toBe(surface);
+        expect(surface.parentElement).toBe(root);
+        expect(root.querySelectorAll('[data-uit-content-surface]')).toHaveLength(1);
+        expect(view.getByRole('textbox')).toBe(input);
+        expect(input).toHaveValue('retained');
+        expect(input).toHaveFocus();
+      };
+      const expectWebkitWrite = (clip: string) => {
+        const writes = setProperty.mock.calls.flatMap(([property, value], index) =>
+          setProperty.mock.contexts[index] === surface.style && property === '-webkit-clip-path'
+            ? [{ kind: 'set' as const, order: setProperty.mock.invocationCallOrder[index], value }]
+            : [],
+        );
+        const removals = removeProperty.mock.calls.flatMap(([property], index) =>
+          removeProperty.mock.contexts[index] === surface.style && property === '-webkit-clip-path'
+            ? [{ kind: 'remove' as const, order: removeProperty.mock.invocationCallOrder[index], value: '' }]
+            : [],
+        );
+        const operations = [...writes, ...removals].sort((first, second) => first.order - second.order);
+        expect(operations.length).toBeGreaterThan(0);
+        const lastOperation = operations[operations.length - 1];
+        expect(lastOperation.kind).toBe(clip === '' ? 'remove' : 'set');
+        expect(lastOperation.value).toBe(clip);
+      };
+      const expectClip = (clip: string, renderedByReact = false) => {
+        expect(surface.style.clipPath).toBe(clip);
+        if (renderedByReact) {
+          const style = surface.style as CSSStyleDeclaration & {
+            WebkitClipPath?: string;
+            webkitClipPath?: string;
+          };
+          expect(style.WebkitClipPath || style.webkitClipPath || style.getPropertyValue('-webkit-clip-path')).toBe(clip);
+        } else {
+          expectWebkitWrite(clip);
+        }
+      };
+      const expectBounds = (width: number, renderedByReact = false) => {
+        expectClip(`inset(0px calc(100% - ${width}px) calc(100% - 40px) 0px round 0px)`, renderedByReact);
+        expect(surface.style.clipPath).not.toContain('path(');
+        expect(surface.style.borderRadius).toBe('0px');
+        expect(surface.style.overflow).toBe('hidden');
+      };
+      fireEvent.change(input, { target: { value: 'retained' } });
+      act(() => input.focus());
+      expectClip(`path('${trianglePath(100, 40)}')`, true);
+      view.rerender(draw(100, 'bounds', 0));
+      expectBounds(100, true);
+      expectRetained();
+
+      naturalWidth = 160;
+      view.rerender(draw(160, 'bounds', 1));
+      expect(root).toHaveAttribute('data-uit-layout-transition-active', 'true');
+      setProperty.mockClear();
+      removeProperty.mockClear();
+      runFrame(50);
+      expect(Number.parseFloat(root.style.width)).toBeGreaterThan(100);
+      expect(Number.parseFloat(root.style.width)).toBeLessThan(160);
+      expect(surface.style.clipPath).toContain('inset(0px calc(100% - ');
+      expect(surface.style.clipPath).not.toContain('path(');
+      expectWebkitWrite(surface.style.clipPath);
+      setProperty.mockClear();
+      removeProperty.mockClear();
+      runFrame(1000);
+      expect(root).not.toHaveAttribute('data-uit-layout-transition-active');
+      expectBounds(160);
+      expect(onComplete).not.toHaveBeenCalled();
+      runFrame(1016);
+      runFrame(1032);
+      expect(onComplete).toHaveBeenCalledTimes(1);
+      expectBounds(160);
+      expect(materialLayer.style.clipPath).toBe(`path('${trianglePath(160, 40)}')`);
+      expectRetained();
+
+      naturalWidth = 200;
+      view.rerender(draw(200, 'bounds', 2));
+      runFrame(1082);
+      expect(root).toHaveAttribute('data-uit-layout-transition-active', 'true');
+      const canceledFrames = Array.from(frames.values());
+      const cancelCount = cancelFrame.mock.calls.length;
+      naturalWidth = 240;
+      view.rerender(draw(240, 'bounds', 3));
+      expect(cancelFrame.mock.calls.length).toBeGreaterThan(cancelCount);
+      expect(root).toHaveAttribute('data-uit-layout-transition-active', 'true');
+      setProperty.mockClear();
+      removeProperty.mockClear();
+      runFrame(2082);
+      runFrame(2098);
+      runFrame(2114);
+      expect(onComplete).toHaveBeenCalledTimes(2);
+      expect(root).toHaveStyle({ width: '240px', height: '40px' });
+      expectBounds(240);
+      act(() => canceledFrames.forEach(callback => callback(now)));
+      act(() => vi.advanceTimersByTime(1000));
+      expect(onComplete).toHaveBeenCalledTimes(2);
+      expectBounds(240);
+      expectRetained();
+
+      naturalWidth = 280;
+      view.rerender(draw(280, 'bounds', 4));
+      runFrame(2164);
+      expect(root).toHaveAttribute('data-uit-layout-transition-active', 'true');
+      setProperty.mockClear();
+      removeProperty.mockClear();
+      view.rerender(draw(280, 'none', 4));
+      expect(root).not.toHaveAttribute('data-uit-layout-transition-active');
+      expect(onComplete).toHaveBeenCalledTimes(3);
+      expectClip('');
+      expect(surface.style.overflow).toBe('visible');
+      runFrame(3164);
+      runFrame(3180);
+      runFrame(3196);
+      act(() => vi.advanceTimersByTime(1000));
+      expectClip('');
+      expect(onComplete).toHaveBeenCalledTimes(3);
+      expectRetained();
+      for (const mode of ['shape', 'bounds', 'none'] as const) {
+        view.rerender(draw(280, mode, 4));
+        if (mode === 'bounds') expectBounds(280, true);
+        else expectClip(mode === 'shape' ? `path('${trianglePath(280, 40)}')` : '', true);
+        expect(surface.style.overflow).toBe(mode === 'none' ? 'visible' : 'hidden');
+        expectRetained();
+      }
+
+      naturalWidth = 100;
+      view.rerender(draw(100, 'bounds', 5));
+      runFrame(4000);
+      runFrame(4016);
+      runFrame(4032);
+      expectBounds(100);
+      expect(onComplete).toHaveBeenCalledTimes(4);
+      onComplete.mockClear();
+      naturalWidth = 160;
+      view.rerender(draw(160, 'bounds', 6));
+      runFrame(4082);
+      expect(root).toHaveAttribute('data-uit-layout-transition-active', 'true');
+      expect(Number.parseFloat(root.style.width)).toBeGreaterThan(100);
+      expect(Number.parseFloat(root.style.width)).toBeLessThan(160);
+      const modeCanceledFrames = Array.from(frames.values());
+      setProperty.mockClear();
+      removeProperty.mockClear();
+      naturalWidth = 240;
+      view.rerender(draw(240, 'none', 7));
+      expect(root).toHaveStyle({ width: '240px', height: '40px' });
+      expect(root).not.toHaveAttribute('data-uit-layout-transition-active');
+      expectClip('');
+      expect(surface.style.overflow).toBe('visible');
+      expect(onComplete).toHaveBeenCalledTimes(1);
+      expectRetained();
+      runFrame(5082);
+      runFrame(5098);
+      runFrame(5114);
+      act(() => modeCanceledFrames.forEach(callback => callback(now)));
+      act(() => vi.advanceTimersByTime(1000));
+      expect(root).toHaveStyle({ width: '240px', height: '40px' });
+      expect(root).not.toHaveAttribute('data-uit-layout-transition-active');
+      expectClip('');
+      expect(surface.style.overflow).toBe('visible');
+      expect(onComplete).toHaveBeenCalledTimes(1);
+      expectRetained();
+    } finally {
+      view.unmount();
+      frames.clear();
+      vi.useRealTimers();
+    }
   });
 });

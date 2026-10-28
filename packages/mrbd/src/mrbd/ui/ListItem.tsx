@@ -42,6 +42,7 @@ import {
   useMemo,
   type CSSProperties,
 } from 'react';
+import type { ContainerRootStyle } from '@wearables-ui-toolkit/foundation';
 import {
   Container,
   PartialFocusSupportedAxis,
@@ -85,7 +86,7 @@ export type {
   StatusIndicator,
 } from './ListItem.types';
 
-const EMPTY_LIST_ITEM_STYLE: CSSProperties = {};
+const EMPTY_LIST_ITEM_STYLE: ContainerRootStyle = {};
 const LIST_ITEM_KEY_WRAPPER_STYLE: CSSProperties = { width: '100%' };
 const DEFAULT_LIST_ITEM_SHAPE_PROVIDER =
   new RoundedRectangleShapeProvider(CornerRadius.MEDIUM);

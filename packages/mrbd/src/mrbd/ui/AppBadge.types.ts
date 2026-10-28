@@ -7,13 +7,15 @@
  */
 
 import type { HTMLAttributes } from 'react';
+import type { ContainerRootStyle } from '@wearables-ui-toolkit/foundation';
 import type { IconSource } from '@wearables-ui-toolkit/foundation/components/IconImage';
 import type { ShapeProvider } from '@wearables-ui-toolkit/foundation/material/ShapeProvider';
 
 export interface AppBadgeProps extends Omit<
   HTMLAttributes<HTMLDivElement>,
-  'children'
+  'children' | 'style'
 > {
+  style?: ContainerRootStyle;
   /** Decorative icon centered in the badge. */
   icon?: IconSource;
   shapeProvider?: ShapeProvider;

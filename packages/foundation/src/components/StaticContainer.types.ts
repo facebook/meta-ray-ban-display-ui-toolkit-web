@@ -9,9 +9,11 @@
 import type {
   HTMLAttributes,
   ReactNode,
+  Ref,
 } from 'react';
 import type { VisualState } from '../base/Interactions';
 import type { ContainerMaterial } from '../material/ContainerMaterial';
+import type { ContainerRootStyle, ContainerContentStyle, ContentClipMode } from './ContainerContent.types';
 import type { ShapeProvider } from '../material/ShapeProvider';
 
 /**
@@ -27,7 +29,7 @@ export type BackgroundStyle = (typeof BackgroundStyle)[keyof typeof BackgroundSt
 
 export type StaticContainerLayoutTransitionAnchor = 'start' | 'end';
 
-export interface StaticContainerProps extends HTMLAttributes<HTMLDivElement> {
+export interface StaticContainerProps extends Omit<HTMLAttributes<HTMLDivElement>, 'style'> {
   /** Container content. */
   children?: ReactNode;
 
@@ -52,8 +54,8 @@ export interface StaticContainerProps extends HTMLAttributes<HTMLDivElement> {
   /** Background style controlling the static visual state. */
   backgroundStyle?: BackgroundStyle;
 
-  /** Whether to clip child views within the container. */
-  clipContent?: boolean;
+  /** Shape clipping, rectangular bounds clipping, or visible content overflow. */
+  contentClip?: ContentClipMode;
 
   /**
    * Whether to render smooth (squircle) corners. When `false`, the container
@@ -74,6 +76,12 @@ export interface StaticContainerProps extends HTMLAttributes<HTMLDivElement> {
   /** Called when a requested layout transition completes. */
   onLayoutTransitionComplete?: () => void;
 
-  /** Additional CSS class for the content wrapper. */
+  /** Content layout class; geometry and clipping remain toolkit-owned. */
   contentClassName?: string;
+  /** Content padding, layout and typography styles. */
+  contentStyle?: ContainerContentStyle;
+  /** Ref to the content layout element. */
+  contentRef?: Ref<HTMLDivElement>;
+  /** Outer placement and whole-component composition styles. */
+  style?: ContainerRootStyle;
 }

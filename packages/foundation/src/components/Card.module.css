@@ -28,7 +28,6 @@
 .card {
   position: relative;
   display: inline-flex;
-  overflow: hidden;
 }
 
 .contentStack {

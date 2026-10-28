@@ -84,6 +84,22 @@ function createProbeMaterial() {
 // ============================================================================
 
 describe('Button render modes', () => {
+  it('uses one rectangular viewport, retains the natural-width row, and forwards content styling and ref', () => {
+    const contentRef = { current: null as HTMLDivElement | null };
+    const { container } = render(<Button title="Natural label" alwaysShowText contentRef={contentRef} contentClassName="custom-content" contentStyle={{ backgroundColor: 'red' }} />);
+    const root = screen.getByRole('button');
+    const surface = root.querySelector<HTMLElement>('[data-uit-content-surface]')!;
+    const natural = surface.querySelector<HTMLElement>('[class*="contentView"]')!;
+    expect(contentRef.current).toBe(surface);
+    expect(surface.parentElement).toBe(root);
+    expect(surface).toHaveClass('custom-content');
+    expect(surface).toHaveStyle({ overflow: 'hidden' });
+    expect(surface.style.backgroundColor).toBe('red');
+    expect(surface.style.clipPath).toContain('inset(');
+    expect(natural.parentElement).toBe(surface);
+    expect(container.querySelectorAll('[class*="contentViewContainer"]')).toHaveLength(1);
+    expect(natural).toHaveTextContent('Natural label');
+  });
   it('renders with icon only (ICON mode)', () => {
     const { container } = render(
       <Button icon={{ uri: TEST_ICON_SRC }} title="Reply" />

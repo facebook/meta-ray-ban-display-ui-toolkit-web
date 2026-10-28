@@ -31,13 +31,13 @@ export const LauncherSmallButton = memo(function LauncherSmallButton({
   return (
     <Container
       className={classNames('launcherSmallButton', className)}
+      contentClassName="launcherSmallButtonContent"
       height="var(--launcher-small-button-height)"
       material={material}
       onClick={onClick}
       role="button"
       aria-label={title}
     >
-      <div className="launcherSmallButtonContent">
         {icon != null && (
           <span className="launcherSmallButtonIconSlot">{icon}</span>
         )}
@@ -49,7 +49,6 @@ export const LauncherSmallButton = memo(function LauncherSmallButton({
         >
           {title}
         </TextView>
-      </div>
     </Container>
   );
 });

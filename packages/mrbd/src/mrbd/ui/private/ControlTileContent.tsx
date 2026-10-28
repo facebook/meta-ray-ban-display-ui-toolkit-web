@@ -6,6 +6,8 @@
  *
  */
 
+import type { ContainerRootStyle } from '@wearables-ui-toolkit/foundation';
+
 import {
   memo,
   useEffect,
@@ -343,24 +345,20 @@ export const ControlTileContent = memo(function ControlTileContent({
     }),
     [iconBackgroundStyle, nonHorizontalAlpha, normalBackgroundOpacity],
   );
-  const iconMaterialBackgroundStyle = useMemo<CSSProperties>(
+  const iconMaterialBackgroundStyle = useMemo<ContainerRootStyle>(
     () => ({
       position: 'absolute',
       inset: 0,
-      borderRadius: '50%',
-      overflow: 'hidden',
       opacity: nonHorizontalAlpha * normalBackgroundOpacity,
       pointerEvents: nonHorizontalAlpha > 0 ? undefined : 'none',
       transition: iconBackgroundStyle.transition,
     }),
     [iconBackgroundStyle.transition, nonHorizontalAlpha, normalBackgroundOpacity],
   );
-  const checkedIconMaterialBackgroundStyle = useMemo<CSSProperties>(
+  const checkedIconMaterialBackgroundStyle = useMemo<ContainerRootStyle>(
     () => ({
       position: 'absolute',
       inset: 0,
-      borderRadius: '50%',
-      overflow: 'hidden',
       opacity: nonHorizontalAlpha * checkedProgress,
       pointerEvents: nonHorizontalAlpha > 0 ? undefined : 'none',
       transition: iconBackgroundStyle.transition,

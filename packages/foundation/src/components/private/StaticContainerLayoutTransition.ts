@@ -6,6 +6,7 @@
  *
  */
 
+import { SharedBoxResizeObserver } from '../../utils/SharedBoxResizeObserver';
 import {
   useEffect,
   useLayoutEffect,
@@ -29,6 +30,7 @@ import type { ContainerMaterialInset } from '../../material/ContainerMaterial';
 import {
   MANAGED_LAYOUT_TRANSITION_COMPLETE_EVENT,
 } from '../../utils/useMeasuredElementDimensions';
+import type { ContentClipMode } from '../ContainerContent.types';
 import type {
   StaticContainerLayoutTransitionAnchor,
 } from '../StaticContainer.types';
@@ -55,6 +57,10 @@ interface StaticContainerLayoutTransitionOptions {
   transitionSignature: unknown;
   anchor: StaticContainerLayoutTransitionAnchor;
   onComplete?: () => void;
+  clippingContentRef?: RefObject<HTMLDivElement | null>;
+  contentClip: ContentClipMode;
+  rootWidth: number | string;
+  rootHeight: number | string;
 }
 
 interface ElementSize {
@@ -75,6 +81,7 @@ const ZERO_MATERIAL_INSET: ContainerMaterialInset = {
 };
 
 interface ActiveLayoutTransition {
+  currentSize: ElementSize;
   transition: SynchronizedTransitionHandle | null;
   content: {
     clipPath: string;
@@ -132,21 +139,6 @@ function readLayoutSize(element: HTMLElement): ElementSize {
   return {
     height: element.offsetHeight,
     width: element.offsetWidth,
-  };
-}
-
-function readRenderedSize(
-  element: HTMLElement,
-  fallback: ElementSize,
-): ElementSize {
-  const rect = element.getBoundingClientRect();
-  if (rect.width <= 0 || rect.height <= 0) {
-    return fallback;
-  }
-
-  return {
-    height: rect.height,
-    width: rect.width,
   };
 }
 
@@ -519,6 +511,10 @@ export function useStaticContainerLayoutTransition({
   transitionSignature,
   anchor,
   onComplete,
+  clippingContentRef,
+  contentClip,
+  rootWidth,
+  rootHeight,
 }: StaticContainerLayoutTransitionOptions): void {
   const prefersReducedMotion = usePrefersReducedMotion();
   const previousSizeRef = useRef<ElementSize | null>(null);
@@ -532,6 +528,7 @@ export function useStaticContainerLayoutTransition({
   const previousTransitionSignatureRef = useRef(transitionSignature);
   const activeTransitionRef = useRef<ActiveLayoutTransition | null>(null);
   const onCompleteRef = useRef(onComplete);
+  const previousContentClipRef = useRef(contentClip);
 
   useLayoutEffect(() => {
     onCompleteRef.current = onComplete;
@@ -540,6 +537,11 @@ export function useStaticContainerLayoutTransition({
   useLayoutEffect(() => {
     latestShapeSnapshotRef.current = shapeSnapshot;
   }, [shapeSnapshot]);
+
+  const restoreDeclaredRootSize = (element: HTMLElement): void => {
+    element.style.width = rootWidth === 'auto' ? '' : typeof rootWidth === 'number' ? `${rootWidth}px` : rootWidth;
+    element.style.height = rootHeight === 'auto' ? '' : typeof rootHeight === 'number' ? `${rootHeight}px` : rootHeight;
+  };
 
   const cancelActiveTransition = (complete: boolean): void => {
     const activeTransition = activeTransitionRef.current;
@@ -550,6 +552,7 @@ export function useStaticContainerLayoutTransition({
     activeTransitionRef.current = null;
     activeTransition.transition?.cancel(complete);
     clearActiveTransitionStyles(activeTransition);
+    restoreDeclaredRootSize(activeTransition.root.element);
 
     if (complete) {
       onCompleteRef.current?.();
@@ -571,19 +574,58 @@ export function useStaticContainerLayoutTransition({
       return;
     }
 
-    const observer = new window.ResizeObserver(() => {
+    const observer = new SharedBoxResizeObserver(() => {
+      if (activeTransitionRef.current == null) {
+        previousSizeRef.current = readLayoutSize(element);
+        previousShapeRef.current = latestShapeSnapshotRef.current;
+        previousParticipantRectsRef.current = measureLayoutParticipants(element);
+      }
+    }, 'border-box');
+    observer.observe(element, { box: 'border-box' });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [containerRef, contentRef]);
+
+  useLayoutEffect(() => {
+    const element = containerRef.current;
+    const content = clippingContentRef?.current;
+    if (element == null || content == null || typeof ResizeObserver === 'undefined') return;
+    const observer = new SharedBoxResizeObserver(() => {
       if (activeTransitionRef.current == null) {
         previousSizeRef.current = readLayoutSize(element);
         previousShapeRef.current = latestShapeSnapshotRef.current;
         previousParticipantRectsRef.current = measureLayoutParticipants(element);
       }
     });
-    observer.observe(element);
+    observer.observe(content);
+    return () => observer.disconnect();
+  }, [containerRef, contentRef, clippingContentRef]);
 
-    return () => {
-      observer.disconnect();
-    };
-  }, [containerRef, contentRef]);
+  useLayoutEffect(() => {
+    const active = activeTransitionRef.current;
+    const modeChanged = previousContentClipRef.current !== contentClip;
+    previousContentClipRef.current = contentClip;
+    if (active != null && (modeChanged || contentRef.current !== active.content.element)) {
+      const surface = contentRef.current;
+      const nextClipPath = surface?.style.clipPath ?? '';
+      const nextWebkitClipPath = surface == null ? '' : readWebkitClipPath(surface);
+      cancelActiveTransition(true);
+      previousTransitionTokenRef.current = transitionToken;
+      previousTransitionSignatureRef.current = transitionSignature;
+      if (surface != null) {
+        surface.style.clipPath = nextClipPath;
+        writeWebkitClipPath(surface, nextWebkitClipPath);
+      }
+      const root = containerRef.current;
+      if (root != null) {
+        previousSizeRef.current = readLayoutSize(root);
+        previousShapeRef.current = latestShapeSnapshotRef.current;
+        previousParticipantRectsRef.current = measureLayoutParticipants(root);
+      }
+    }
+  }, [containerRef, contentRef, contentClip, rootWidth, rootHeight, transitionToken, transitionSignature]);
 
   useLayoutEffect(() => {
     const element = containerRef.current;
@@ -601,9 +643,7 @@ export function useStaticContainerLayoutTransition({
     const previousSize = previousSizeRef.current;
     const previousParticipantRects = previousParticipantRectsRef.current;
     const activeTransition = activeTransitionRef.current;
-    const fromSize = activeTransition != null && previousSize != null
-      ? readRenderedSize(element, previousSize)
-      : previousSize;
+    const fromSize = activeTransition?.currentSize ?? previousSize;
     const previousShape = previousShapeRef.current;
     const currentShapeSnapshot = latestShapeSnapshotRef.current;
     if (activeTransition != null) {
@@ -693,6 +733,7 @@ export function useStaticContainerLayoutTransition({
       participant.dataset.uitLayoutTransitionSkipFlip !== 'true',
     );
     const activeLayoutTransition: ActiveLayoutTransition = {
+      currentSize: fromSize,
       content: {
         clipPath: contentElement.style.clipPath,
         element: contentElement,
@@ -714,9 +755,10 @@ export function useStaticContainerLayoutTransition({
     };
     activeTransitionRef.current = activeLayoutTransition;
     element.dataset.uitLayoutTransitionActive = 'true';
-    const clipsContent =
+    const clipsContent = contentClip === 'shape' && (
       hasClipPath(activeLayoutTransition.content.clipPath) ||
-      hasClipPath(activeLayoutTransition.content.webkitClipPath);
+      hasClipPath(activeLayoutTransition.content.webkitClipPath)
+    );
 
     const fromShape = previousShape == null
       ? null
@@ -789,6 +831,7 @@ export function useStaticContainerLayoutTransition({
         easedProgress,
       );
 
+      activeLayoutTransition.currentSize = { width: currentWidth, height: currentHeight };
       if (fromShape != null && toShape != null) {
         const currentShape: StaticContainerSmoothShapeSnapshot = {
           height: currentHeight,
@@ -851,6 +894,11 @@ export function useStaticContainerLayoutTransition({
         });
       }
 
+      if (contentClip === 'bounds' || (contentClip === 'shape' && (fromShape == null || toShape == null))) {
+        const clip = `inset(0px calc(100% - ${currentWidth}px) calc(100% - ${currentHeight}px) 0px round ${contentClip === 'shape' ? element.style.borderRadius || '0px' : '0px'})`;
+        contentElement.style.clipPath = clip;
+        writeWebkitClipPath(contentElement, clip);
+      }
       element.style.width = formatPx(currentWidth);
       element.style.height = formatPx(currentHeight);
       applyParticipantProgress(easedProgress);
@@ -915,14 +963,15 @@ export function useStaticContainerLayoutTransition({
       const finalMaterialShapePath = toShape == null
         ? undefined
         : getShapePath(toShape, finalMaterialSize);
+      const finalContentClip = contentClip === 'none' ? undefined
+        : contentClip === 'shape' && finalContentShapePath != null ? `path('${finalContentShapePath}')`
+        : `inset(0px calc(100% - ${naturalToSize.width}px) calc(100% - ${naturalToSize.height}px) 0px round ${contentClip === 'shape' ? element.style.borderRadius || '0px' : '0px'})`;
       completeActiveTransitionStyles(
         activeLayoutTransition,
         finalMaterialSize,
         toShape?.materialInset ?? ZERO_MATERIAL_INSET,
         anchor,
-        finalContentShapePath == null
-          ? undefined
-          : `path('${finalContentShapePath}')`,
+        finalContentClip,
         finalMaterialShapePath == null
           ? undefined
           : `path('${finalMaterialShapePath}')`,
@@ -967,9 +1016,6 @@ export function useStaticContainerLayoutTransition({
       ],
     });
 
-    return () => {
-      cancelActiveTransition(false);
-    };
   }, [
     anchor,
     backgroundLayerRef,
@@ -977,6 +1023,8 @@ export function useStaticContainerLayoutTransition({
     contentRef,
     foregroundLayerRef,
     prefersReducedMotion,
+    rootWidth,
+    rootHeight,
     transitionSignature,
     transitionToken,
   ]);

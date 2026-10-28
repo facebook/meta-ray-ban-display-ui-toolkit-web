@@ -10,8 +10,8 @@ import {
   forwardRef,
   memo,
   useMemo,
-  type CSSProperties,
 } from 'react';
+import type { ContainerRootStyle } from '../ContainerContent.types';
 import { Container } from '../Container';
 import type { ContainerProps } from '../Container.types';
 import { MaterialLibrary } from '../../material/MaterialLibrary';
@@ -22,7 +22,7 @@ import {
 
 export type PanelInternalProps = Omit<ContainerProps, 'interactive'>;
 
-const EMPTY_PANEL_STYLE: CSSProperties = {};
+const EMPTY_PANEL_STYLE: ContainerRootStyle = {};
 const PANEL_CONTENT_SCALE_FOR_STATE = () => 1;
 const DEFAULT_PANEL_SHAPE_PROVIDER =
   new RoundedRectangleShapeProvider(CornerRadius.MEDIUM);
@@ -48,7 +48,7 @@ export const PanelInternal = memo(forwardRef<
     () => materialProp ?? MaterialLibrary.panel(),
     [materialProp],
   );
-  const panelStyle: CSSProperties = useMemo(
+  const panelStyle: ContainerRootStyle = useMemo(
     () => ({
       cursor: 'default',
       ...style,

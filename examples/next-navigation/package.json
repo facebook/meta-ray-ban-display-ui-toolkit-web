@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@wearables-ui-toolkit/mrbd": "129.23.0",
-    "next": "16.3.8",
+    "next": "16.4.1",
     "react": "19.2.7",
     "react-dom": "19.2.7"
   },
